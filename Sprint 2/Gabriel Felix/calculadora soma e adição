@@ -1,0 +1,7 @@
+a= float(input('Número A: '))
+b= float(input('Número B: '))
+
+def soma (a,b):
+    return a+b
+def multiplicação(a,b):
+    return a*b
