@@ -1,7 +1,6 @@
 def multiplicar(a, b):
     return a * b
 
-
 def dividir(a, b):
     if b != 0:
         return a / b
@@ -39,3 +38,8 @@ else:
     resultado = "Não vai funcionar "
 
 print(f"Resultado: {resultado}")
+
+def soma (a,b):
+    return a+b
+def multiplicação(a,b):
+    return a*b
