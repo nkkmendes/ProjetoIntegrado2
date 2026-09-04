@@ -68,4 +68,3 @@ if a != 0:
     elif a == 8:
         r = calcula_percentual(x, y)
     print("Resultado:"+str(r))
-    
