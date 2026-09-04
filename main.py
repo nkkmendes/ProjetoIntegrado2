@@ -1,3 +1,9 @@
+def calcula_radificacao(x,y):
+    return x ** (1/y)
+
+def calcula_exponenciacao(x,y):
+    return x **y
+
 def multiplicar(a, b):
     return a * b
 
