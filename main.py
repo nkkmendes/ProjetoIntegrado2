@@ -28,3 +28,9 @@ def percentual(a,b):
         return(x)
     else:
         return "Não é possível fazer este percentual"
+
+def soma(a,b):
+    return a + b
+
+def subtracao(a,b)
+    return a - b
