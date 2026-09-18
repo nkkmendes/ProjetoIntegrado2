@@ -29,8 +29,10 @@ h1,h2,h3{margin:0}
 .auth-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:34px 34px 30px;
   width:100%;max-width:430px;box-shadow:0 10px 30px rgba(15,44,76,.07)}
 .auth-card.signup{background:#f1f3f5;max-width:470px;text-align:center}
-.logo{width:56px;height:56px;border-radius:50%;background:var(--primary-2);color:#fff;display:flex;
-  align-items:center;justify-content:center;font-weight:700;letter-spacing:.5px}
+.logo{width:112px;height:112px;border-radius:22px;background:#fff;color:#fff;display:flex;
+  align-items:center;justify-content:center;font-weight:700;letter-spacing:.5px;overflow:hidden;flex:0 0 auto;
+  border:1px solid var(--line)}
+.logo img{width:88%;height:88%;object-fit:contain}
 .auth-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
 .auth-head h1{font-size:30px}
 .signup .logo{margin:0 auto 12px}
@@ -53,7 +55,7 @@ h1,h2,h3{margin:0}
 .shell{display:flex;min-height:100vh}
 .side{width:280px;flex:0 0 280px;background:var(--nav);color:#e2e8f0;display:flex;flex-direction:column;padding:22px 20px}
 .side .brandrow{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.side .brandrow .logo{width:44px;height:44px;font-size:14px}
+.side .brandrow .logo{width:80px;height:80px;font-size:14px;border-radius:16px}
 .side .authbtns{display:flex;flex-direction:column;gap:8px;flex:1;min-width:110px}
 .side .authbtns button{background:transparent;color:#fff;border:1px solid #3b5878;border-radius:7px;padding:6px 10px;font-size:13px}
 .side .authbtns button.hi{border-color:#5b9bf3;color:#9cc6ff}
@@ -207,7 +209,7 @@ table.list tr:last-child td{border-bottom:0}
 <!-- ============ LOGIN ============ -->
 <div id="view-login" class="auth-wrap hidden">
   <div class="auth-card">
-    <div class="auth-head"><h1>Login</h1><div class="logo">MF</div></div>
+    <div class="auth-head"><h1>Login</h1><div class="logo"><img src="Logo.jpeg" alt="MatriculaFácil"></div></div>
     <div class="field"><label>E-mail</label><input id="li-email" type="email" placeholder="seu.email@exemplo.com"></div>
     <div class="field"><label>Senha</label><input id="li-pass" type="password" placeholder="Pelo menos 6 caracteres"></div>
     <div id="li-err" class="err hidden"></div>
@@ -221,7 +223,7 @@ table.list tr:last-child td{border-bottom:0}
 <!-- ============ CRIAR CONTA ============ -->
 <div id="view-signup" class="auth-wrap hidden">
   <div class="auth-card signup">
-    <div class="logo">MF</div>
+    <div class="logo"><img src="Logo.jpeg" alt="MatriculaFácil"></div>
     <h1>Criar conta</h1>
     <p class="sub">Acesse seu portal de planejamento PUC-Rio</p>
     <div class="field"><label>Nome completo</label><input id="su-nome" placeholder="Ex: Ana Souza"></div>
@@ -238,7 +240,7 @@ table.list tr:last-child td{border-bottom:0}
 <div id="view-app" class="shell hidden">
   <aside class="side">
     <div class="brandrow">
-      <div class="logo">MF</div>
+      <div class="logo"><img src="Logo.jpeg" alt="MatriculaFácil"></div>
       <div class="authbtns" id="authbtns">
         <button onclick="go('login')">Login</button>
         <button class="hi" onclick="go('signup')">Criar conta</button>
