@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLUXA - Simulador de matrícula</title>
+    <link rel="stylesheet" href="simulador.css">
+</head>
+<body>
+    <!-- Menu lateral -->
+    <aside class="menu">
+        <img class="logo" src="Logo.jpeg" alt="FLUXA">
+        <h2>Meu planejamento</h2>
+        <p>PUC-Rio · Engenharia de Computação</p>
+        <nav>
+            <a href="planejamento.html">▤ &nbsp; Planejamento</a>
+            <a href="simulador.html" class="ativo" aria-current="page">▦ &nbsp; Simulador de matrícula</a>
+        </nav>
+        <p class="rodape">FLUXA<br>Organize seu próximo semestre.</p>
+    </aside>
+
+    <main>
+        <h1>Simulador de matrícula</h1>
+        <p class="descricao">Monte sua grade, escolha o período e visualize os horários das disciplinas.</p>
+        <div class="botoes">
+            <button class="azul" type="button" disabled>Minha grade · 2026.2</button>
+            <button type="button" disabled>+ Nova grade</button>
+        </div>
+        <div class="resumo">
+            <div class="nome-grade">
+                <h2>Minha grade</h2>
+                <p class="descricao">2026.2 · Engenharia de Computação</p>
+            </div>
+            <div class="numero"><p>Disciplinas</p><strong>0</strong></div>
+            <div class="numero"><p>Créditos</p><strong>0</strong></div>
+            <div class="numero"><p>Conflitos</p><strong class="verde">0</strong></div>
+        </div>
+        <label for="curso">Curso</label>
+        <select id="curso"><option>Engenharia de Computação — Currículo 2023</option></select>
+        <div class="botoes">
+            <button class="azul" type="button" disabled>+ Adicionar disciplina</button>
+            <button type="button" disabled>Importar do planejamento</button>
+            <button type="button" disabled>Duplicar grade</button>
+            <button type="button" disabled>Salvar versão</button>
+            <button type="button" disabled>Limpar grade</button>
+        </div>
+        <p class="aviso">Planeje os horários das suas disciplinas. Esta tela não realiza matrícula nem consulta vagas na PUC.</p>
+
+        <!-- Grade semanal -->
+        <div class="rolagem" tabindex="0" role="region" aria-label="Horários da semana">
+            <div class="grade">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Horário</th>
+                            <th scope="col">Segunda</th>
+                            <th scope="col">Terça</th>
+                            <th scope="col">Quarta</th>
+                            <th scope="col">Quinta</th>
+                            <th scope="col">Sexta</th>
+                            <th scope="col">Sábado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><th scope="row">07:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">07:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">08:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">08:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">09:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">09:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">10:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">10:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">11:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">11:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">12:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">12:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">13:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">13:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">14:00</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><th scope="row">14:30</th><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+                <div class="vazio">
+                    <div class="calendario">▦</div>
+                    <h3>Nenhuma disciplina adicionada</h3>
+                    <p>Suas disciplinas aparecerão aqui quando forem cadastradas.</p>
+                    <button class="azul" type="button" disabled>+ Adicionar disciplina</button>
+                </div>
+            </div>
+        </div>
+        <h2 class="titulo-lista">Disciplinas da grade</h2>
+        <p class="descricao">Sua grade ainda está vazia.</p>
+        <p class="observacao">Versão visual em HTML e CSS. Cadastro, salvamento e verificação de conflitos ainda não estão disponíveis.</p>
+    </main>
+</body>
+</html>
