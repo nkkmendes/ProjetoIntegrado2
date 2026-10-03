@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contagem de Créditos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-container">
+    <!-- Cabeçalho da Página -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Contagem de Créditos</h1>
+        <p class="page-sub">Acompanhe o progresso de créditos obrigatórios, eletivos e optativos no seu currículo.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn ghost" onclick="window.print()">Imprimir</button>
+      </div>
+    </div>
+
+    <!-- Informações Gerais do Aluno -->
+    <div class="card flush mb-24">
+      <table class="list">
+        <thead>
+          <tr>
+            <th>Centro</th>
+            <th>Curso</th>
+            <th>Habilitação</th>
+            <th>Ênfase</th>
+            <th>Currículo</th>
+            <th class="center">CR Acumulado</th>
+            <th class="center">CR Período</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>AAA</strong></td>
+            <td>AAA</td>
+            <td>AAA</td>
+            <td>AAA</td>
+            <td>0/0</td>
+            <td class="center"><span class="pill">0</span></td>
+            <td class="center"><span class="pill">0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Layout em 2 Colunas -->
+    <div class="grid2">
+
+      <!-- Coluna Esquerda: Obrigatórias e Extensão -->
+      <div>
+        <div class="card flush mb-24">
+          <div class="card-header">Obrigatórias</div>
+          <table class="list">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th class="center">Cumpridos</th>
+                <th class="center">A cumprir</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Básicas</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Religiosas</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Pedagógicas</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Do curso</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Da habilitação</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Da ênfase</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>De formação geral</td><td class="center">0</td><td class="center">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid2 mb-24">
+          <div class="card flush">
+            <div class="card-header sm">Atividades Complementares</div>
+            <table class="list">
+              <thead>
+                <tr><th class="center">Cumpridas</th><th class="center">A cumprir</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="center">0</td><td class="center">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card flush">
+            <div class="card-header sm">Horas de Extensão</div>
+            <table class="list">
+              <thead>
+                <tr><th class="center">Cumpridas</th><th class="center">A cumprir</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="center">0</td><td class="center">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card highlight mb-24">
+          <div class="totals">
+            <div>
+              <div class="stat-label">Total do Currículo</div>
+              <div class="stat-value">0 cr.</div>
+            </div>
+            <div class="end">
+              <div class="stat-label">Total Cumprido</div>
+              <div class="stat-value ok">0 cr.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna Direita: Eletivas, Optativas e Duração -->
+      <div>
+        <div class="card flush mb-24">
+          <div class="card-header">Eletivas</div>
+          <table class="list">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th class="center">Cumpridos</th>
+                <th class="center">A cumprir</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Do departamento</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Fora do departamento</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Livres</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>De orientação</td><td class="center">0</td><td class="center">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card flush mb-24">
+          <div class="card-header">Optativas</div>
+          <table class="list">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th class="center">Cumpridos</th>
+                <th class="center">A cumprir</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Básicas</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Religiosas</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Do curso</td><td class="center">0</td><td class="center">0</td></tr>
+              <tr><td>Da habilitação</td><td class="center">0</td><td class="center">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card flush mb-24">
+          <div class="card-header">Duração do Curso</div>
+          <table class="list">
+            <thead>
+              <tr>
+                <th class="center">Máx. Períodos</th>
+                <th class="center">Utilizados</th>
+                <th class="center">Restantes</th>
+                <th class="center">Horas Cumpridas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="center">0</td>
+                <td class="center">0</td>
+                <td class="center">0</td>
+                <td class="center">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Nota Informativa -->
+    <div class="disclaimer mt-16">
+      <p><strong>Aviso:</strong> Todos os dados exibidos têm caráter estritamente informativo e não substituem os documentos oficiais emitidos pela Coordenação Central de Admissão e Registro (CCAR) da PUC-Rio.</p>
+    </div>
+  </div>
+</body>
+</html>

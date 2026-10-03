@@ -1,0 +1,455 @@
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --background: #f8fafc;
+  --surface-muted: #f1f5f9;
+  --card: #ffffff;
+  --line: #e2e8f0;
+  --ink-1: #0f172a;
+  --ink-2: #475569;
+  --muted: #64748b;
+  --ok: #16a34a;
+  --danger: #b91c1c;
+  --highlight-bg: #eff6ff;
+  --highlight-line: #bfdbfe;
+  --sidebar-bg: #111827;
+  --sidebar-text: #9ca3af;
+  --sidebar-active: #2563eb;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--ink-1);
+}
+
+/* =========================================================
+   Layout da aplicação (index.html)
+   ========================================================= */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--sidebar-bg);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.brand-logo img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.user-info {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.user-info .name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #f3f4f6;
+}
+
+.user-info .email {
+  font-size: 12px;
+  color: var(--sidebar-text);
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #1f2937;
+  color: #fff;
+}
+
+.nav-item.active {
+  background-color: var(--sidebar-active);
+  color: #fff;
+}
+
+.sidebar-footer {
+  font-size: 11px;
+  color: #6b7280;
+  border-top: 1px solid #1f2937;
+  padding-top: 16px;
+}
+
+.btn-logout {
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid #374151;
+  color: #d1d5db;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-logout:hover {
+  background: #1f2937;
+  color: #fff;
+}
+
+/* Área principal e frame */
+.main-content {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--background);
+}
+
+.page-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* =========================================================
+   Páginas internas
+   ========================================================= */
+.page-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.page-header.tight {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.page-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.page-header .page-sub {
+  margin-bottom: 0;
+}
+
+.page-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* =========================================================
+   Cards
+   ========================================================= */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Card que contém tabela: sem padding interno */
+.card.flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Cabeçalho de seção dentro de card */
+.card-header {
+  padding: 14px 16px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--line);
+  background: var(--background);
+}
+
+.card-header.sm {
+  padding: 12px 16px;
+}
+
+/* Aviso com faixa lateral */
+.card.notice {
+  background-color: var(--background);
+  border-left: 4px solid var(--primary);
+}
+
+.card.notice p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* Card de destaque (totais) */
+.card.highlight {
+  background-color: var(--highlight-bg);
+  border-color: var(--highlight-line);
+}
+
+/* =========================================================
+   Totais / estatísticas
+   ========================================================= */
+.totals {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totals .end {
+  text-align: right;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-value.ok {
+  color: var(--ok);
+}
+
+/* =========================================================
+   Barra do período letivo
+   ========================================================= */
+.period-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.period-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+/* =========================================================
+   Tabelas
+   ========================================================= */
+.list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.list th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--background);
+  color: var(--ink-2);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+
+.list td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-1);
+}
+
+.list tr:last-child td {
+  border-bottom: none;
+}
+
+/* Especificidade (0,2,0) para vencer ".list th" (0,1,1) */
+.list .center {
+  text-align: center;
+}
+
+.list .emph {
+  font-weight: 600;
+}
+
+/* Larguras de coluna (Notas do Período) */
+.col-code  { min-width: 90px; }
+.col-name  { min-width: 220px; }
+.col-grade { width: 60px; }
+.col-avg   { width: 70px; }
+.col-final { width: 90px; }
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+/* Células bloqueadas ou não aplicáveis */
+.cell-disabled {
+  background-color: var(--surface-muted);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--line),
+    var(--line) 10px,
+    var(--surface-muted) 10px,
+    var(--surface-muted) 20px
+  );
+}
+
+.status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.action-link {
+  color: var(--primary);
+  text-decoration: underline;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.action-link:hover {
+  color: var(--primary-hover);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+  opacity: 1;
+}
+
+/* =========================================================
+   Pills
+   ========================================================= */
+.pill {
+  background: #e0e7ff;
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.pill.lg {
+  font-size: 14px;
+  padding: 4px 10px;
+}
+
+/* =========================================================
+   Nota informativa (rodapé das páginas)
+   ========================================================= */
+.disclaimer {
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.disclaimer p {
+  margin: 0;
+}
+
+.disclaimer .alert {
+  margin-bottom: 6px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* =========================================================
+   Botões
+   ========================================================= */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn.ghost {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+
+.btn.ghost:hover {
+  background: var(--surface-muted);
+}
+
+/* =========================================================
+   Utilitários de espaçamento
+   ========================================================= */
+.mt-16 { margin-top: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }

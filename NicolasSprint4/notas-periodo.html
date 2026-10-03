@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas do Período - Consulta de Graus</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-container">
+
+    <div class="page-header tight">
+      <div>
+        <h1 class="page-title">Consulta de Graus</h1>
+        <p class="page-sub">Acompanhe o rendimento acadêmico, notas e avaliações do período atual.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn ghost" onclick="alert('Critérios de avaliação de cada disciplina.')">📋 Critérios de Avaliação</button>
+        <button class="btn ghost" onclick="window.print()">🖨️ Imprimir</button>
+      </div>
+    </div>
+
+    <div class="card notice mb-20">
+      <p>
+        <strong>Aviso:</strong> Mantenha o seu e-mail de contacto atualizado no sistema, pois as notificações sobre a atualização de graus serão enviadas diretamente para ele.
+      </p>
+    </div>
+
+    <div class="period-bar">
+      <div class="period-label">
+        Período Letivo: <span class="pill lg">2026.2</span>
+      </div>
+    </div>
+
+    <div class="card flush mb-20">
+      <div class="table-responsive">
+        <table class="list">
+          <thead>
+            <tr>
+              <th class="col-code">Disciplina</th>
+              <th class="col-name">Nome</th>
+              <th class="center">Turma</th>
+              <th class="center col-grade">G1</th>
+              <th class="center col-grade">G2</th>
+              <th class="center col-grade">G3</th>
+              <th class="center col-final">Prova Final</th>
+              <th class="center col-avg">Média</th>
+              <th class="center">Situação</th>
+              <th class="center">Critério</th>
+              <th class="center">Programa</th>
+              <th class="center">Registro Aulas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>AAA0000</strong></td>
+              <td>NOME DA DISCIPLINA</td>
+              <td class="center">00A</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="cell-disabled"></td>
+              <td class="cell-disabled"></td>
+              <td class="center">-</td>
+              <td class="center"><span class="status">Em curso</span></td>
+              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
+              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
+              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+            </tr>
+
+            <tr>
+              <td><strong>AAA0000</strong></td>
+              <td>NOME DA DISCIPLINA</td>
+              <td class="center">00A</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="cell-disabled"></td>
+              <td class="cell-disabled"></td>
+              <td class="center">-</td>
+              <td class="center"><span class="status">Em curso</span></td>
+              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
+              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
+              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+            </tr>
+
+            <tr>
+              <td><strong>AAA0000</strong></td>
+              <td>NOME DA DISCIPLINA</td>
+              <td class="center">00A</td>
+              <td class="center emph">-</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="center"><span class="status">Em curso</span></td>
+              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
+              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
+              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+            </tr>
+
+            <tr>
+              <td><strong>AAA0000</strong></td>
+              <td>NOME DA DISCIPLINA</td>
+              <td class="center">00A</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="cell-disabled"></td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="center"><span class="status">Em curso</span></td>
+              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
+              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
+              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+            </tr>
+
+            <tr>
+              <td><strong>AAA0000</strong></td>
+              <td>NOME DA DISCIPLINA</td>
+              <td class="center">00A</td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="cell-disabled"></td>
+              <td class="center">-</td>
+              <td class="center">-</td>
+              <td class="center"><span class="status">Em curso</span></td>
+              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
+              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
+              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <p class="alert">
+        Obs.: O número de graus parciais depende do critério de avaliação adotado por cada disciplina. Verifique o critério de avaliação clicando no respetivo código na penúltima coluna da tabela.
+      </p>
+      <p>
+        Todos e quaisquer dados obtidos através deste sistema de consulta têm finalidade mera e exclusivamente informativa e não podem ser usados como documentos oficiais para qualquer fim de direito. Todo e qualquer documento de carácter oficial e comprovativo deverá ser necessariamente obtido junto da Coordenação Central de Admissão e Registro (CCAR) da PUC-Rio, conforme as normas estatutárias e regimentais em vigor.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
