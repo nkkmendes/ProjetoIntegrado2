@@ -10,3 +10,6 @@ def planejamento(request):
 
 def simulacao(request):
     return render(request, 'Simulador (1).html')
+
+def nivelamento(request):
+    return render(request, 'nivelamento.html')
