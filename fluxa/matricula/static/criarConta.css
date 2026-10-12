@@ -1,0 +1,89 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 99vh; 
+    background-color: #F0F4FA;
+    align-items: center;
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+    font-variation-settings:
+        "wdth" 100;
+}
+
+div {
+    width: 350px;
+    height: 650px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 25px;
+    border: 1px solid #475569;
+    padding: 35px;
+    color: #0F2C4C;
+    background-color: #FFFFFF;
+    align-items: start;
+    justify-content: center;
+}
+
+img {
+    width: 100px;
+    align-self: center;
+}
+
+h1 {
+    width: 100%;
+    text-align: center;
+}
+
+h4 {
+    margin-bottom: 0px;
+}
+
+p {
+    width: 100%;
+    margin: 0px;
+    text-align: center;
+    font-weight: 300;
+    font-size: 14px;
+    color: #0F2C4C;
+}
+
+a {
+    color: #1D4E78;
+    text-decoration: none;
+}
+
+input {
+    margin-top: 5px;
+    margin-left: 5px;
+    display: flex;
+    border-radius: 5px;
+    padding: 15px;
+    width: 310px;
+    border: 1px solid #475569;
+    font-weight: 300;
+    font-size: 13px;
+    color: #475569;
+}
+
+button {
+    margin-top: 20px;
+    margin-left: 5px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 15px;
+    width: 342px;
+    background-color: #1D4E78;
+    color: #0F2C4C;
+    border: 1px solid #1D4E78;
+    font-weight: bold;
+    cursor: pointer;
+    color: #FFFFFF;
+}
