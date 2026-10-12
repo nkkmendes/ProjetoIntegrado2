@@ -21,3 +21,9 @@ def simulacao(request):
 
 def nivelamento(request):
     return render(request, 'nivelamento.html')
+
+def contagem_creditos(request):
+    return render(request, 'contagem-creditos.html')
+
+def notas_periodo(request):
+    return render(request, 'notas-periodo.html')

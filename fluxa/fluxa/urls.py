@@ -10,4 +10,6 @@ urlpatterns = [
     path('', views.telaInicio, name='telaInicio'),
     path('login/', views.login, name='login'),
     path('criarConta/', views.criarConta, name='criarConta'),
+    path('creditos/', views.contagem_creditos, name='creditos'),
+    path('notas-periodo/', views.notas_periodo, name='notas_periodo'),
 ]
