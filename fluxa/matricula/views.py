@@ -27,3 +27,6 @@ def contagem_creditos(request):
 
 def notas_periodo(request):
     return render(request, 'notas-periodo.html')
+
+def telaErro(request):
+    return render(request, 'erro.html')

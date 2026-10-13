@@ -12,4 +12,5 @@ urlpatterns = [
     path('criarConta/', views.criarConta, name='criarConta'),
     path('creditos/', views.contagem_creditos, name='creditos'),
     path('notas-periodo/', views.notas_periodo, name='notas_periodo'),
+    path('erro/', views.telaErro, name='erro'),
 ]
