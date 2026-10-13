@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxograma de Engenharia de Computação</title>
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}">
+</head>
+<body>
+<main>
+  <h1>Fluxograma de matérias</h1>
+  <p>Engenharia de Computação — PUC-Rio</p>
+  <p>Passe o mouse para ver as relações entre matérias. Clique para abrir os detalhes.</p>
+  <form>
+    <fieldset><legend>Tamanho dos cartões</legend>
+      <label><input type="radio" name="zoom" id="zoom75"> 75%</label>
+      <label><input type="radio" name="zoom" id="zoom100" checked> 100%</label>
+      <label><input type="radio" name="zoom" id="zoom125"> 125%</label>
+      <button type="reset">Limpar marcações e tamanho</button>
+    </fieldset>
+    <div class="quadro" tabindex="0" role="region" aria-label="Disciplinas por período, com rolagem">
+      <div class="grade">
+        <!-- Cada cartão tem seu código. As classes rel-CODIGO identificam as relações. -->
+        <section class="periodo"><h2>1º período</h2>
+          <details class="materia livre" id="ENG4010"><summary class="rel-ENG4010"><strong>ENG4010</strong> — Projeto Integrado - Sustentabilidade</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4010" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="EMP1310"><summary class="rel-EMP1310 rel-EMP1320"><strong>EMP1310</strong> — Comunicação e Trabalho em Equipe</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#EMP1320">EMP1320</a></p><label><input class="feito" id="feito-EMP1310" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="ENG4025"><summary class="rel-ENG4025"><strong>ENG4025</strong> — Ciências Ambientais</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4025" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="CTC4001"><summary class="rel-CTC4001 rel-ENG0425 rel-ENG4420"><strong>CTC4001</strong> — Instrumentação e Medição</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG0425">ENG0425</a>, <a href="#ENG4420">ENG4420</a></p><label><input class="feito" id="feito-CTC4001" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="CTC4002"><summary class="rel-CTC4002 rel-INF1037"><strong>CTC4002</strong> — Modelagem e Programação</summary>
+            <div class="detalhes"><p>6 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1037">INF1037</a></p><label><input class="feito" id="feito-CTC4002" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="CTC4003"><summary class="rel-CTC4003 rel-MAT4200"><strong>CTC4003</strong> — Desenho Técnico e Geometria Analítica</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#MAT4200">MAT4200</a></p><label><input class="feito" id="feito-CTC4003" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="CRE1200"><summary class="rel-CRE0712 rel-CRE1200"><strong>CRE1200</strong> — O Humano e o Fenômeno Religioso</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#CRE0712">CRE0712</a></p><label><input class="feito" id="feito-CRE1200" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>2º período</h2>
+          <details class="materia livre" id="ENG4021"><summary class="rel-ENG4021 rel-INF1037"><strong>ENG4021</strong> — Projeto Integrado - Software</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: <a href="#INF1037">INF1037</a></p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4021" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="EMP1320"><summary class="rel-EMP1310 rel-EMP1320 rel-EMP1330"><strong>EMP1320</strong> — Criação de Oportunidade</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#EMP1310">EMP1310</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#EMP1330">EMP1330</a></p><label><input class="feito" id="feito-EMP1320" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1037"><summary class="rel-CTC4002 rel-ENG4021 rel-ENG4033 rel-ENG4502 rel-INF1010 rel-INF1018 rel-INF1037"><strong>INF1037</strong> — Programação em C</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#CTC4002">CTC4002</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4033">ENG4033</a>, <a href="#ENG4502">ENG4502</a>, <a href="#INF1010">INF1010</a>, <a href="#INF1018">INF1018</a></p><label><input class="feito" id="feito-INF1037" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="MAT4161"><summary class="rel-FIS4001 rel-MAT4161 rel-MAT4162"><strong>MAT4161</strong> — Cálculo a uma Variável</summary>
+            <div class="detalhes"><p>6 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#MAT4162">MAT4162</a></p><label><input class="feito" id="feito-MAT4161" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="FIS4001"><summary class="rel-ENG4007 rel-ENG4011 rel-FIS4001 rel-FIS4002 rel-MAT4161"><strong>FIS4001</strong> — Física I</summary>
+            <div class="detalhes"><p>5 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: <a href="#MAT4161">MAT4161</a></p><p>É pré-requisito de: <a href="#FIS4002">FIS4002</a>, <a href="#ENG4007">ENG4007</a>, <a href="#ENG4011">ENG4011</a></p><label><input class="feito" id="feito-FIS4001" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="MAT4200"><summary class="rel-CTC4003 rel-MAT4200 rel-MAT4202"><strong>MAT4200</strong> — Álgebra Linear I</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#CTC4003">CTC4003</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#MAT4202">MAT4202</a></p><label><input class="feito" id="feito-MAT4200" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="INF1012"><summary class="rel-INF1012 rel-INF1383"><strong>INF1012</strong> — Modelagem de Dados</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1383">INF1383</a></p><label><input class="feito" id="feito-INF1012" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="INF1009"><summary class="rel-INF1009 rel-MAT1320"><strong>INF1009</strong> — Lógica para Computação</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#MAT1320">MAT1320</a></p><label><input class="feito" id="feito-INF1009" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>3º período</h2>
+          <details class="materia" id="ENG0425"><summary class="rel-CTC4001 rel-ENG0425 rel-ENG0434 rel-ENG4420"><strong>ENG0425</strong> — Optativas de Fundamentos à Eletrônica</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#CTC4001">CTC4001</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG0434">ENG0434</a></p><label><input class="feito" id="feito-ENG0425" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4033"><summary class="rel-CTC4002 rel-ENG4033 rel-ENG4051 rel-INF1037"><strong>ENG4033</strong> — Projeto Programação de Microcontroladores</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1037">INF1037</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4051">ENG4051</a></p><label><input class="feito" id="feito-ENG4033" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4420"><summary class="rel-CTC4001 rel-ENG0425 rel-ENG4051 rel-ENG4420 rel-ENG4421 rel-FIS4002"><strong>ENG4420</strong> — Circuitos Elétricos e Eletrônicos I</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#CTC4001">CTC4001</a></p><p>Co-requisitos: <a href="#ENG0425">ENG0425</a>, <a href="#FIS4002">FIS4002</a></p><p>É pré-requisito de: <a href="#ENG4051">ENG4051</a>, <a href="#ENG4421">ENG4421</a></p><label><input class="feito" id="feito-ENG4420" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="MAT4162"><summary class="rel-ENG4501 rel-MAT4161 rel-MAT4162 rel-MAT4174"><strong>MAT4162</strong> — Cálculo a Várias Variáveis I</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#MAT4161">MAT4161</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4501">ENG4501</a>, <a href="#MAT4174">MAT4174</a></p><label><input class="feito" id="feito-MAT4162" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="FIS4002"><summary class="rel-ENG4420 rel-FIS4001 rel-FIS4002 rel-FIS4003"><strong>FIS4002</strong> — Física II</summary>
+            <div class="detalhes"><p>5 créditos</p><p>Pré-requisitos: <a href="#FIS4001">FIS4001</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#FIS4003">FIS4003</a></p><label><input class="feito" id="feito-FIS4002" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="MAT4202"><summary class="rel-CTC4003 rel-MAT4174 rel-MAT4200 rel-MAT4202"><strong>MAT4202</strong> — Álgebra Linear II</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#MAT4200">MAT4200</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#MAT4174">MAT4174</a></p><label><input class="feito" id="feito-MAT4202" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1383"><summary class="rel-ENG4402 rel-INF1012 rel-INF1383"><strong>INF1383</strong> — Banco de Dados</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1012">INF1012</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4402">ENG4402</a></p><label><input class="feito" id="feito-INF1383" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4007"><summary class="rel-ENG4007 rel-FIS4001"><strong>ENG4007</strong> — Introdução à Mecânica dos Sólidos</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#FIS4001">FIS4001</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4007" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>4º período</h2>
+          <details class="materia livre" id="ENG4040"><summary class="rel-ENG4040 rel-ENG4502"><strong>ENG4040</strong> — Projeto Integrado - Ciência de Dados</summary>
+            <div class="detalhes"><p>3 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: <a href="#ENG4502">ENG4502</a></p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4040" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4502"><summary class="rel-CTC4002 rel-ENG4040 rel-ENG4501 rel-ENG4502 rel-INF1037"><strong>ENG4502</strong> — Introdução à Ciência de Dados</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1037">INF1037</a></p><p>Co-requisitos: <a href="#ENG4501">ENG4501</a></p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4502" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4501"><summary class="rel-ENG4501 rel-ENG4502 rel-INF0305 rel-MAT4161 rel-MAT4162"><strong>ENG4501</strong> — Probabilidade e Estatística Computacional</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#MAT4162">MAT4162</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF0305">INF0305</a></p><label><input class="feito" id="feito-ENG4501" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4402"><summary class="rel-ENG4402 rel-INF1012 rel-INF1383"><strong>ENG4402</strong> — Engenharia de Dados</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#INF1383">INF1383</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4402" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="MAT4174"><summary class="rel-CTC4003 rel-INF0305 rel-MAT4161 rel-MAT4162 rel-MAT4174 rel-MAT4200 rel-MAT4202"><strong>MAT4174</strong> — Equações Diferenciais, Sinais e Sistemas</summary>
+            <div class="detalhes"><p>6 créditos</p><p>Pré-requisitos: <a href="#MAT4162">MAT4162</a>, <a href="#MAT4202">MAT4202</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF0305">INF0305</a></p><label><input class="feito" id="feito-MAT4174" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1010"><summary class="rel-CTC4002 rel-ENG0382 rel-INF1010 rel-INF1022 rel-INF1037 rel-INF1636 rel-INF1721"><strong>INF1010</strong> — Estruturas de Dados Avançadas</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1037">INF1037</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG0382">ENG0382</a>, <a href="#INF1022">INF1022</a>, <a href="#INF1636">INF1636</a>, <a href="#INF1721">INF1721</a></p><label><input class="feito" id="feito-INF1010" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1018"><summary class="rel-CTC4002 rel-ENG4451 rel-INF1018 rel-INF1037 rel-INF1316"><strong>INF1018</strong> — Software Básico</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1037">INF1037</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1316">INF1316</a>, <a href="#ENG4451">ENG4451</a></p><label><input class="feito" id="feito-INF1018" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4011"><summary class="rel-ENG4011 rel-FIS4001"><strong>ENG4011</strong> — Fenômenos de Transporte I</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#FIS4001">FIS4001</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4011" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>5º período</h2>
+          <details class="materia" id="ENG0434"><summary class="rel-CTC4001 rel-ENG0425 rel-ENG0434 rel-ENG4448"><strong>ENG0434</strong> — Optativas de Eletrônica Digital</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG0425">ENG0425</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4448">ENG4448</a></p><label><input class="feito" id="feito-ENG0434" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG0382"><summary class="rel-CTC4002 rel-ENG0382 rel-ENG0383 rel-INF1010 rel-INF1027 rel-INF1037"><strong>ENG0382</strong> — Optativas de Programação Modular</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1010">INF1010</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1027">INF1027</a>, <a href="#ENG0383">ENG0383</a></p><label><input class="feito" id="feito-ENG0382" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4051"><summary class="rel-CTC4001 rel-CTC4002 rel-ENG4033 rel-ENG4051 rel-ENG4061 rel-ENG4420 rel-INF1037"><strong>ENG4051</strong> — Projeto Internet das Coisas</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG4033">ENG4033</a>, <a href="#ENG4420">ENG4420</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4061">ENG4061</a></p><label><input class="feito" id="feito-ENG4051" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4421"><summary class="rel-CTC4001 rel-ENG4405 rel-ENG4420 rel-ENG4421"><strong>ENG4421</strong> — Circuitos Elétricos e Eletrônicos II</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG4420">ENG4420</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4405">ENG4405</a></p><label><input class="feito" id="feito-ENG4421" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="MAT1320"><summary class="rel-INF1009 rel-INF1631 rel-MAT1320"><strong>MAT1320</strong> — Introdução Matemática Discreta</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1009">INF1009</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1631">INF1631</a></p><label><input class="feito" id="feito-MAT1320" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="FIS4003"><summary class="rel-FIS4001 rel-FIS4002 rel-FIS4003"><strong>FIS4003</strong> — Física III</summary>
+            <div class="detalhes"><p>6 créditos</p><p>Pré-requisitos: <a href="#FIS4002">FIS4002</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-FIS4003" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>6º período</h2>
+          <details class="materia" id="ENG4061"><summary class="rel-CTC4001 rel-CTC4002 rel-ENG4033 rel-ENG4051 rel-ENG4061 rel-ENG4420 rel-INF1037"><strong>ENG4061</strong> — Projeto Robótica</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG4051">ENG4051</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4061" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4448"><summary class="rel-CTC4001 rel-ENG0425 rel-ENG0434 rel-ENG4448 rel-ENG4451"><strong>ENG4448</strong> — Computação Digital</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG0434">ENG0434</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4451">ENG4451</a></p><label><input class="feito" id="feito-ENG4448" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1022"><summary class="rel-CTC4002 rel-INF1010 rel-INF1022 rel-INF1037"><strong>INF1022</strong> — Analisadores Léxicos e Sintáticos</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1010">INF1010</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF1022" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1631"><summary class="rel-INF1009 rel-INF1631 rel-INF1721 rel-MAT1320"><strong>INF1631</strong> — Estruturas Discretas</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#MAT1320">MAT1320</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1721">INF1721</a></p><label><input class="feito" id="feito-INF1631" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1636"><summary class="rel-CTC4002 rel-INF0312 rel-INF1010 rel-INF1037 rel-INF1636"><strong>INF1636</strong> — Programação Orientada a Objetos</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1010">INF1010</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF0312">INF0312</a></p><label><input class="feito" id="feito-INF1636" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1316"><summary class="rel-CTC4002 rel-INF1018 rel-INF1037 rel-INF1316 rel-INF1643"><strong>INF1316</strong> — Sistemas Operacionais</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1018">INF1018</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF1643">INF1643</a></p><label><input class="feito" id="feito-INF1316" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="CRE0712"><summary class="rel-CRE0712 rel-CRE1200 rel-CRE1241"><strong>CRE0712</strong> — Optativas de Cristianismo</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#CRE1200">CRE1200</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#CRE1241">CRE1241</a></p><label><input class="feito" id="feito-CRE0712" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>7º período</h2>
+          <details class="materia" id="ENG4405"><summary class="rel-CTC4001 rel-ENG4405 rel-ENG4420 rel-ENG4421"><strong>ENG4405</strong> — Materiais para Eletrônica e Computação</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG4421">ENG4421</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4405" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1721"><summary class="rel-CTC4002 rel-INF0303 rel-INF1009 rel-INF1010 rel-INF1037 rel-INF1631 rel-INF1721 rel-MAT1320"><strong>INF1721</strong> — Análise de Algoritmos</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1010">INF1010</a>, <a href="#INF1631">INF1631</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#INF0303">INF0303</a></p><label><input class="feito" id="feito-INF1721" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4451"><summary class="rel-CTC4001 rel-CTC4002 rel-ENG0425 rel-ENG0434 rel-ENG4448 rel-ENG4451 rel-INF1018 rel-INF1037"><strong>ENG4451</strong> — Arquitetura de Computadores</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG4448">ENG4448</a>, <a href="#INF1018">INF1018</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4451" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1643"><summary class="rel-CTC4002 rel-INF1018 rel-INF1037 rel-INF1316 rel-INF1643"><strong>INF1643</strong> — Redes de Comunicação de Dados</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1316">INF1316</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF1643" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF1027"><summary class="rel-CTC4002 rel-ENG0382 rel-INF1010 rel-INF1027 rel-INF1037"><strong>INF1027</strong> — Teste e Medição de Software</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG0382">ENG0382</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF1027" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG0383"><summary class="rel-CTC4002 rel-ENG0382 rel-ENG0383 rel-INF1010 rel-INF1037"><strong>ENG0383</strong> — Optativas de Engenharia de Software</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#ENG0382">ENG0382</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG0383" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="CRE1241"><summary class="rel-CRE0712 rel-CRE1200 rel-CRE1241 rel-CRE1275"><strong>CRE1241</strong> — Ética Cristã</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#CRE0712">CRE0712</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#CRE1275">CRE1275</a></p><label><input class="feito" id="feito-CRE1241" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>8º período</h2>
+          <details class="materia livre" id="ENG4030"><summary class="rel-EMP1330 rel-ENG4030"><strong>ENG4030</strong> — Projeto Integrado - Empreendedorismo</summary>
+            <div class="detalhes"><p>3 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: <a href="#EMP1330">EMP1330</a></p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4030" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="EMP1330"><summary class="rel-EMP1310 rel-EMP1320 rel-EMP1330 rel-ENG4030"><strong>EMP1330</strong> — Mentalidade Empreendedora</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#EMP1320">EMP1320</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-EMP1330" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="ENG0558"><summary class="rel-ENG0558"><strong>ENG0558</strong> — Opt. de Administração e Economia para Eng.</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG0558" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF0312"><summary class="rel-CTC4002 rel-INF0312 rel-INF1010 rel-INF1037 rel-INF1636"><strong>INF0312</strong> — Optativas de Programação Avançada para Engenharia</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1636">INF1636</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF0312" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF0303"><summary class="rel-CTC4002 rel-INF0303 rel-INF1009 rel-INF1010 rel-INF1037 rel-INF1631 rel-INF1721 rel-MAT1320"><strong>INF0303</strong> — Optativas de Inteligência Artificial</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#INF1721">INF1721</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF0303" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="INF0305"><summary class="rel-CTC4003 rel-ENG4501 rel-INF0305 rel-MAT4161 rel-MAT4162 rel-MAT4174 rel-MAT4200 rel-MAT4202"><strong>INF0305</strong> — Optativas de Computação Científica</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: <a href="#MAT4174">MAT4174</a>, <a href="#ENG4501">ENG4501</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF0305" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="JUR0205"><summary class="rel-JUR0205"><strong>JUR0205</strong> — Optativas de Direito para CTC</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-JUR0205" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>9º período</h2>
+          <details class="materia" id="ENG4134"><summary class="rel-ENG4134 rel-ENG4135"><strong>ENG4134</strong> — Projeto de Graduação em Eng. da Computação I</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: <a href="#ENG4135">ENG4135</a></p><p>Mínimo de 150 créditos concluídos.</p><label><input class="feito" id="feito-ENG4134" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="ELL0900"><summary class="rel-ELL0900"><strong>ELL0900</strong> — Eletivas Livres - Dentro/Fora Departamento</summary>
+            <div class="detalhes"><p>6 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ELL0900" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="ELO0900"><summary class="rel-ELO0900"><strong>ELO0900</strong> — Eletivas de Orientação</summary>
+            <div class="detalhes"><p>8 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ELO0900" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="FIL0300"><summary class="rel-FIL0300"><strong>FIL0300</strong> — Optativas de Filosofia - CB/CTC</summary>
+            <div class="detalhes"><p>4 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-FIL0300" type="checkbox"> Concluída</label></div></details>
+          <details class="materia livre" id="INF1014"><summary class="rel-INF1014"><strong>INF1014</strong> — Seminários</summary>
+            <div class="detalhes"><p>1 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-INF1014" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="CRE1275"><summary class="rel-CRE0712 rel-CRE1200 rel-CRE1241 rel-CRE1275"><strong>CRE1275</strong> — Ética Socioambiental e Direitos Humanos</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#CRE1241">CRE1241</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-CRE1275" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>10º período</h2>
+          <details class="materia" id="ENG4135"><summary class="rel-ENG4134 rel-ENG4135"><strong>ENG4135</strong> — Projeto de Graduação em Eng. da Computação II</summary>
+            <div class="detalhes"><p>2 créditos</p><p>Pré-requisitos: <a href="#ENG4134">ENG4134</a></p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ENG4135" type="checkbox"> Concluída</label></div></details>
+          <details class="materia" id="ENG4153"><summary class="rel-ENG4153"><strong>ENG4153</strong> — Estágio Supervisionado em Eng. da Computação</summary>
+            <div class="detalhes"><p>1 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><p>Mínimo de 170 créditos concluídos.</p><label><input class="feito" id="feito-ENG4153" type="checkbox"> Concluída</label></div></details>
+        </section>
+        <section class="periodo"><h2>Atividades complementares</h2>
+          <details class="materia livre" id="ACP0900"><summary class="rel-ACP0900"><strong>ACP0900</strong> — Atividades Complementares</summary>
+            <div class="detalhes"><p>10 créditos</p><p>Pré-requisitos: Nenhum</p><p>Co-requisitos: Nenhum</p><p>É pré-requisito de: Nenhum</p><label><input class="feito" id="feito-ACP0900" type="checkbox"> Concluída</label></div></details>
+        </section>
+      </div>
+    </div>
+    <p>As marcações não são salvas ao sair.</p>
+  </form>
+</main>
+</body>
+</html>

@@ -30,3 +30,6 @@ def notas_periodo(request):
 
 def telaErro(request):
     return render(request, 'erro.html')
+
+def fluxograma(request):
+    return render(request, 'fluxograma.html')

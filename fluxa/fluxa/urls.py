@@ -13,4 +13,5 @@ urlpatterns = [
     path('creditos/', views.contagem_creditos, name='creditos'),
     path('notas-periodo/', views.notas_periodo, name='notas_periodo'),
     path('erro/', views.telaErro, name='erro'),
+    path('fluxograma/', views.fluxograma, name='fluxograma'),
 ]
