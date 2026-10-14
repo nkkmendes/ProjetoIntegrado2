@@ -1,31 +1,31 @@
 /* Estrutura básica: sem linhas, setas, imagens ou bibliotecas. */
 * { box-sizing: border-box; }
-body { margin: 0; background: #f5f5f5; color: #222; font: 16px Arial, sans-serif; }
+body { margin: 0; background: #F0F4FA; color: #0F2C4C; font: 300 16px 'Courier New', Courier, monospace; }
 main { padding: 20px; }
 h1 { font-size: 26px; margin-top: 0; }
 p { line-height: 1.5; }
-fieldset { border: 1px solid #aaa; padding: 12px; }
+fieldset { border: 1px solid #475569; border-radius: 5px; padding: 12px; }
 fieldset label { display: inline-block; margin-right: 14px; }
-button { padding: 8px 12px; font: inherit; cursor: pointer; }
-input { accent-color: #2457a7; }
+button { padding: 8px 12px; font: inherit; font-weight: bold; cursor: pointer; background: #1D4E78; color: #FFFFFF; border: 1px solid #1D4E78; border-radius: 5px; }
+input { accent-color: #1D4E78; }
 .legenda { font-size: 14px; }
 .livre { background: #e0efd7; color: #23451c; }
 .concluida { background: #356b35; color: white; }
 .azul { background: #2457a7; color: white; }
-.quadro { max-height: 72vh; min-height: 300px; overflow: auto; border: 1px solid #aaa; background: white; }
+.quadro { max-height: 72vh; min-height: 300px; overflow: auto; border: 1px solid #475569; border-radius: 25px; background: white; }
 .grade { display: flex; align-items: flex-start; gap: 16px; width: max-content; padding: 16px; }
 .periodo { width: 230px; flex-shrink: 0; }
 .periodo h2 { font-size: 18px; margin: 0 0 16px; }
-.materia { margin-bottom: 12px; border: 1px solid #a5a5a5; background: white; scroll-margin: 16px; }
-summary { padding: 12px; background: #e0e0e0; color: #222; line-height: 1.45; cursor: pointer; }
+.materia { margin-bottom: 12px; border: 1px solid #475569; border-radius: 5px; overflow: hidden; background: white; scroll-margin: 16px; }
+summary { padding: 12px; background: #F0F4FA; color: #0F2C4C; line-height: 1.45; cursor: pointer; }
 summary strong { font-size: 14px; }
 .materia.livre summary { background: #e0efd7; color: #23451c; }
 .detalhes { padding: 10px; font-size: 14px; overflow-wrap: anywhere; }
 .detalhes p { margin: 0 0 10px; }
 .detalhes label { display: block; padding: 8px 0; cursor: pointer; }
-a { color: #164e9c; }
-:focus-visible { outline: 3px solid #1c4fa0; outline-offset: 2px; }
-.materia:target { outline: 3px solid #1c4fa0; }
+a { color: #1D4E78; }
+:focus-visible { outline: 3px solid #1D4E78; outline-offset: 2px; }
+.materia:target { outline: 3px solid #1D4E78; }
 form:has(#zoom75:checked) .grade { zoom: .75; }
 form:has(#zoom125:checked) .grade { zoom: 1.25; }
 @media (max-width: 600px) {

@@ -4,15 +4,16 @@
 body {
     margin: 0;
     display: flex;
-    font-family: Arial, sans-serif;
-    color: #19446e;
-    background: #f5f8fc;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 300;
+    color: #0F2C4C;
+    background: #F0F4FA;
 }
 aside {
     width: 245px;
     min-height: 100vh;
     padding: 25px;
-    background: #244d76;
+    background: #1D4E78;
     color: white;
 }
 aside > strong {
@@ -41,30 +42,32 @@ button {
     margin-right: 10px;
     border: 0;
     border-radius: 5px;
-    background: #244d76;
+    background: #1D4E78;
     color: white;
+    font-family: inherit;
+    font-weight: bold;
     cursor: pointer;
 }
 details {
     margin-bottom: 15px;
-    border: 1px solid #bfd1e3;
-    border-radius: 6px;
+    border: 1px solid #475569;
+    border-radius: 5px;
     background: white;
 }
 summary {
     padding: 15px;
-    background: #eaf1f8;
+    background: #F0F4FA;
     font-weight: bold;
     cursor: pointer;
 }
 label {
     display: block;
     padding: 12px;
-    border-top: 1px solid #edf1f6;
+    border-top: 1px solid #CBD5E1;
     line-height: 1.5;
 }
 input {
-    accent-color: #244d76;
+    accent-color: #1D4E78;
 }
 @media (max-width: 750px) {
     body {

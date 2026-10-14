@@ -6,15 +6,15 @@ body {
   margin: 0;
   display: flex;
   min-height: 100vh;
-  font: 14px Arial, sans-serif;
-  color: #19446e;
-  background: #f5f8fc;
+  font: 300 14px 'Courier New', Courier, monospace;
+  color: #0F2C4C;
+  background: #F0F4FA;
 }
 
 .menu {
   width: 245px;
   padding: 30px 22px;
-  background: #244d76;
+  background: #1D4E78;
   color: white;
   display: flex;
   flex-direction: column;
@@ -35,7 +35,7 @@ body {
 }
 
 .menu p {
-  color: #dce9f6;
+  color: #F0F4FA;
   line-height: 1.6;
 }
 
@@ -49,15 +49,16 @@ nav a {
   margin-bottom: 8px;
   color: white;
   text-decoration: none;
-  border-radius: 7px;
+  border-radius: 5px;
 }
 
 nav a:hover {
-  background: #365f87;
+  background: #0F2C4C;
 }
 
 nav .ativo {
-  background: #6096b8;
+  background: #F0F4FA;
+  color: #0F2C4C;
   font-weight: bold;
 }
 
@@ -76,15 +77,15 @@ h1 {
 }
 
 .descricao {
-  color: #647d97;
+  color: #475569;
   margin-bottom: 25px;
 }
 
 .tabela {
   max-width: 700px;
   overflow: hidden;
-  border: 1px solid #d3e1ef;
-  border-radius: 8px;
+  border: 1px solid #475569;
+  border-radius: 25px;
   background: white;
 }
 
@@ -95,12 +96,12 @@ table {
 
 th, td {
   padding: 14px;
-  border-bottom: 1px solid #e5edf5;
+  border-bottom: 1px solid #CBD5E1;
   text-align: left;
 }
 
 th {
-  background: #d5e7f5;
+  background: #F0F4FA;
 }
 
 th:last-child, td:last-child {
