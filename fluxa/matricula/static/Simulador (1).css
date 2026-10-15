@@ -6,9 +6,9 @@ body {
     margin: 0;
     display: flex;
     min-height: 100vh;
-    font: 14px Arial, sans-serif;
-    color: #19446e;
-    background-color: #f5f8fc;
+    font: 300 14px 'Courier New', Courier, monospace;
+    color: #0F2C4C;
+    background-color: #F0F4FA;
 }
 
 /* Menu lateral */
@@ -16,7 +16,7 @@ body {
     width: 245px;
     flex-shrink: 0;
     padding: 30px 22px;
-    background-color: #244d76;
+    background-color: #1D4E78;
     color: white;
     display: flex;
     flex-direction: column;
@@ -39,7 +39,7 @@ body {
 .menu p {
     font-size: 13px;
     line-height: 1.6;
-    color: #dce9f6;
+    color: #F0F4FA;
 }
 
 nav {
@@ -50,18 +50,19 @@ nav a {
     display: block;
     padding: 15px 12px;
     margin-bottom: 10px;
-    border-radius: 7px;
+    border-radius: 5px;
     color: white;
     text-decoration: none;
     line-height: 1.5;
 }
 
 nav a:hover {
-    background-color: #365f87;
+    background-color: #0F2C4C;
 }
 
 nav .ativo {
-    background-color: #6096b8;
+    background-color: #F0F4FA;
+    color: #0F2C4C;
     font-weight: bold;
 }
 
@@ -88,7 +89,7 @@ h2 {
 }
 
 .descricao {
-    color: #647d97;
+    color: #475569;
     line-height: 1.6;
     margin: 0 0 20px;
 }
@@ -102,18 +103,18 @@ h2 {
 
 button, .botao {
     padding: 11px 16px;
-    border: 1px solid #bfd1e3;
-    border-radius: 7px;
+    border: 1px solid #475569;
+    border-radius: 5px;
     background-color: white;
-    color: #244d76;
-    font: bold 14px Arial, sans-serif;
+    color: #475569;
+    font: bold 14px 'Courier New', Courier, monospace;
     text-decoration: none;
     line-height: 1.4;
 }
 
 .azul {
-    background-color: #244d76;
-    border-color: #244d76;
+    background-color: #1D4E78;
+    border-color: #1D4E78;
     color: white;
 }
 
@@ -132,11 +133,11 @@ label {
 
 input, select {
     padding: 11px;
-    border: 1px solid #bfd1e3;
-    border-radius: 7px;
+    border: 1px solid #475569;
+    border-radius: 5px;
     background-color: white;
-    color: #19446e;
-    font: 14px Arial, sans-serif;
+    color: #475569;
+    font: 300 14px 'Courier New', Courier, monospace;
 }
 
 #curso {
@@ -147,20 +148,20 @@ input, select {
 .aviso {
     padding: 15px 18px;
     margin: 24px 0;
-    border-left: 3px solid #83add3;
-    background-color: #edf5fc;
+    border-left: 3px solid #1D4E78;
+    background-color: #FFFFFF;
     line-height: 1.6;
 }
 
 .observacao {
     margin-top: 25px;
-    color: #647d97;
+    color: #475569;
     font-size: 12px;
     line-height: 1.6;
 }
 
 a:focus-visible, button:focus-visible, summary:focus-visible {
-    outline: 3px solid #6096b8;
+    outline: 3px solid #1D4E78;
     outline-offset: 3px;
 }
 
@@ -185,8 +186,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .numero {
     min-width: 105px;
     padding: 14px 20px;
-    border: 1px solid #d3e1ef;
-    border-radius: 8px;
+    border: 1px solid #475569;
+    border-radius: 25px;
     background-color: white;
 }
 
@@ -206,8 +207,8 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 /* Tabela de horários */
 .rolagem {
     overflow-x: auto;
-    border: 1px solid #d3e1ef;
-    border-radius: 8px;
+    border: 1px solid #475569;
+    border-radius: 25px;
 }
 
 .grade {
@@ -224,14 +225,14 @@ table {
 
 th, td {
     height: 28px;
-    border: 1px solid #e5edf5;
+    border: 1px solid #CBD5E1;
     text-align: center;
     font-size: 12px;
 }
 
 thead th {
     height: 36px;
-    background-color: #d5e7f5;
+    background-color: #F0F4FA;
 }
 
 th:first-child {
@@ -239,8 +240,8 @@ th:first-child {
 }
 
 tbody th {
-    background-color: #f5f9fd;
-    color: #647d97;
+    background-color: #F0F4FA;
+    color: #475569;
     font-weight: normal;
 }
 
@@ -255,7 +256,7 @@ tbody th {
 }
 
 .calendario {
-    color: #8aa7c3;
+    color: #475569;
     font-size: 45px;
 }
 
@@ -265,7 +266,7 @@ tbody th {
 }
 
 .vazio p {
-    color: #647d97;
+    color: #475569;
     font-size: 12px;
     line-height: 1.5;
 }
