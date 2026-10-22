@@ -1,48 +1,85 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FLUXA - Nivelamento</title>
-  <link rel="stylesheet" href="nivelamento.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLUXA - Nivelamento</title>
+    <link rel="stylesheet" href="{% static 'nivelamento.css' %}">
 </head>
 <body>
-  <aside class="menu">
-    <img class="logo" src="Logo.jpeg" alt="FLUXA">
-    <h2>Meu planejamento</h2>
-    <p>PUC-Rio · Engenharia de Computação</p>
 
-    <nav>
-      <a href="#">⌂ &nbsp; Início</a>
-      <a href="#">▤ &nbsp; Planejamento</a>
-      <a href="#">▦ &nbsp; Simulador de matrícula</a>
-      <a href="#">⤳ &nbsp; Fluxograma</a>
-      <a href="#" class="ativo">✓ &nbsp; Nivelamento</a>
-    </nav>
+    <aside class="menu">
+        <img class="logo" src="{% static 'Logo.jpeg' %}" alt="FLUXA">
 
-    <p class="rodape">FLUXA<br>Organize seu próximo semestre.</p>
-  </aside>
+        <h2>Meu planejamento</h2>
+        <p>PUC-Rio · Engenharia de Computação</p>
 
-  <main>
-    <h1>Nivelamento</h1>
-    <p class="descricao">Consulte seus níveis atuais de nivelamento.</p>
+        <nav>
+            <a href="{% url 'telaInicio' %}">⌂ &nbsp; Início</a>
+            <a href="{% url 'planejamento' %}">▤ &nbsp; Planejamento</a>
+            <a href="{% url 'simulacao' %}">▦ &nbsp; Simulador de matrícula</a>
+            <a href="{% url 'fluxograma' %}">⤳ &nbsp; Fluxograma</a>
+            <a href="{% url 'nivelamento' %}" class="ativo">✓ &nbsp; Nivelamento</a>
+        </nav>
 
-    <div class="tabela">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Tipo de nivelamento</th>
-            <th>Nível atual</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>CT</td><td>Compreensão de Texto</td><td>5</td></tr>
-          <tr><td>MA</td><td>Matemática</td><td>2</td></tr>
-          <tr><td>PT</td><td>Produção de Texto</td><td>4</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+        <p class="rodape">
+            FLUXA<br>
+            Organize seu próximo semestre.
+        </p>
+    </aside>
+
+    <main>
+        <h1>Nivelamento</h1>
+
+        <p class="descricao">
+            Consulte e registre seus níveis de nivelamento.
+        </p>
+
+        <h2>Salvar nivelamento</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Salvar nivelamento
+            </button>
+        </form>
+
+        <h2>Nivelamentos salvos</h2>
+
+        <div class="tabela">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo de nivelamento</th>
+                        <th>Nível atual</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in dados %}
+                    <tr>
+                        <td>{{ item.nome }}</td>
+                        <td>{{ item.area }}</td>
+                        <td>{{ item.resultado }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            Nenhum nivelamento salvo.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
 </body>
 </html>

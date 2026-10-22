@@ -25,7 +25,24 @@
         <h1>Planejamento personalizado</h1>
         <p>Engenharia de Computação — Currículo 2023</p>
         <p>Marque as disciplinas que pretende cursar em 2026.2.</p>
-        <form>
+        <form method="POST"></form>
+        
+{% csrf_token %}
+
+<p>
+    <label>Nome do planejamento:</label>
+    {{ form.nome }}
+    {{ form.nome.errors }}
+</p>
+
+<p>
+    <label>Data do planejamento:</label>
+    {{ form.periodo }}
+    {{ form.periodo.errors }}
+</p>
+
+<button type="submit">Salvar planejamento</button>
+
             <p>
                 <button type="reset">Limpar seleção</button>
                 <a href="Simulador (1).html">Abrir simulador →</a>
