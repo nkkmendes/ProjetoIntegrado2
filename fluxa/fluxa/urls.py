@@ -14,4 +14,5 @@ urlpatterns = [
     path('notas-periodo/', views.notas_periodo, name='notas_periodo'),
     path('erro/', views.telaErro, name='erro'),
     path('fluxograma/', views.fluxograma, name='fluxograma'),
+    path('fluxograma/filtrar/', views.filtrar_disciplinas, name='filtrar_disciplinas'),
 ]

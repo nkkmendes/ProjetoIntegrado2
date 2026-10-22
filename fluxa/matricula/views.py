@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import CalendarioMatricula, Disciplina
-from django.db.models import F
+from django.db.models import F, Q
 
 def inicio(request):
     return render(request, 'index.html')
@@ -38,6 +38,26 @@ def telaErro(request):
 
 def fluxograma(request):
     disciplinas = Disciplina.objects.all().order_by(
+        F('periodo').asc(nulls_last=True),
+        'nome'
+    )
+
+    return render(request, 'fluxograma.html', {
+        'disciplinas': disciplinas
+    })
+
+def filtrar_disciplinas(request):
+    busca = request.GET.get('q', '').strip()
+
+    disciplinas = Disciplina.objects.all()
+
+    if busca:
+        disciplinas = disciplinas.filter(
+            Q(nome__icontains=busca) |
+            Q(codigo__icontains=busca)
+        )
+
+    disciplinas = disciplinas.order_by(
         F('periodo').asc(nulls_last=True),
         'nome'
     )
