@@ -1,11 +1,15 @@
 from django.shortcuts import render
-
+from .models import CalendarioMatricula
 
 def inicio(request):
     return render(request, 'index.html')
 
 def telaInicio(request):
-    return render(request, 'inicio_html.html')
+    calendario = CalendarioMatricula.objects.first()
+
+    return render(request, 'inicio_html.html', {
+        'calendario': calendario
+    })
 
 def login(request):
     return render(request, 'login.html')
