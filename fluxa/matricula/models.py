@@ -8,3 +8,29 @@ class CalendarioMatricula(models.Model):
     inicio_aulas = models.DateField()
     inicio_ajuste = models.DateField()
     fim_ajuste = models.DateField()
+
+
+class Disciplina(models.Model):
+    codigo = models.CharField(max_length=20, unique=True)
+    nome = models.CharField(max_length=200)
+    periodo = models.IntegerField(null=True, blank=True)
+    creditos = models.IntegerField()
+
+    pre_requisitos = models.ManyToManyField(
+        'self',
+        blank=True,
+        symmetrical=False,
+        related_name='dependentes'
+    )
+
+    co_requisitos = models.ManyToManyField(
+        'self',
+        blank=True,
+        symmetrical=False,
+        related_name='associadas'
+    )
+
+    creditos_minimos = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.nome

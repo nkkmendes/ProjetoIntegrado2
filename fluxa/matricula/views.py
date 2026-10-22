@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import CalendarioMatricula
+from .models import CalendarioMatricula, Disciplina
 
 def inicio(request):
     return render(request, 'index.html')
@@ -36,4 +36,8 @@ def telaErro(request):
     return render(request, 'erro.html')
 
 def fluxograma(request):
-    return render(request, 'fluxograma.html')
+    disciplinas = Disciplina.objects.all().order_by('periodo', 'nome')
+
+    return render(request, 'fluxograma.html', {
+        'disciplinas': disciplinas
+    })
