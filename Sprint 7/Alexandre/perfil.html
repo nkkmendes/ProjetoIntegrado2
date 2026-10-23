@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Fluxa - Perfil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="{% static 'perfil.css' %}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <aside>
+        <img src="{% static 'Logo.jpeg' %}">
+        <h4>Meu planejamento</h4>
+        <p>PUC-Rio · Engenharia de Computação</p>
+        <nav>
+            <a href="{% url 'telaInicio' %}">Início</a>
+            <a href="{% url 'planejamento' %}">Planejamento</a>
+            <a href="{% url 'simulacao' %}">Simulador de matrícula</a>
+            <a href="{% url 'fluxograma' %}">Fluxograma</a>
+            <a href="{% url 'notas_periodo' %}">Consulta de Graus</a>
+            <a href="{% url 'creditos' %}">Contagem de Créditos</a>
+            <a href="{% url 'nivelamento' %}">Nivelamento</a>
+            <a href="{% url 'perfil' %}" style="background-color: #1D4E78; font-weight: bold;">Meu perfil</a>
+        </nav>
+    </aside>
+    <main>
+        <h1>Perfil do aluno</h1>
+        <p>Veja seus dados pessoais e acadêmicos.</p>
+        <div>
+            <h2>Nome do Aluno</h2>
+            <p>usuario@aluno.puc-rio.br</p>
+            <button>Editar dados</button>
+        </div>
+        <div>
+            <h2>Dados acadêmicos</h2>
+            <h4>Matrícula</h4>
+            <p>0000000</p>
+            <h4>Curso</h4>
+            <p>Engenharia de Computação</p>
+            <h4>Ingresso</h4>
+            <p>0000.0</p>
+            <h4>CR acumulado</h4>
+            <p>0,0</p>
+            <h4>Créditos cumpridos</h4>
+            <p>0 de 250</p>
+            <h4>Período atual</h4>
+            <p>1º</p>
+        </div>
+    </main>
+</body>
+</html>
