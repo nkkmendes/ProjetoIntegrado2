@@ -29,7 +29,10 @@
       </nav>
       <div class="bottom">
         <div class="hint">Suas grades e listas são<br>salvas neste navegador</div>
-        <a href="login.html"><button class="logout">Logout</button></a>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="logout">Logout</button>
+        </form>
       </div>
     </aside>
     <main class="main">
