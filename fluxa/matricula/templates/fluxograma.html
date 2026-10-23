@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxograma de Engenharia de Computação</title>
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=2">
+</head>
+<body>
+<main>
+  <h1>Fluxograma de matérias</h1>
+  <p>Engenharia de Computação — PUC-Rio</p>
+  <p>Passe o mouse para ver as relações entre matérias. Clique para abrir os detalhes.</p>
+  <form>
+    <fieldset><legend>Tamanho dos cartões</legend>
+      <label><input type="radio" name="zoom" id="zoom75"> 75%</label>
+      <label><input type="radio" name="zoom" id="zoom100" checked> 100%</label>
+      <label><input type="radio" name="zoom" id="zoom125"> 125%</label>
+      <button type="reset">Limpar marcações e tamanho</button>
+    </fieldset>
+    <div class="quadro" tabindex="0" role="region" aria-label="Disciplinas por período, com rolagem">
+      <div class="grade">
+        {% regroup disciplinas by periodo as grupos %}
+        {% for grupo in grupos %}
+        <section class="periodo">
+          {% if grupo.grouper %}
+          <h2>{{ grupo.grouper }}º período</h2>
+          {% else %}
+          <h2>Atividades complementares</h2>
+          {% endif %}
+
+          {% for disciplina in grupo.list %}
+          <details class="materia{% if not disciplina.pre_requisitos.all %} livre{% endif %}" id="{{ disciplina.codigo }}">
+            <summary class="rel-{{ disciplina.codigo }}{% for item in disciplina.pre_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.co_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.dependentes.all %} rel-{{ item.codigo }}{% endfor %}">
+              <strong>{{ disciplina.codigo }}</strong> — {{ disciplina.nome }}
+            </summary>
+            <div class="detalhes">
+              <p>{{ disciplina.creditos }} créditos</p>
+              <p>Pré-requisitos:
+                {% for item in disciplina.pre_requisitos.all %}
+                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  Nenhum
+                {% endfor %}
+              </p>
+              <p>Co-requisitos:
+                {% for item in disciplina.co_requisitos.all %}
+                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  Nenhum
+                {% endfor %}
+              </p>
+              <p>É pré-requisito de:
+                {% for item in disciplina.dependentes.all %}
+                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  Nenhum
+                {% endfor %}
+              </p>
+              {% if disciplina.creditos_minimos %}
+              <p>Mínimo de {{ disciplina.creditos_minimos }} créditos concluídos.</p>
+              {% endif %}
+              <label><input class="feito" id="feito-{{ disciplina.codigo }}" type="checkbox"> Concluída</label>
+            </div>
+          </details>
+          {% endfor %}
+        </section>
+        {% empty %}
+        <p>Nenhuma disciplina cadastrada.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <p>As marcações não são salvas ao sair.</p>
+  </form>
+</main>
+</body>
+</html>

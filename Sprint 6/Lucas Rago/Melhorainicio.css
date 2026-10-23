@@ -1,0 +1,215 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f8fc;
+    color: #19446e;
+}
+
+.shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Menu lateral */
+.side {
+    width: 245px;
+    padding: 25px;
+    background: #244d76;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.brandrow {
+    margin-bottom: 25px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo img {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    background: white;
+    border-radius: 8px;
+}
+
+.lf {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.who {
+    margin-bottom: 25px;
+}
+
+.who .t {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.who .s {
+    font-size: 12px;
+    color: #dce9f6;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav a {
+    padding: 12px;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.nav a:hover {
+    background: #365f87;
+}
+
+.nav a.active {
+    background: #6096b8;
+    font-weight: bold;
+}
+
+.ic {
+    margin-right: 10px;
+}
+
+.bottom {
+    margin-top: auto;
+    padding-top: 25px;
+}
+
+.hint {
+    font-size: 12px;
+    color: #dce9f6;
+    margin-bottom: 15px;
+}
+
+.logout {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: white;
+    color: #244d76;
+    cursor: pointer;
+}
+
+/* Conteúdo principal */
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 35px;
+}
+
+.page-title {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.page-sub {
+    color: #647d97;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 22px;
+    margin: 35px 0 20px;
+}
+
+/* Organização dos cartões */
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border: 1px solid #d3e1ef;
+    border-radius: 8px;
+}
+
+.card h2 {
+    font-size: 18px;
+    margin-top: 0;
+}
+
+.kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5edf5;
+}
+
+.pill {
+    color: #244d76;
+    font-weight: bold;
+}
+
+.ol {
+    padding-left: 20px;
+    line-height: 1.8;
+}
+
+/* Ferramentas */
+.tool {
+    text-decoration: none;
+    color: #19446e;
+}
+
+.tool:hover {
+    border-color: #6096b8;
+    background: #edf5fc;
+}
+
+.tool h3 {
+    font-size: 17px;
+}
+
+.tool p {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Celular */
+@media (max-width: 750px) {
+    .shell {
+        flex-direction: column;
+    }
+
+    .side {
+        width: 100%;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    .grid2, .grid3 {
+        grid-template-columns: 1fr;
+    }
+}

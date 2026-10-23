@@ -1,0 +1,115 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  font: 300 14px 'Courier New', Courier, monospace;
+  color: #0F2C4C;
+  background: #F0F4FA;
+}
+
+.menu {
+  width: 245px;
+  padding: 30px 22px;
+  background: #1D4E78;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  padding: 7px;
+  border-radius: 12px;
+  background: white;
+  object-fit: contain;
+}
+
+.menu h2 {
+  margin: 18px 0 6px;
+  font-size: 18px;
+}
+
+.menu p {
+  color: #F0F4FA;
+  line-height: 1.6;
+}
+
+nav {
+  margin-top: 30px;
+}
+
+nav a {
+  display: block;
+  padding: 13px 12px;
+  margin-bottom: 8px;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+nav a:hover {
+  background: #0F2C4C;
+}
+
+nav .ativo {
+  background: #F0F4FA;
+  color: #0F2C4C;
+  font-weight: bold;
+}
+
+.rodape {
+  margin-top: auto;
+}
+
+main {
+  flex: 1;
+  padding: 35px;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+}
+
+.descricao {
+  color: #475569;
+  margin-bottom: 25px;
+}
+
+.tabela {
+  max-width: 700px;
+  overflow: hidden;
+  border: 1px solid #475569;
+  border-radius: 25px;
+  background: white;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 14px;
+  border-bottom: 1px solid #CBD5E1;
+  text-align: left;
+}
+
+th {
+  background: #F0F4FA;
+}
+
+th:last-child, td:last-child {
+  text-align: center;
+}
+
+@media (max-width: 750px) {
+  body { flex-direction: column; }
+  .menu { width: 100%; }
+  main { padding: 22px 16px; }
+}

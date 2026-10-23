@@ -1,0 +1,979 @@
+[
+  {
+    "model": "matricula.disciplina",
+    "pk": 1,
+    "fields": {
+      "codigo": "ENG4010",
+      "nome": "Projeto Integrado - Sustentabilidade",
+      "periodo": 1,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 2,
+    "fields": {
+      "codigo": "EMP1310",
+      "nome": "Comunicação e Trabalho em Equipe",
+      "periodo": 1,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 3,
+    "fields": {
+      "codigo": "ENG4025",
+      "nome": "Ciências Ambientais",
+      "periodo": 1,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 4,
+    "fields": {
+      "codigo": "CTC4001",
+      "nome": "Instrumentação e Medição",
+      "periodo": 1,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 5,
+    "fields": {
+      "codigo": "CTC4002",
+      "nome": "Modelagem e Programação",
+      "periodo": 1,
+      "creditos": 6,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 6,
+    "fields": {
+      "codigo": "CTC4003",
+      "nome": "Desenho Técnico e Geometria Analítica",
+      "periodo": 1,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 7,
+    "fields": {
+      "codigo": "CRE1200",
+      "nome": "O Humano e o Fenômeno Religioso",
+      "periodo": 1,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 8,
+    "fields": {
+      "codigo": "ENG4021",
+      "nome": "Projeto Integrado - Software",
+      "periodo": 2,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [
+        10
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 9,
+    "fields": {
+      "codigo": "EMP1320",
+      "nome": "Criação de Oportunidade",
+      "periodo": 2,
+      "creditos": 2,
+      "pre_requisitos": [
+        2
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 10,
+    "fields": {
+      "codigo": "INF1037",
+      "nome": "Programação em C",
+      "periodo": 2,
+      "creditos": 4,
+      "pre_requisitos": [
+        5
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 11,
+    "fields": {
+      "codigo": "MAT4161",
+      "nome": "Cálculo a uma Variável",
+      "periodo": 2,
+      "creditos": 6,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 12,
+    "fields": {
+      "codigo": "FIS4001",
+      "nome": "Física I",
+      "periodo": 2,
+      "creditos": 5,
+      "pre_requisitos": [],
+      "co_requisitos": [
+        11
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 13,
+    "fields": {
+      "codigo": "MAT4200",
+      "nome": "Álgebra Linear I",
+      "periodo": 2,
+      "creditos": 4,
+      "pre_requisitos": [
+        6
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 14,
+    "fields": {
+      "codigo": "INF1012",
+      "nome": "Modelagem de Dados",
+      "periodo": 2,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 15,
+    "fields": {
+      "codigo": "INF1009",
+      "nome": "Lógica para Computação",
+      "periodo": 2,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 16,
+    "fields": {
+      "codigo": "ENG0425",
+      "nome": "Optativas de Fundamentos à Eletrônica",
+      "periodo": 3,
+      "creditos": 2,
+      "pre_requisitos": [
+        4
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 17,
+    "fields": {
+      "codigo": "ENG4033",
+      "nome": "Projeto Programação de Microcontroladores",
+      "periodo": 3,
+      "creditos": 4,
+      "pre_requisitos": [
+        10
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 18,
+    "fields": {
+      "codigo": "ENG4420",
+      "nome": "Circuitos Elétricos e Eletrônicos I",
+      "periodo": 3,
+      "creditos": 4,
+      "pre_requisitos": [
+        4
+      ],
+      "co_requisitos": [
+        16,
+        20
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 19,
+    "fields": {
+      "codigo": "MAT4162",
+      "nome": "Cálculo a Várias Variáveis I",
+      "periodo": 3,
+      "creditos": 4,
+      "pre_requisitos": [
+        11
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 20,
+    "fields": {
+      "codigo": "FIS4002",
+      "nome": "Física II",
+      "periodo": 3,
+      "creditos": 5,
+      "pre_requisitos": [
+        12
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 21,
+    "fields": {
+      "codigo": "MAT4202",
+      "nome": "Álgebra Linear II",
+      "periodo": 3,
+      "creditos": 4,
+      "pre_requisitos": [
+        13
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 22,
+    "fields": {
+      "codigo": "INF1383",
+      "nome": "Banco de Dados",
+      "periodo": 3,
+      "creditos": 4,
+      "pre_requisitos": [
+        14
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 23,
+    "fields": {
+      "codigo": "ENG4007",
+      "nome": "Introdução à Mecânica dos Sólidos",
+      "periodo": 3,
+      "creditos": 2,
+      "pre_requisitos": [
+        12
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 24,
+    "fields": {
+      "codigo": "ENG4040",
+      "nome": "Projeto Integrado - Ciência de Dados",
+      "periodo": 4,
+      "creditos": 3,
+      "pre_requisitos": [],
+      "co_requisitos": [
+        25
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 25,
+    "fields": {
+      "codigo": "ENG4502",
+      "nome": "Introdução à Ciência de Dados",
+      "periodo": 4,
+      "creditos": 4,
+      "pre_requisitos": [
+        10
+      ],
+      "co_requisitos": [
+        26
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 26,
+    "fields": {
+      "codigo": "ENG4501",
+      "nome": "Probabilidade e Estatística Computacional",
+      "periodo": 4,
+      "creditos": 4,
+      "pre_requisitos": [
+        19
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 27,
+    "fields": {
+      "codigo": "ENG4402",
+      "nome": "Engenharia de Dados",
+      "periodo": 4,
+      "creditos": 2,
+      "pre_requisitos": [
+        22
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 28,
+    "fields": {
+      "codigo": "MAT4174",
+      "nome": "Equações Diferenciais, Sinais e Sistemas",
+      "periodo": 4,
+      "creditos": 6,
+      "pre_requisitos": [
+        19,
+        21
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 29,
+    "fields": {
+      "codigo": "INF1010",
+      "nome": "Estruturas de Dados Avançadas",
+      "periodo": 4,
+      "creditos": 4,
+      "pre_requisitos": [
+        10
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 30,
+    "fields": {
+      "codigo": "INF1018",
+      "nome": "Software Básico",
+      "periodo": 4,
+      "creditos": 4,
+      "pre_requisitos": [
+        10
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 31,
+    "fields": {
+      "codigo": "ENG4011",
+      "nome": "Fenômenos de Transporte I",
+      "periodo": 4,
+      "creditos": 2,
+      "pre_requisitos": [
+        12
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 32,
+    "fields": {
+      "codigo": "ENG0434",
+      "nome": "Optativas de Eletrônica Digital",
+      "periodo": 5,
+      "creditos": 4,
+      "pre_requisitos": [
+        16
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 33,
+    "fields": {
+      "codigo": "ENG0382",
+      "nome": "Optativas de Programação Modular",
+      "periodo": 5,
+      "creditos": 4,
+      "pre_requisitos": [
+        29
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 34,
+    "fields": {
+      "codigo": "ENG4051",
+      "nome": "Projeto Internet das Coisas",
+      "periodo": 5,
+      "creditos": 4,
+      "pre_requisitos": [
+        17,
+        18
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 35,
+    "fields": {
+      "codigo": "ENG4421",
+      "nome": "Circuitos Elétricos e Eletrônicos II",
+      "periodo": 5,
+      "creditos": 4,
+      "pre_requisitos": [
+        18
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 36,
+    "fields": {
+      "codigo": "MAT1320",
+      "nome": "Introdução Matemática Discreta",
+      "periodo": 5,
+      "creditos": 4,
+      "pre_requisitos": [
+        15
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 37,
+    "fields": {
+      "codigo": "FIS4003",
+      "nome": "Física III",
+      "periodo": 5,
+      "creditos": 6,
+      "pre_requisitos": [
+        20
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 38,
+    "fields": {
+      "codigo": "ENG4061",
+      "nome": "Projeto Robótica",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        34
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 39,
+    "fields": {
+      "codigo": "ENG4448",
+      "nome": "Computação Digital",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        32
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 40,
+    "fields": {
+      "codigo": "INF1022",
+      "nome": "Analisadores Léxicos e Sintáticos",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        29
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 41,
+    "fields": {
+      "codigo": "INF1631",
+      "nome": "Estruturas Discretas",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        36
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 42,
+    "fields": {
+      "codigo": "INF1636",
+      "nome": "Programação Orientada a Objetos",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        29
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 43,
+    "fields": {
+      "codigo": "INF1316",
+      "nome": "Sistemas Operacionais",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        30
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 44,
+    "fields": {
+      "codigo": "CRE0712",
+      "nome": "Optativas de Cristianismo",
+      "periodo": 6,
+      "creditos": 4,
+      "pre_requisitos": [
+        7
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 45,
+    "fields": {
+      "codigo": "ENG4405",
+      "nome": "Materiais para Eletrônica e Computação",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        35
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 46,
+    "fields": {
+      "codigo": "INF1721",
+      "nome": "Análise de Algoritmos",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        29,
+        41
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 47,
+    "fields": {
+      "codigo": "ENG4451",
+      "nome": "Arquitetura de Computadores",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        39,
+        30
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 48,
+    "fields": {
+      "codigo": "INF1643",
+      "nome": "Redes de Comunicação de Dados",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        43
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 49,
+    "fields": {
+      "codigo": "INF1027",
+      "nome": "Teste e Medição de Software",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        33
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 50,
+    "fields": {
+      "codigo": "ENG0383",
+      "nome": "Optativas de Engenharia de Software",
+      "periodo": 7,
+      "creditos": 4,
+      "pre_requisitos": [
+        33
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 51,
+    "fields": {
+      "codigo": "CRE1241",
+      "nome": "Ética Cristã",
+      "periodo": 7,
+      "creditos": 2,
+      "pre_requisitos": [
+        44
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 52,
+    "fields": {
+      "codigo": "ENG4030",
+      "nome": "Projeto Integrado - Empreendedorismo",
+      "periodo": 8,
+      "creditos": 3,
+      "pre_requisitos": [],
+      "co_requisitos": [
+        53
+      ],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 53,
+    "fields": {
+      "codigo": "EMP1330",
+      "nome": "Mentalidade Empreendedora",
+      "periodo": 8,
+      "creditos": 2,
+      "pre_requisitos": [
+        9
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 54,
+    "fields": {
+      "codigo": "ENG0558",
+      "nome": "Opt. de Administração e Economia para Eng.",
+      "periodo": 8,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 55,
+    "fields": {
+      "codigo": "INF0312",
+      "nome": "Optativas de Programação Avançada para Engenharia",
+      "periodo": 8,
+      "creditos": 4,
+      "pre_requisitos": [
+        42
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 56,
+    "fields": {
+      "codigo": "INF0303",
+      "nome": "Optativas de Inteligência Artificial",
+      "periodo": 8,
+      "creditos": 4,
+      "pre_requisitos": [
+        46
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 57,
+    "fields": {
+      "codigo": "INF0305",
+      "nome": "Optativas de Computação Científica",
+      "periodo": 8,
+      "creditos": 4,
+      "pre_requisitos": [
+        28,
+        26
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 58,
+    "fields": {
+      "codigo": "JUR0205",
+      "nome": "Optativas de Direito para CTC",
+      "periodo": 8,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 59,
+    "fields": {
+      "codigo": "ENG4134",
+      "nome": "Projeto de Graduação em Eng. da Computação I",
+      "periodo": 9,
+      "creditos": 2,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 150
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 60,
+    "fields": {
+      "codigo": "ELL0900",
+      "nome": "Eletivas Livres - Dentro/Fora Departamento",
+      "periodo": 9,
+      "creditos": 6,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 61,
+    "fields": {
+      "codigo": "ELO0900",
+      "nome": "Eletivas de Orientação",
+      "periodo": 9,
+      "creditos": 8,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 62,
+    "fields": {
+      "codigo": "FIL0300",
+      "nome": "Optativas de Filosofia - CB/CTC",
+      "periodo": 9,
+      "creditos": 4,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 63,
+    "fields": {
+      "codigo": "INF1014",
+      "nome": "Seminários",
+      "periodo": 9,
+      "creditos": 1,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 64,
+    "fields": {
+      "codigo": "CRE1275",
+      "nome": "Ética Socioambiental e Direitos Humanos",
+      "periodo": 9,
+      "creditos": 2,
+      "pre_requisitos": [
+        51
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 65,
+    "fields": {
+      "codigo": "ENG4135",
+      "nome": "Projeto de Graduação em Eng. da Computação II",
+      "periodo": 10,
+      "creditos": 2,
+      "pre_requisitos": [
+        59
+      ],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 66,
+    "fields": {
+      "codigo": "ENG4153",
+      "nome": "Estágio Supervisionado em Eng. da Computação",
+      "periodo": 10,
+      "creditos": 1,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 170
+    }
+  },
+  {
+    "model": "matricula.disciplina",
+    "pk": 67,
+    "fields": {
+      "codigo": "ACP0900",
+      "nome": "Atividades Complementares",
+      "periodo": null,
+      "creditos": 10,
+      "pre_requisitos": [],
+      "co_requisitos": [],
+      "creditos_minimos": 0
+    }
+  }
+]

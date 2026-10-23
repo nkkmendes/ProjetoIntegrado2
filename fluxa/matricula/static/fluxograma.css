@@ -1,0 +1,172 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f5f7fc; color: #324d73; font: 16px Arial, sans-serif; }
+main { padding: 20px; }
+h1 { font-size: 26px; margin-top: 0; }
+p { line-height: 1.5; }
+fieldset { border: 1px solid #c3d2e8; padding: 12px; }
+fieldset label { display: inline-block; margin-right: 14px; }
+button { padding: 8px 12px; font: inherit; cursor: pointer; background: #324d73; color: white; border: 1px solid #324d73; border-radius: 8px; }
+input { accent-color: #496b91; }
+.legenda { font-size: 14px; }
+.livre { background: #dae7f5; color: #324d73; }
+.concluida { background: #324d73; color: white; }
+.azul { background: #496b91; color: white; }
+.quadro { max-height: 72vh; min-height: 300px; overflow: auto; border: 1px solid #c3d2e8; background: white; }
+.grade { display: flex; align-items: flex-start; gap: 16px; width: max-content; padding: 16px; }
+.periodo { width: 230px; flex-shrink: 0; }
+.periodo h2 { font-size: 18px; margin: 0 0 16px; }
+.materia { margin-bottom: 12px; border: 1px solid #c3d2e8; background: white; scroll-margin: 16px; }
+summary { padding: 12px; background: #edf2f8; color: #324d73; line-height: 1.45; cursor: pointer; }
+summary strong { font-size: 14px; }
+.materia.livre summary { background: #dae7f5; color: #324d73; }
+.detalhes { padding: 10px; font-size: 14px; overflow-wrap: anywhere; }
+.detalhes p { margin: 0 0 10px; }
+.detalhes label { display: block; padding: 8px 0; cursor: pointer; }
+a { color: #324d73; }
+:focus-visible { outline: 3px solid #324d73; outline-offset: 2px; }
+.materia:target { outline: 3px solid #324d73; }
+form:has(#zoom75:checked) .grade { zoom: .75; }
+form:has(#zoom125:checked) .grade { zoom: 1.25; }
+@media (max-width: 600px) {
+  main { padding: 12px; }
+  h1 { font-size: 22px; }
+}
+
+form:where(:has(#feito-EMP1310:checked)) .materia:where(#EMP1320) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CTC4002:checked)) .materia:where(#INF1037) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CTC4003:checked)) .materia:where(#MAT4200) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CTC4001:checked)) .materia:where(#ENG0425) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1037:checked)) .materia:where(#ENG4033) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CTC4001:checked)) .materia:where(#ENG4420) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT4161:checked)) .materia:where(#MAT4162) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-FIS4001:checked)) .materia:where(#FIS4002) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT4200:checked)) .materia:where(#MAT4202) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1012:checked)) .materia:where(#INF1383) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-FIS4001:checked)) .materia:where(#ENG4007) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1037:checked)) .materia:where(#ENG4502) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT4162:checked)) .materia:where(#ENG4501) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1383:checked)) .materia:where(#ENG4402) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT4162:checked):has(#feito-MAT4202:checked)) .materia:where(#MAT4174) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1037:checked)) .materia:where(#INF1010) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1037:checked)) .materia:where(#INF1018) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-FIS4001:checked)) .materia:where(#ENG4011) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG0425:checked)) .materia:where(#ENG0434) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1010:checked)) .materia:where(#ENG0382) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4033:checked):has(#feito-ENG4420:checked)) .materia:where(#ENG4051) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4420:checked)) .materia:where(#ENG4421) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1009:checked)) .materia:where(#MAT1320) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-FIS4002:checked)) .materia:where(#FIS4003) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4051:checked)) .materia:where(#ENG4061) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG0434:checked)) .materia:where(#ENG4448) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1010:checked)) .materia:where(#INF1022) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT1320:checked)) .materia:where(#INF1631) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1010:checked)) .materia:where(#INF1636) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1018:checked)) .materia:where(#INF1316) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CRE1200:checked)) .materia:where(#CRE0712) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4421:checked)) .materia:where(#ENG4405) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1010:checked):has(#feito-INF1631:checked)) .materia:where(#INF1721) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4448:checked):has(#feito-INF1018:checked)) .materia:where(#ENG4451) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1316:checked)) .materia:where(#INF1643) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG0382:checked)) .materia:where(#INF1027) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG0382:checked)) .materia:where(#ENG0383) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CRE0712:checked)) .materia:where(#CRE1241) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-EMP1320:checked)) .materia:where(#EMP1330) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1636:checked)) .materia:where(#INF0312) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1721:checked)) .materia:where(#INF0303) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-MAT4174:checked):has(#feito-ENG4501:checked)) .materia:where(#INF0305) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-CRE1241:checked)) .materia:where(#CRE1275) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-ENG4134:checked)) .materia:where(#ENG4135) summary { background: #dae7f5; color: #324d73; }
+
+.materia:has(.feito:checked) summary { background: #324d73; color: white; }
+.grade:has(#ENG4010:hover, #ENG4010 > summary:focus-visible) .rel-ENG4010 { background: #496b91; color: white; }
+.grade:has(#EMP1310:hover, #EMP1310 > summary:focus-visible) .rel-EMP1310 { background: #496b91; color: white; }
+.grade:has(#ENG4025:hover, #ENG4025 > summary:focus-visible) .rel-ENG4025 { background: #496b91; color: white; }
+.grade:has(#CTC4001:hover, #CTC4001 > summary:focus-visible) .rel-CTC4001 { background: #496b91; color: white; }
+.grade:has(#CTC4002:hover, #CTC4002 > summary:focus-visible) .rel-CTC4002 { background: #496b91; color: white; }
+.grade:has(#CTC4003:hover, #CTC4003 > summary:focus-visible) .rel-CTC4003 { background: #496b91; color: white; }
+.grade:has(#CRE1200:hover, #CRE1200 > summary:focus-visible) .rel-CRE1200 { background: #496b91; color: white; }
+.grade:has(#ENG4021:hover, #ENG4021 > summary:focus-visible) .rel-ENG4021 { background: #496b91; color: white; }
+.grade:has(#EMP1320:hover, #EMP1320 > summary:focus-visible) .rel-EMP1320 { background: #496b91; color: white; }
+.grade:has(#INF1037:hover, #INF1037 > summary:focus-visible) .rel-INF1037 { background: #496b91; color: white; }
+.grade:has(#MAT4161:hover, #MAT4161 > summary:focus-visible) .rel-MAT4161 { background: #496b91; color: white; }
+.grade:has(#FIS4001:hover, #FIS4001 > summary:focus-visible) .rel-FIS4001 { background: #496b91; color: white; }
+.grade:has(#MAT4200:hover, #MAT4200 > summary:focus-visible) .rel-MAT4200 { background: #496b91; color: white; }
+.grade:has(#INF1012:hover, #INF1012 > summary:focus-visible) .rel-INF1012 { background: #496b91; color: white; }
+.grade:has(#INF1009:hover, #INF1009 > summary:focus-visible) .rel-INF1009 { background: #496b91; color: white; }
+.grade:has(#ENG0425:hover, #ENG0425 > summary:focus-visible) .rel-ENG0425 { background: #496b91; color: white; }
+.grade:has(#ENG4033:hover, #ENG4033 > summary:focus-visible) .rel-ENG4033 { background: #496b91; color: white; }
+.grade:has(#ENG4420:hover, #ENG4420 > summary:focus-visible) .rel-ENG4420 { background: #496b91; color: white; }
+.grade:has(#MAT4162:hover, #MAT4162 > summary:focus-visible) .rel-MAT4162 { background: #496b91; color: white; }
+.grade:has(#FIS4002:hover, #FIS4002 > summary:focus-visible) .rel-FIS4002 { background: #496b91; color: white; }
+.grade:has(#MAT4202:hover, #MAT4202 > summary:focus-visible) .rel-MAT4202 { background: #496b91; color: white; }
+.grade:has(#INF1383:hover, #INF1383 > summary:focus-visible) .rel-INF1383 { background: #496b91; color: white; }
+.grade:has(#ENG4007:hover, #ENG4007 > summary:focus-visible) .rel-ENG4007 { background: #496b91; color: white; }
+.grade:has(#ENG4040:hover, #ENG4040 > summary:focus-visible) .rel-ENG4040 { background: #496b91; color: white; }
+.grade:has(#ENG4502:hover, #ENG4502 > summary:focus-visible) .rel-ENG4502 { background: #496b91; color: white; }
+.grade:has(#ENG4501:hover, #ENG4501 > summary:focus-visible) .rel-ENG4501 { background: #496b91; color: white; }
+.grade:has(#ENG4402:hover, #ENG4402 > summary:focus-visible) .rel-ENG4402 { background: #496b91; color: white; }
+.grade:has(#MAT4174:hover, #MAT4174 > summary:focus-visible) .rel-MAT4174 { background: #496b91; color: white; }
+.grade:has(#INF1010:hover, #INF1010 > summary:focus-visible) .rel-INF1010 { background: #496b91; color: white; }
+.grade:has(#INF1018:hover, #INF1018 > summary:focus-visible) .rel-INF1018 { background: #496b91; color: white; }
+.grade:has(#ENG4011:hover, #ENG4011 > summary:focus-visible) .rel-ENG4011 { background: #496b91; color: white; }
+.grade:has(#ENG0434:hover, #ENG0434 > summary:focus-visible) .rel-ENG0434 { background: #496b91; color: white; }
+.grade:has(#ENG0382:hover, #ENG0382 > summary:focus-visible) .rel-ENG0382 { background: #496b91; color: white; }
+.grade:has(#ENG4051:hover, #ENG4051 > summary:focus-visible) .rel-ENG4051 { background: #496b91; color: white; }
+.grade:has(#ENG4421:hover, #ENG4421 > summary:focus-visible) .rel-ENG4421 { background: #496b91; color: white; }
+.grade:has(#MAT1320:hover, #MAT1320 > summary:focus-visible) .rel-MAT1320 { background: #496b91; color: white; }
+.grade:has(#FIS4003:hover, #FIS4003 > summary:focus-visible) .rel-FIS4003 { background: #496b91; color: white; }
+.grade:has(#ENG4061:hover, #ENG4061 > summary:focus-visible) .rel-ENG4061 { background: #496b91; color: white; }
+.grade:has(#ENG4448:hover, #ENG4448 > summary:focus-visible) .rel-ENG4448 { background: #496b91; color: white; }
+.grade:has(#INF1022:hover, #INF1022 > summary:focus-visible) .rel-INF1022 { background: #496b91; color: white; }
+.grade:has(#INF1631:hover, #INF1631 > summary:focus-visible) .rel-INF1631 { background: #496b91; color: white; }
+.grade:has(#INF1636:hover, #INF1636 > summary:focus-visible) .rel-INF1636 { background: #496b91; color: white; }
+.grade:has(#INF1316:hover, #INF1316 > summary:focus-visible) .rel-INF1316 { background: #496b91; color: white; }
+.grade:has(#CRE0712:hover, #CRE0712 > summary:focus-visible) .rel-CRE0712 { background: #496b91; color: white; }
+.grade:has(#ENG4405:hover, #ENG4405 > summary:focus-visible) .rel-ENG4405 { background: #496b91; color: white; }
+.grade:has(#INF1721:hover, #INF1721 > summary:focus-visible) .rel-INF1721 { background: #496b91; color: white; }
+.grade:has(#ENG4451:hover, #ENG4451 > summary:focus-visible) .rel-ENG4451 { background: #496b91; color: white; }
+.grade:has(#INF1643:hover, #INF1643 > summary:focus-visible) .rel-INF1643 { background: #496b91; color: white; }
+.grade:has(#INF1027:hover, #INF1027 > summary:focus-visible) .rel-INF1027 { background: #496b91; color: white; }
+.grade:has(#ENG0383:hover, #ENG0383 > summary:focus-visible) .rel-ENG0383 { background: #496b91; color: white; }
+.grade:has(#CRE1241:hover, #CRE1241 > summary:focus-visible) .rel-CRE1241 { background: #496b91; color: white; }
+.grade:has(#ENG4030:hover, #ENG4030 > summary:focus-visible) .rel-ENG4030 { background: #496b91; color: white; }
+.grade:has(#EMP1330:hover, #EMP1330 > summary:focus-visible) .rel-EMP1330 { background: #496b91; color: white; }
+.grade:has(#ENG0558:hover, #ENG0558 > summary:focus-visible) .rel-ENG0558 { background: #496b91; color: white; }
+.grade:has(#INF0312:hover, #INF0312 > summary:focus-visible) .rel-INF0312 { background: #496b91; color: white; }
+.grade:has(#INF0303:hover, #INF0303 > summary:focus-visible) .rel-INF0303 { background: #496b91; color: white; }
+.grade:has(#INF0305:hover, #INF0305 > summary:focus-visible) .rel-INF0305 { background: #496b91; color: white; }
+.grade:has(#JUR0205:hover, #JUR0205 > summary:focus-visible) .rel-JUR0205 { background: #496b91; color: white; }
+.grade:has(#ENG4134:hover, #ENG4134 > summary:focus-visible) .rel-ENG4134 { background: #496b91; color: white; }
+.grade:has(#ELL0900:hover, #ELL0900 > summary:focus-visible) .rel-ELL0900 { background: #496b91; color: white; }
+.grade:has(#ELO0900:hover, #ELO0900 > summary:focus-visible) .rel-ELO0900 { background: #496b91; color: white; }
+.grade:has(#FIL0300:hover, #FIL0300 > summary:focus-visible) .rel-FIL0300 { background: #496b91; color: white; }
+.grade:has(#INF1014:hover, #INF1014 > summary:focus-visible) .rel-INF1014 { background: #496b91; color: white; }
+.grade:has(#CRE1275:hover, #CRE1275 > summary:focus-visible) .rel-CRE1275 { background: #496b91; color: white; }
+.grade:has(#ENG4135:hover, #ENG4135 > summary:focus-visible) .rel-ENG4135 { background: #496b91; color: white; }
+.grade:has(#ENG4153:hover, #ENG4153 > summary:focus-visible) .rel-ENG4153 { background: #496b91; color: white; }
+.grade:has(#ACP0900:hover, #ACP0900 > summary:focus-visible) .rel-ACP0900 { background: #496b91; color: white; }
+
+button:hover { background: #496b91; }
+.periodo h2 { background: #324d73; color: white; padding: 12px; border-radius: 8px; }
+
+/* Paleta aplicada à página inteira. */
+html { min-height: 100%; background: #324d73; }
+body { min-height: 100vh; background: #324d73; color: #324d73; }
+main { padding: 28px; }
+main > h1 { color: white; margin-bottom: 20px; }
+main > p { color: #e6eff9; }
+form { background: #f5f7fc; padding: 20px; border-radius: 12px; }
+fieldset { background: #dae7f5; color: #324d73; border: 1px solid #c3d2e8; border-radius: 10px; margin-bottom: 18px; }
+legend { background: #dae7f5; color: #324d73; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+fieldset label { color: #324d73; }
+button { background: #324d73; color: white; border-color: #324d73; }
+input { accent-color: #324d73; }
+.quadro { background: #eef4fb; border-color: #c3d2e8; border-radius: 10px; scrollbar-color: #7397b7 #dae7f5; }
+.materia { border-color: #c3d2e8; border-radius: 8px; background: white; }
+summary { border-radius: 7px; }
+.detalhes { background: white; color: #324d73; border-radius: 0 0 8px 8px; }
+footer { color: #e6eff9; }
+@media (max-width: 600px) {
+  main { padding: 12px; }
+  form { padding: 10px; }
+}
