@@ -1,11 +1,11 @@
 * { box-sizing: border-box; }
-body { margin: 0; background: #f5f7fc; color: #324d73; font: 16px Arial, sans-serif; }
+body { margin: 0; background: #f5f7fc; color: #324d73; font: 300 16px 'Courier New', Courier, monospace; }
 main { padding: 20px; }
 h1 { font-size: 26px; margin-top: 0; }
 p { line-height: 1.5; }
 fieldset { border: 1px solid #c3d2e8; padding: 12px; }
 fieldset label { display: inline-block; margin-right: 14px; }
-button { padding: 8px 12px; font: inherit; cursor: pointer; background: #324d73; color: white; border: 1px solid #324d73; border-radius: 8px; }
+button { padding: 8px 12px; font: inherit; font-weight: bold; cursor: pointer; background: #324d73; color: white; border: 1px solid #324d73; border-radius: 8px; }
 input { accent-color: #496b91; }
 .legenda { font-size: 14px; }
 .livre { background: #dae7f5; color: #324d73; }
