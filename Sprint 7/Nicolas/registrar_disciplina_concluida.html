@@ -1,0 +1,76 @@
+<!--
+    Este arquivo fica em fluxa/templates/fluxa/... e e encontrado
+    automaticamente pelo Django por causa de APP_DIRS=True no
+    settings.py (TEMPLATES) - a view (views.py) so pede o caminho
+    "fluxa/registrar_disciplina_concluida.html", sem precisar
+    configurar nada aqui.
+
+    As marcacoes com chave-porcentagem (tags, como if/for/csrf_token) e
+    chave-dupla (variaveis, como form) sao a "Django Template Language":
+    o Django substitui/avalia isso no servidor antes de mandar o HTML
+    final pro navegador. O navegador nunca ve essas marcacoes, so o
+    resultado ja processado.
+-->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar disciplina concluida</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 40px auto; }
+        p { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 6px; box-sizing: border-box; }
+        /* classe que o Django gera automaticamente em volta dos erros
+           de cada campo do form, quando form.is_valid() falha */
+        ul.errorlist { color: #b00020; margin: 0 0 8px; padding-left: 18px; }
+        ul.messages { list-style: none; padding: 0; }
+        ul.messages li { background: #e6f4ea; color: #1e7e34; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; }
+        button { padding: 8px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Registrar disciplina concluida</h1>
+
+    <!--
+        "messages" chega aqui sozinha, sem a view passar ela no
+        contexto do render() - ela vem do context processor
+        "django.contrib.messages.context_processors.messages"
+        (settings.py). E a mensagem de sucesso que views.py cria com
+        messages.success(...) depois de salvar o formulario.
+    -->
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!--
+        method="post" porque estamos enviando dados que vao alterar o
+        banco (criar um Historico) - GET seria pra so ler/exibir algo.
+    -->
+    <form method="post">
+        <!--
+            A tag csrf_token abaixo insere um campo <input type="hidden">
+            com um token unico por sessao. O CsrfViewMiddleware
+            (settings.py) rejeita qualquer POST sem esse token valido -
+            protege contra ataques de Cross-Site Request Forgery (um
+            site malicioso tentando submeter esse form escondido por voce).
+        -->
+        {% csrf_token %}
+
+        <!--
+            form.as_p desenha TODOS os campos do DisciplinaConcluidaForm
+            (forms.py) automaticamente, cada um dentro de um <p>, já com
+            o <label>, o <input>/<select> certo pro tipo do campo, e a
+            lista de erros (ul.errorlist) em cima do campo que falhou -
+            tudo isso sem a gente escrever HTML campo por campo.
+        -->
+        {{ form.as_p }}
+
+        <button type="submit">Salvar</button>
+    </form>
+</body>
+</html>
