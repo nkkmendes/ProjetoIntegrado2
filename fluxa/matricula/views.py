@@ -63,14 +63,58 @@ def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
+
 def planejamento(request):
-    return render(request, 'planejamento (1).html')
+    form = PlanejamentoForm(request.POST or None)
+
+    if request.method == 'POST':
+        dados = request.POST.copy()
+        dados['disciplinas'] = ', '.join(
+            request.POST.getlist('disciplina')
+        )
+        form = PlanejamentoForm(dados)
+
+        if form.is_valid():
+            form.save()
+            return redirect('planejamento')
+
+    registros = PlanejamentoSalvo.objects.all()
+
+    return render(request, 'planejamento (1).html', {
+        'form': form,
+        'dados': registros
+    })
+
 
 def simulacao(request):
-    return render(request, 'Simulador (1).html')
+    form = SimulacaoForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('simulacao')
+
+    registros = SimulacaoSalva.objects.all()
+
+    return render(request, 'Simulador (1).html', {
+        'form': form,
+        'dados': registros
+    })
+
 
 def nivelamento(request):
-    return render(request, 'nivelamento.html')
+    form = NivelamentoForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('nivelamento')
+
+    registros = NivelamentoSalvo.objects.all()
+
+    return render(request, 'nivelamento.html', {
+        'form': form,
+        'dados': registros
+    })
+
 
 def contagem_creditos(request):
     return render(request, 'contagem-creditos.html')
