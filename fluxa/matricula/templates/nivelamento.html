@@ -1,4 +1,5 @@
 
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -17,11 +18,15 @@
         <p>PUC-Rio · Engenharia de Computação</p>
 
         <nav>
-            <a href="{% url 'telaInicio' %}">⌂ &nbsp; Início</a>
-            <a href="{% url 'planejamento' %}">▤ &nbsp; Planejamento</a>
-            <a href="{% url 'simulacao' %}">▦ &nbsp; Simulador de matrícula</a>
-            <a href="{% url 'fluxograma' %}">⤳ &nbsp; Fluxograma</a>
-            <a href="{% url 'nivelamento' %}" class="ativo">✓ &nbsp; Nivelamento</a>
+            <a href="{% url 'telaInicio' %}">Início</a>
+            <a href="{% url 'planejamento' %}">Planejamento</a>
+            <a href="{% url 'simulacao' %}">Simulador de matrícula</a>
+            <a href="{% url 'fluxograma' %}">Fluxograma</a>
+            <a href="{% url 'notas_periodo' %}">Consulta de Graus</a>
+            <a href="{% url 'creditos' %}">Contagem de Créditos</a>
+            <a href="{% url 'nivelamento' %}" class="ativo">
+                Nivelamento
+            </a>
         </nav>
 
         <p class="rodape">
@@ -78,7 +83,6 @@
                 </tbody>
             </table>
         </div>
-
     </main>
 
 </body>
