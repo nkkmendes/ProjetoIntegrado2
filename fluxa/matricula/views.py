@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
@@ -125,8 +125,17 @@ def contagem_creditos(request):
 def notas_periodo(request):
     return render(request, 'notas-periodo.html')
 
-def telaErro(request):
-    return render(request, 'erro.html')
+def telaErro(request, titulo='Algo deu errado', mensagem='Não foi possível carregar esta página.', status=200):
+    return render(request, 'erro.html', {
+        'titulo': titulo,
+        'mensagem': mensagem
+    }, status=status)
+
+def erro_404(request, exception):
+    return telaErro(request, 'Página não encontrada', 'O endereço acessado não existe.', 404)
+
+def erro_500(request):
+    return telaErro(request, 'Algo deu errado', 'Ocorreu um erro no servidor. Tente novamente em alguns instantes.', 500)
 
 def perfil(request):
     return render(request, 'perfil.html')
@@ -162,10 +171,10 @@ def filtrar_disciplinas(request):
     })
 
 def detalhes_disciplina(request, codigo):
-    disciplina = get_object_or_404(
-        Disciplina,
-        codigo=codigo
-    )
+    try:
+        disciplina = Disciplina.objects.get(codigo=codigo)
+    except Disciplina.DoesNotExist:
+        return telaErro(request, 'Disciplina não encontrada', f'Não existe disciplina com o código {codigo}.', 404)
 
     dados = {
         'codigo': disciplina.codigo,

@@ -34,3 +34,6 @@ urlpatterns = [
     path('fluxograma/disciplina/<str:codigo>/', views.detalhes_disciplina, name='detalhes_disciplina'),
     path('perfil/', views.perfil, name='perfil'),
 ]
+
+handler404 = views.erro_404
+handler500 = views.erro_500
