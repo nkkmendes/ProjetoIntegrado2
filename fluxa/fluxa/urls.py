@@ -32,4 +32,5 @@ urlpatterns = [
     path('fluxograma/', views.fluxograma, name='fluxograma'),
     path('fluxograma/filtrar/', views.filtrar_disciplinas, name='filtrar_disciplinas'),
     path('fluxograma/disciplina/<str:codigo>/', views.detalhes_disciplina, name='detalhes_disciplina'),
+    path('perfil/', views.perfil, name='perfil'),
 ]

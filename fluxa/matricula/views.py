@@ -128,6 +128,9 @@ def notas_periodo(request):
 def telaErro(request):
     return render(request, 'erro.html')
 
+def perfil(request):
+    return render(request, 'perfil.html')
+
 def fluxograma(request):
     disciplinas = Disciplina.objects.all().order_by(
         F('periodo').asc(nulls_last=True),
