@@ -1,6 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.contrib import messages
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.views.decorators.http import require_POST
 from .models import CalendarioMatricula, Disciplina
+from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
 from django.db.models import F, Q
 
 def inicio(request):
@@ -14,10 +18,50 @@ def telaInicio(request):
     })
 
 def login(request):
-    return render(request, 'login.html')
+    if request.user.is_authenticated:
+        return redirect('telaInicio')
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            auth_login(request, form.usuario)
+            return redirect('telaInicio')
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
 
 def criarConta(request):
-    return render(request, 'criarConta.html')
+    if request.method == 'POST':
+        form = CadastroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            auth_login(request, usuario)
+            return redirect('telaInicio')
+    else:
+        form = CadastroForm()
+
+    return render(request, 'criarConta.html', {'form': form})
+
+def recuperar_senha(request):
+    if request.method == 'POST':
+        form = RecuperarSenhaForm(request.POST)
+        if form.is_valid():
+            form.save(request=request, use_https=request.is_secure())
+            messages.success(
+                request,
+                'Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha.'
+            )
+            return redirect('login')
+    else:
+        form = RecuperarSenhaForm()
+
+    return render(request, 'recuperar_senha.html', {'form': form})
+
+@require_POST
+def logout_view(request):
+    auth_logout(request)
+    return redirect('login')
 
 def planejamento(request):
     return render(request, 'planejamento (1).html')
