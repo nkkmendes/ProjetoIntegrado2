@@ -5,6 +5,10 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.views.decorators.http import require_POST
 from .models import CalendarioMatricula, Disciplina
 from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
+
+from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
+from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
+
 from django.db.models import F, Q
 
 def inicio(request):
@@ -114,7 +118,6 @@ def nivelamento(request):
         'form': form,
         'dados': registros
     })
-
 
 def contagem_creditos(request):
     return render(request, 'contagem-creditos.html')

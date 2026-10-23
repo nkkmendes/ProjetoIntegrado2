@@ -3,6 +3,11 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 from matricula import views
 
+from matricula import views as matricula_views
+
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('planejamento/', views.planejamento, name='planejamento'),

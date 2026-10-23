@@ -85,9 +85,10 @@ class PlanejamentoForm(forms.ModelForm):
     class Meta:
         model = PlanejamentoSalvo
         fields = ['nome', 'periodo', 'disciplinas']
+        
         widgets = {
-            'periodo': forms.DateInput(attrs={'type': 'date'})
-        }
+        'periodo': forms.NumberInput(attrs={'min': 1, 'max': 10})
+    }
 
 
 class SimulacaoForm(forms.ModelForm):
