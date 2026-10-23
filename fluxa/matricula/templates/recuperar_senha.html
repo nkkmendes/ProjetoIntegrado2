@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Fluxa - Recuperar senha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="{% static 'login.css' %}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div>
+        <div style="border: none; padding-left: 0px; padding-right: 0px; width: 350px; height: 180px; flex-direction: row; align-items: center;">
+            <h1>Recuperar senha</h1>
+            <img src="{% static 'Logo.jpeg' %}">
+        </div>
+
+        <form method="post" action="{% url 'recuperar_senha' %}">
+            {% csrf_token %}
+            <h4>E-mail</h4>
+            {{ form.email }}
+            {{ form.email.errors }}
+
+            <button type="submit" style="background-color: #1D4E78; color: #FFFFFF; border: 1px solid #1D4E78;">Enviar link</button>
+        </form>
+
+        <a href="{% url 'login' %}"><button type="button">Voltar ao login</button></a>
+    </div>
+</body>
+</html>
