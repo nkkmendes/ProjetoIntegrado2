@@ -1,0 +1,95 @@
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    margin: 0px;
+    min-height: 100vh;
+    background-color: #F0F4FA;
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+    font-variation-settings:
+        "wdth" 100;
+    color: #0F2C4C;
+}
+
+aside {
+    width: 245px;
+    padding: 30px 22px;
+    background-color: #0F2C4C;
+    color: #FFFFFF;
+}
+
+img {
+    width: 80px;
+    padding: 7px;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+}
+
+nav {
+    margin-top: 35px;
+}
+
+a {
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+nav a {
+    display: block;
+    padding: 15px 12px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-weight: 300;
+}
+
+main {
+    flex: 1;
+    padding: 35px;
+}
+
+main div {
+    margin-top: 24px;
+    padding: 28px;
+    border: 1px solid #475569;
+    border-radius: 25px;
+    background-color: #FFFFFF;
+}
+
+h1 {
+    margin: 0px;
+}
+
+h2 {
+    margin: 0px;
+}
+
+h4 {
+    margin-bottom: 0px;
+}
+
+p {
+    margin: 0px;
+    font-weight: 300;
+    font-size: 14px;
+}
+
+main p {
+    color: #475569;
+}
+
+button {
+    margin-top: 20px;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #1D4E78;
+    border: 1px solid #1D4E78;
+    font-weight: bold;
+    cursor: pointer;
+    color: #FFFFFF;
+}
