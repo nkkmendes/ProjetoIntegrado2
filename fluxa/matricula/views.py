@@ -9,6 +9,10 @@ from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
 from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
 
+from .models import CreditosAluno, GrauAluno
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+
 from django.db.models import F, Q
 
 def inicio(request):
