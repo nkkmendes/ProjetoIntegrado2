@@ -128,7 +128,7 @@ def nivelamento(request):
 
 @login_required(login_url='login')
 
-@login_required(login_url='login')
+
 def contagem_creditos(request):
     form = CreditosAlunoForm(request.POST or None)
 
@@ -176,7 +176,6 @@ def contagem_creditos(request):
 
 @login_required(login_url='login')
 
-@login_required(login_url='login')
 def notas_periodo(request):
     form = GrauAlunoForm(request.POST or None)
 
