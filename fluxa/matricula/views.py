@@ -123,11 +123,47 @@ def nivelamento(request):
         'dados': registros
     })
 
-def contagem_creditos(request):
-    return render(request, 'contagem-creditos.html')
 
+@login_required(login_url='login')
+def contagem_creditos(request):
+    registros = CreditosAluno.objects.filter(
+        aluno=request.user
+    ).select_related('disciplina')
+
+    concluidas = registros.filter(concluida=True)
+
+    total_cumprido = concluidas.aggregate(
+        total=Sum('disciplina__creditos')
+    )['total'] or 0
+
+    total_curriculo = Disciplina.objects.aggregate(
+        total=Sum('creditos')
+    )['total'] or 0
+
+    total_pendente = max(
+        total_curriculo - total_cumprido, 0
+    )
+
+    return render(request, 'contagem-creditos.html', {
+        'registros': registros,
+        'total_curriculo': total_curriculo,
+        'total_cumprido': total_cumprido,
+        'total_pendente': total_pendente
+    })
+
+
+@login_required(login_url='login')
 def notas_periodo(request):
-    return render(request, 'notas-periodo.html')
+    graus = GrauAluno.objects.filter(
+        aluno=request.user
+    ).select_related('disciplina').order_by(
+        'disciplina__nome'
+    )
+
+    return render(request, 'notas-periodo.html', {
+        'graus': graus,
+        'periodo_letivo': '2026.2'
+    })
 
 def telaErro(request, titulo='Algo deu errado', mensagem='Não foi possível carregar esta página.', status=200):
     return render(request, 'erro.html', {
