@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — Fluxa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/fluxa-design-tokens.css">
+  <link rel="stylesheet" href="css/fluxa-components.css">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<!-- Esta página é a única exceção à regra “sem style”: os atributos style
+     servem só para exibir amostras de tokens. Telas da aplicação não usam style. -->
+<a class="fluxa-skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<div class="fluxa-app-shell">
+  <aside class="fluxa-app-shell__nav">
+    <a class="fluxa-brand" href="#inicio"><img src="Logo.jpeg" alt=""><span>Fluxa DS</span></a>
+    <nav class="fluxa-primary-nav" aria-label="Seções da documentação">
+      <p class="fluxa-primary-nav__heading">Começar</p>
+      <ul>
+        <li><a class="fluxa-primary-nav__item" href="#inicio" aria-current="page">Introdução</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#como-usar">Como usar no Django</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#regras">Regras</a></li>
+      </ul>
+      <p class="fluxa-primary-nav__heading">Fundamentos</p>
+      <ul>
+        <li><a class="fluxa-primary-nav__item" href="#cores">Cores</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#tipografia">Tipografia</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#forma">Raios, bordas e foco</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#espacamento">Espaçamento e layout</a></li>
+      </ul>
+      <p class="fluxa-primary-nav__heading">Componentes</p>
+      <ul>
+        <li><a class="fluxa-primary-nav__item" href="#botoes">Botões</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#formulario">Formulário</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#feedback">Feedback</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#app-shell">AppShell</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#page-header">PageHeader</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#card">Card</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#tabela">Tabela e estado vazio</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#filter-panel">FilterPanel</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#accordion">Accordion</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#dialog">Dialog</a></li>
+        <li><a class="fluxa-primary-nav__item" href="#error-page">ErrorPage</a></li>
+      </ul>
+    </nav>
+    <div class="fluxa-user-menu">
+      <button class="fluxa-button" type="button" id="alternar-tema" aria-pressed="false">Tema escuro</button>
+    </div>
+  </aside>
+
+  <main class="fluxa-app-shell__main" id="conteudo">
+    <div class="fluxa-page-container">
+
+      <header class="fluxa-page-header" id="inicio">
+        <div class="fluxa-page-header__text">
+          <h1 class="fluxa-page-header__title">Design System do Fluxa</h1>
+          <p class="fluxa-page-header__subtitle">
+            Norma visual da aplicação. Toda tela nova ou alterada usa apenas os tokens e componentes
+            desta página. O que não está aqui não existe na interface.
+          </p>
+        </div>
+      </header>
+
+      <div class="fluxa-content-region">
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="como-usar">
+          <h2>Como usar no Django</h2>
+          <p>Carregue as fontes e os dois arquivos CSS, nesta ordem, no <code>&lt;head&gt;</code> do template base. Nenhuma tela carrega outro CSS.</p>
+          <div class="doc-example">
+<pre>{% load static %}
+&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&amp;family=Roboto+Mono:wght@400;600&amp;display=swap" rel="stylesheet"&gt;
+&lt;link rel="stylesheet" href="{% static 'css/fluxa-design-tokens.css' %}"&gt;
+&lt;link rel="stylesheet" href="{% static 'css/fluxa-components.css' %}"&gt;</pre>
+          </div>
+          <p>Com o servidor rodando, esta página fica em <code>http://127.0.0.1:8000/static/design-system/index.html</code>.</p>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="regras">
+          <h2>Regras</h2>
+          <ol>
+            <li><strong>Só tokens semânticos.</strong> Telas e componentes usam <code>--fluxa-color-action-primary</code>, nunca <code>--fluxa-color-blue-700</code> nem um hexadecimal.</li>
+            <li><strong>Nada fora da lista.</strong> São 13 cores, 5 tamanhos de fonte, 2 pesos, 3 raios e 6 espaçamentos. Precisa de outro valor? Ele é proposto no arquivo de tokens, nunca criado na tela.</li>
+            <li><strong>Sem CSS por tela.</strong> Sem <code>&lt;style&gt;</code>, sem <code>style=""</code>, sem arquivo CSS específico de uma página.</li>
+            <li><strong>Três botões, três feedbacks.</strong> Botão é primário, secundário ou terciário. Feedback é sucesso, aviso ou erro.</li>
+            <li><strong>Acessível por padrão.</strong> Todo campo tem <code>&lt;label&gt;</code>; foco sempre visível; estado nunca comunicado só por cor.</li>
+          </ol>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="cores">
+          <h2>Cores</h2>
+          <p>A paleta tem <strong>13 cores</strong>: 3 azuis, 4 neutros e 3 pares de feedback. As 3 cores marcadas como “tema escuro” só existem para o modo escuro.</p>
+          <div class="doc-swatches" data-swatches="blue-50 blue-700 blue-900 gray-0 gray-100 gray-300 gray-600 green-100 green-700 yellow-100 yellow-700 red-100 red-700 blue-300:escuro gray-800:escuro gray-900:escuro"></div>
+
+          <h3>Tokens semânticos: os únicos usados em telas</h3>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th></th><th>Token</th><th>Valor (tema claro)</th><th>Uso</th></tr></thead>
+                <tbody>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-surface-page)"></td><td><code>surface-page</code></td><td><code>blue-50</code></td><td>Fundo da página</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-surface-default)"></td><td><code>surface-default</code></td><td><code>gray-0</code></td><td>Cards, campos, tabelas, dialog</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-surface-subtle)"></td><td><code>surface-subtle</code></td><td><code>gray-100</code></td><td>Cabeçalho e hover de tabela</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-surface-navigation)"></td><td><code>surface-navigation</code></td><td><code>blue-700</code></td><td>Barra lateral</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-surface-navigation-active)"></td><td><code>surface-navigation-active</code></td><td><code>blue-900</code></td><td>Item ativo e hover da barra lateral</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-text-primary)"></td><td><code>text-primary</code></td><td><code>blue-900</code></td><td>Títulos e texto</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-text-secondary)"></td><td><code>text-secondary</code></td><td><code>gray-600</code></td><td>Subtítulo, ajuda, rótulo de dado</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-text-on-primary)"></td><td><code>text-on-primary</code></td><td><code>gray-0</code></td><td>Texto do botão primário</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-text-on-navigation)"></td><td><code>text-on-navigation</code></td><td><code>gray-0</code></td><td>Texto da barra lateral</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-border-default)"></td><td><code>border-default</code></td><td><code>gray-300</code></td><td>Todas as bordas e divisórias</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-action-primary)"></td><td><code>action-primary</code></td><td><code>blue-700</code></td><td>Botões, links, checkbox</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-action-primary-hover)"></td><td><code>action-primary-hover</code></td><td><code>blue-900</code></td><td>Hover do botão primário</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-action-hover-bg)"></td><td><code>action-hover-bg</code></td><td><code>blue-50</code></td><td>Hover do secundário e do terciário</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-disabled-bg)"></td><td><code>disabled-bg</code></td><td><code>gray-100</code></td><td>Fundo de botão e campo desabilitados</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-disabled-text)"></td><td><code>disabled-text</code></td><td><code>gray-600</code></td><td>Texto de botão e campo desabilitados</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-disabled-border)"></td><td><code>disabled-border</code></td><td><code>gray-300</code></td><td>Borda de botão e campo desabilitados</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-focus)"></td><td><code>focus</code></td><td><code>blue-700</code></td><td>Contorno de foco</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-success-text)"></td><td><code>success-text</code> / <code>-bg</code></td><td><code>green-700</code> / <code>green-100</code></td><td>Aprovado, concluído, salvo</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-warning-text)"></td><td><code>warning-text</code> / <code>-bg</code></td><td><code>yellow-700</code> / <code>yellow-100</code></td><td>Em curso, pendente, atenção</td></tr>
+                  <tr><td class="doc-dot" aria-hidden="true" style="--doc-swatch:var(--fluxa-color-danger-text)"></td><td><code>danger-text</code> / <code>-bg</code></td><td><code>red-700</code> / <code>red-100</code></td><td>Reprovado, erro, campo inválido</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Todos com o prefixo <code>--fluxa-color-</code>. Tema escuro: classe <code>dark-mode</code> no <code>&lt;body&gt;</code>; ele redefine só estes tokens. No tema escuro os pares de feedback se invertem (tom claro no texto, tom escuro no fundo).</p>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="tipografia">
+          <h2>Tipografia</h2>
+          <p><strong>Open Sans</strong> em tudo. <strong>Roboto Mono</strong> só em códigos de disciplina, notas, créditos e outros números que precisam alinhar. São 5 tamanhos e 2 pesos.</p>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th>Papel</th><th>Amostra</th><th class="fluxa-table__number">Tamanho</th><th>Peso</th><th class="fluxa-table__number">Altura de linha</th><th>Onde</th></tr></thead>
+                <tbody>
+                  <tr><td><code>page-title</code></td><td><span class="fluxa-page-header__title">Notas</span></td><td class="fluxa-table__number">32px</td><td>600</td><td class="fluxa-table__number">1.25</td><td><code>&lt;h1&gt;</code> da página, valor de indicador</td></tr>
+                  <tr><td><code>section-title</code></td><td><span class="fluxa-card__title">Disciplinas</span></td><td class="fluxa-table__number">20px</td><td>600</td><td class="fluxa-table__number">1.25</td><td>Título de card, seção, dialog</td></tr>
+                  <tr><td><code>body</code></td><td><span style="font-size:var(--fluxa-font-size-body)">Texto corrido</span></td><td class="fluxa-table__number">16px</td><td>400</td><td class="fluxa-table__number">1.5</td><td>Parágrafos, valor digitado em campo</td></tr>
+                  <tr><td><code>small</code></td><td>Rótulo, botão, tabela</td><td class="fluxa-table__number">14px</td><td>400 / 600</td><td class="fluxa-table__number">1.5</td><td>Rótulo e botão (600), tabela, navegação</td></tr>
+                  <tr><td><code>caption</code></td><td><span style="font-size:var(--fluxa-font-size-caption)">Formato AAAA.S</span></td><td class="fluxa-table__number">12px</td><td>400 / 600</td><td class="fluxa-table__number">1.5</td><td>Ajuda; erro de campo e badge (600)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Tokens: <code>--fluxa-font-size-{caption, small, body, section-title, page-title}</code>, <code>--fluxa-font-weight-{regular, semibold}</code>, <code>--fluxa-line-height-{heading, text}</code>, <code>--fluxa-font-family-{text, code}</code>. Abaixo de 768px o <code>page-title</code> passa a 24px.</p>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="forma">
+          <h2>Raios, bordas e foco</h2>
+          <div class="doc-example">
+            <div class="doc-example__preview">
+              <div class="doc-shape" style="border-radius:var(--fluxa-radius-control)">control<br>8px</div>
+              <div class="doc-shape" style="border-radius:var(--fluxa-radius-container)">container<br>16px</div>
+              <div class="doc-shape" style="border-radius:var(--fluxa-radius-pill)">pill</div>
+              <div class="doc-shape" style="border:0;box-shadow:var(--fluxa-shadow-overlay)">shadow-overlay</div>
+            </div>
+          </div>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th>Token</th><th class="fluxa-table__number">Valor</th><th>Aplica-se a</th></tr></thead>
+                <tbody>
+                  <tr><td><code>--fluxa-radius-control</code></td><td class="fluxa-table__number">8px</td><td>Botões, campos, alertas, resumo de erros, itens da navegação</td></tr>
+                  <tr><td><code>--fluxa-radius-container</code></td><td class="fluxa-table__number">16px</td><td>Cards, tabelas, FilterPanel, accordion, dialog</td></tr>
+                  <tr><td><code>--fluxa-radius-pill</code></td><td class="fluxa-table__number">9999px</td><td>Badges</td></tr>
+                  <tr><td><code>--fluxa-border-width</code></td><td class="fluxa-table__number">1px</td><td>Toda borda, na cor <code>border-default</code></td></tr>
+                  <tr><td><code>--fluxa-shadow-overlay</code></td><td class="fluxa-table__number">—</td><td>Só dialog. Cards não têm sombra.</td></tr>
+                  <tr><td><code>--fluxa-focus-width</code> / <code>-offset</code></td><td class="fluxa-table__number">2px / 2px</td><td>Contorno de foco de todo elemento interativo, na cor <code>focus</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="espacamento">
+          <h2>Espaçamento e layout</h2>
+          <div class="fluxa-grid fluxa-grid--2">
+            <div class="fluxa-card fluxa-card--flush">
+              <div class="fluxa-card__header"><p class="fluxa-card__title">Escala</p></div>
+              <div class="fluxa-table-area">
+                <table class="fluxa-table">
+                  <thead><tr><th>Token</th><th class="fluxa-table__number">Valor</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>--fluxa-space-1</code></td><td class="fluxa-table__number">4px</td></tr>
+                    <tr><td><code>--fluxa-space-2</code></td><td class="fluxa-table__number">8px</td></tr>
+                    <tr><td><code>--fluxa-space-3</code></td><td class="fluxa-table__number">16px</td></tr>
+                    <tr><td><code>--fluxa-space-4</code></td><td class="fluxa-table__number">24px</td></tr>
+                    <tr><td><code>--fluxa-space-5</code></td><td class="fluxa-table__number">32px</td></tr>
+                    <tr><td><code>--fluxa-space-6</code></td><td class="fluxa-table__number">48px</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="fluxa-card fluxa-card--flush">
+              <div class="fluxa-card__header"><p class="fluxa-card__title">Por relação (prefira estes)</p></div>
+              <div class="fluxa-table-area">
+                <table class="fluxa-table">
+                  <thead><tr><th>Token</th><th class="fluxa-table__number">Valor</th><th>Entre</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>space-inline</code></td><td class="fluxa-table__number">8px</td><td>rótulo↔campo, botão↔botão</td></tr>
+                    <tr><td><code>space-field-gap</code></td><td class="fluxa-table__number">16px</td><td>campos de um formulário</td></tr>
+                    <tr><td><code>space-card-padding</code></td><td class="fluxa-table__number">24px</td><td>borda do card e conteúdo</td></tr>
+                    <tr><td><code>space-grid-gap</code></td><td class="fluxa-table__number">24px</td><td>cards de uma grade</td></tr>
+                    <tr><td><code>space-section-gap</code></td><td class="fluxa-table__number">48px</td><td>seções da página</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="fluxa-card">
+            <p class="fluxa-card__title">Layout</p>
+            <dl class="fluxa-key-value">
+              <dt>Largura máxima do conteúdo</dt><dd><code>1440px</code></dd>
+              <dt>Formulário / área de leitura</dt><dd><code>1200px / 768px</code></dd>
+              <dt>Padding horizontal (≥1200 / ≥768 / &lt;768)</dt><dd><code>72 / 32 / 16px</code></dd>
+              <dt>Barra lateral</dt><dd><code>256px</code>, vai para o topo abaixo de 1024px</dd>
+              <dt>Breakpoints</dt><dd><code>480 · 768 · 1024 · 1200 · 1440</code></dd>
+              <dt>Altura de botão e campo</dt><dd><code>40px</code> (única)</dd>
+              <dt>Área de toque de itens de lista e navegação</dt><dd><code>44px</code></dd>
+            </dl>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="botoes">
+          <h2>Botões</h2>
+          <p>Existem <strong>três</strong> tipos. Todos têm altura de 40px, padding horizontal de 16px, raio <code>control</code> (8px) e texto de 14px semibold em Open Sans.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="doc-button-matrix">
+                <span></span><strong>Habilitado</strong><strong>Desabilitado</strong>
+                <strong>Primário</strong>
+                <span><button class="fluxa-button fluxa-button--primary" type="button">Salvar notas</button></span>
+                <span><button class="fluxa-button fluxa-button--primary" type="button" disabled>Salvar notas</button></span>
+                <strong>Secundário</strong>
+                <span><button class="fluxa-button fluxa-button--secondary" type="button">Cancelar</button></span>
+                <span><button class="fluxa-button fluxa-button--secondary" type="button" disabled>Cancelar</button></span>
+                <strong>Terciário</strong>
+                <span><button class="fluxa-button fluxa-button--tertiary" type="button">Ver detalhes</button></span>
+                <span><button class="fluxa-button fluxa-button--tertiary" type="button" disabled>Ver detalhes</button></span>
+              </div>
+            </div>
+<pre>&lt;button class="fluxa-button fluxa-button--primary" type="submit"&gt;Salvar notas&lt;/button&gt;
+&lt;button class="fluxa-button fluxa-button--secondary" type="button"&gt;Cancelar&lt;/button&gt;
+&lt;a class="fluxa-button fluxa-button--tertiary" href="{% url 'fluxograma' %}"&gt;Ver fluxograma&lt;/a&gt;
+&lt;button class="fluxa-button fluxa-button--primary" type="submit" disabled&gt;Salvar notas&lt;/button&gt;
+{# largura total (ex.: login): acrescente fluxa-button--block #}</pre>
+          </div>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th>Estado</th><th>Propriedade</th><th>Primário</th><th>Secundário</th><th>Terciário</th></tr></thead>
+                <tbody>
+                  <tr><td>Habilitado</td><td>Fundo</td><td><code>action-primary</code></td><td><code>surface-default</code></td><td>transparente</td></tr>
+                  <tr><td></td><td>Texto</td><td><code>text-on-primary</code></td><td><code>action-primary</code></td><td><code>action-primary</code></td></tr>
+                  <tr><td></td><td>Borda</td><td>—</td><td><code>action-primary</code></td><td>—</td></tr>
+                  <tr><td>Hover</td><td>Fundo</td><td><code>action-primary-hover</code></td><td><code>action-hover-bg</code></td><td><code>action-hover-bg</code></td></tr>
+                  <tr><td>Foco</td><td>Contorno</td><td colspan="3">2px na cor <code>focus</code>, afastado 2px (igual nos três)</td></tr>
+                  <tr><td>Desabilitado</td><td>Fundo</td><td><code>disabled-bg</code></td><td><code>disabled-bg</code></td><td>transparente</td></tr>
+                  <tr><td></td><td>Texto</td><td><code>disabled-text</code></td><td><code>disabled-text</code></td><td><code>disabled-text</code></td></tr>
+                  <tr><td></td><td>Borda</td><td><code>disabled-border</code></td><td><code>disabled-border</code></td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="doc-rules">
+            <div class="doc-rules__do"><strong>Faça</strong>No máximo <strong>um</strong> primário por área. Secundário à esquerda, primário à direita. Rótulo com verbo (“Salvar notas”). <code>&lt;button&gt;</code> para ações, <code>&lt;a&gt;</code> para navegação.</div>
+            <div class="doc-rules__dont"><strong>Não faça</strong>Criar outro tipo, cor ou tamanho de botão. Rótulos genéricos (“OK”, “Clique aqui”). Ação destrutiva sem confirmação em <a href="#dialog">Dialog</a>.</div>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="formulario">
+          <h2>Formulário</h2>
+          <p>Campos ficam em um <code>.fluxa-form-grid</code> (<code>--2</code>, <code>--3</code> ou <code>--4</code> colunas; <code>__full</code> ocupa a linha). Cada campo é um <code>.fluxa-field</code>: rótulo, controle, ajuda e erro, nesta ordem.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <form class="fluxa-card" onsubmit="return false">
+                <fieldset class="fluxa-form-section">
+                  <legend class="fluxa-form-section__title">Lançar notas</legend>
+                  <div class="fluxa-form-grid fluxa-form-grid--4">
+                    <div class="fluxa-field fluxa-form-grid__full">
+                      <label class="fluxa-field__label" for="ex-disciplina">Disciplina <span class="fluxa-field__required" aria-hidden="true">*</span></label>
+                      <select class="fluxa-select" id="ex-disciplina" required>
+                        <option value="">Selecione…</option>
+                        <option>INF1037 — Programação em C</option>
+                      </select>
+                    </div>
+                    <div class="fluxa-field">
+                      <label class="fluxa-field__label" for="ex-periodo">Período letivo</label>
+                      <input class="fluxa-input fluxa-input--code" id="ex-periodo" value="2026.2" aria-describedby="ex-periodo-ajuda">
+                      <span class="fluxa-field__hint" id="ex-periodo-ajuda">Formato AAAA.S</span>
+                    </div>
+                    <div class="fluxa-field">
+                      <label class="fluxa-field__label" for="ex-g1">G1</label>
+                      <input class="fluxa-input fluxa-input--code" id="ex-g1" type="number" min="0" max="10" step="0.01" value="8.5">
+                    </div>
+                    <div class="fluxa-field">
+                      <label class="fluxa-field__label" for="ex-g2">G2</label>
+                      <input class="fluxa-input fluxa-input--code" id="ex-g2" type="number" value="12" aria-invalid="true" aria-describedby="ex-g2-erro">
+                      <p class="fluxa-field__error" id="ex-g2-erro">A nota deve estar entre 0 e 10.</p>
+                    </div>
+                    <div class="fluxa-field">
+                      <label class="fluxa-field__label" for="ex-turma">Turma</label>
+                      <input class="fluxa-input" id="ex-turma" value="3WA" disabled>
+                    </div>
+                    <div class="fluxa-form-grid__full">
+                      <label class="fluxa-checkbox"><input type="checkbox" checked> Disciplina concluída</label>
+                    </div>
+                  </div>
+                </fieldset>
+                <div class="fluxa-page-actions fluxa-page-actions--end">
+                  <button class="fluxa-button fluxa-button--secondary" type="reset">Limpar</button>
+                  <button class="fluxa-button fluxa-button--primary" type="submit">Salvar notas</button>
+                </div>
+              </form>
+            </div>
+<pre>{# templates/components/field.html  —  {% include "components/field.html" with field=form.g1 %} #}
+&lt;div class="fluxa-field"&gt;
+  &lt;label class="fluxa-field__label" for="{{ field.id_for_label }}"&gt;{{ field.label }}&lt;/label&gt;
+  {{ field }}
+  {% if field.help_text %}&lt;span class="fluxa-field__hint"&gt;{{ field.help_text }}&lt;/span&gt;{% endif %}
+  {% for erro in field.errors %}&lt;p class="fluxa-field__error"&gt;{{ erro }}&lt;/p&gt;{% endfor %}
+&lt;/div&gt;
+
+# forms.py — a classe vai no widget, nunca no template
+widgets = {
+    'disciplina': forms.Select(attrs={'class': 'fluxa-select'}),
+    'g1': forms.NumberInput(attrs={'class': 'fluxa-input fluxa-input--code', 'min': 0, 'max': 10, 'step': '0.01'}),
+}</pre>
+          </div>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th>Estado do campo</th><th>Borda</th><th>Fundo</th><th>Texto</th></tr></thead>
+                <tbody>
+                  <tr><td>Normal</td><td><code>border-default</code></td><td><code>surface-default</code></td><td><code>text-primary</code>, 16px</td></tr>
+                  <tr><td>Foco</td><td><code>focus</code> + contorno 2px</td><td><code>surface-default</code></td><td><code>text-primary</code></td></tr>
+                  <tr><td>Inválido (<code>aria-invalid="true"</code>)</td><td><code>danger-text</code></td><td><code>surface-default</code></td><td>mensagem em <code>danger-text</code>, 12px semibold</td></tr>
+                  <tr><td>Desabilitado</td><td><code>disabled-border</code></td><td><code>disabled-bg</code></td><td><code>disabled-text</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Rótulo: 14px semibold. Ajuda: 12px <code>text-secondary</code>. Altura do campo: 40px. Use <code>--code</code> em notas, períodos e códigos.</p>
+
+          <h3>Resumo de erros</h3>
+          <p>No topo do formulário quando o envio falha; cada item leva ao campo. Também mostra <code>form.non_field_errors</code>.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-error-summary" role="alert">
+                <p class="fluxa-error-summary__title">Corrija 2 erros para continuar</p>
+                <ul>
+                  <li><a href="#ex-g2">G2: a nota deve estar entre 0 e 10.</a></li>
+                  <li><a href="#ex-disciplina">Disciplina: este campo é obrigatório.</a></li>
+                </ul>
+              </div>
+            </div>
+<pre>{% if form.errors %}
+&lt;div class="fluxa-error-summary" role="alert"&gt;
+  &lt;p class="fluxa-error-summary__title"&gt;Corrija os erros para continuar&lt;/p&gt;
+  &lt;ul&gt;
+    {% for erro in form.non_field_errors %}&lt;li&gt;{{ erro }}&lt;/li&gt;{% endfor %}
+    {% for field in form %}{% for erro in field.errors %}
+      &lt;li&gt;&lt;a href="#{{ field.id_for_label }}"&gt;{{ field.label }}: {{ erro }}&lt;/a&gt;&lt;/li&gt;
+    {% endfor %}{% endfor %}
+  &lt;/ul&gt;
+&lt;/div&gt;
+{% endif %}</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="feedback">
+          <h2>Feedback</h2>
+          <p>Só três estados. O texto sempre diz o estado; a cor apenas reforça.</p>
+          <div class="fluxa-card fluxa-card--flush">
+            <div class="fluxa-table-area">
+              <table class="fluxa-table">
+                <thead><tr><th>Estado</th><th>Badge</th><th>Use para</th></tr></thead>
+                <tbody>
+                  <tr><td><code>success</code></td><td><span class="fluxa-badge fluxa-badge--success">Aprovado</span></td><td>Aprovado, concluído, ação salva com sucesso</td></tr>
+                  <tr><td><code>warning</code></td><td><span class="fluxa-badge fluxa-badge--warning">Em curso</span></td><td>Em curso, pendente, prazo terminando, aviso</td></tr>
+                  <tr><td><code>danger</code></td><td><span class="fluxa-badge fluxa-badge--danger">Reprovado</span></td><td>Reprovado, erro, falha ao salvar</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3>Alerta de página</h3>
+          <p>Mensagem que vale para a página inteira (as <code>messages</code> do Django). Borda 1px na cor do texto, raio <code>control</code>, texto 14px.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-alert fluxa-alert--success" role="status">Notas salvas com sucesso.</div>
+              <div class="fluxa-alert fluxa-alert--warning" role="status">Os créditos exibidos são uma simulação e não substituem o histórico oficial.</div>
+              <div class="fluxa-alert fluxa-alert--danger" role="alert">Não foi possível salvar. Tente novamente.</div>
+            </div>
+<pre>{% for m in messages %}
+  {% if m.tags == 'success' %}&lt;div class="fluxa-alert fluxa-alert--success" role="status"&gt;{{ m }}&lt;/div&gt;
+  {% elif m.tags == 'error' %}&lt;div class="fluxa-alert fluxa-alert--danger" role="alert"&gt;{{ m }}&lt;/div&gt;
+  {% else %}&lt;div class="fluxa-alert fluxa-alert--warning" role="status"&gt;{{ m }}&lt;/div&gt;{% endif %}
+{% endfor %}</pre>
+          </div>
+
+          <h3>Badge</h3>
+          <p>Estado de um item (linha de tabela, card). Formato pílula, borda 1px na cor do texto, texto 12px semibold.</p>
+          <div class="doc-example">
+<pre>{# templates/components/badge_situacao.html #}
+{% if situacao == 'Aprovado' %}&lt;span class="fluxa-badge fluxa-badge--success"&gt;Aprovado&lt;/span&gt;
+{% elif situacao == 'Reprovado' %}&lt;span class="fluxa-badge fluxa-badge--danger"&gt;Reprovado&lt;/span&gt;
+{% else %}&lt;span class="fluxa-badge fluxa-badge--warning"&gt;{{ situacao }}&lt;/span&gt;{% endif %}</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="app-shell">
+          <h2>AppShell</h2>
+          <p>Estrutura de toda tela autenticada: barra lateral (marca, navegação, usuário) e conteúdo. Abaixo de 1024px a barra vai para o topo. O item da página atual recebe <code>aria-current="page"</code>.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--pad0">
+              <div class="doc-shell-frame">
+                <div class="fluxa-app-shell">
+                  <aside class="fluxa-app-shell__nav">
+                    <span class="fluxa-brand"><img src="Logo.jpeg" alt=""><span>Fluxa</span></span>
+                    <nav class="fluxa-primary-nav" aria-label="Exemplo">
+                      <ul>
+                        <li><a class="fluxa-primary-nav__item" href="#app-shell">Início</a></li>
+                        <li><a class="fluxa-primary-nav__item" href="#app-shell">Fluxograma</a></li>
+                        <li><a class="fluxa-primary-nav__item" href="#app-shell" aria-current="page">Créditos</a></li>
+                        <li><a class="fluxa-primary-nav__item" href="#app-shell">Notas do período</a></li>
+                      </ul>
+                    </nav>
+                    <div class="fluxa-user-menu">
+                      <span class="fluxa-user-menu__name">Ana Souza</span>
+                      <span class="fluxa-user-menu__email">ana@aluno.puc-rio.br</span>
+                      <button class="fluxa-button" type="button">Sair</button>
+                    </div>
+                  </aside>
+                  <div class="fluxa-app-shell__main">
+                    <div class="fluxa-page-container">
+                      <div class="fluxa-page-header__text">
+                        <p class="fluxa-page-header__title">Contagem de créditos</p>
+                        <p class="fluxa-page-header__subtitle">Conteúdo da página.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+<pre>&lt;div class="fluxa-app-shell"&gt;
+  &lt;aside class="fluxa-app-shell__nav"&gt;
+    &lt;a class="fluxa-brand" href="{% url 'telaInicio' %}"&gt;&lt;img src="{% static 'Logo.jpeg' %}" alt=""&gt;&lt;span&gt;Fluxa&lt;/span&gt;&lt;/a&gt;
+    &lt;nav class="fluxa-primary-nav" aria-label="Navegação principal"&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a class="fluxa-primary-nav__item" href="{% url 'creditos' %}"
+               {% if request.resolver_match.url_name == 'creditos' %}aria-current="page"{% endif %}&gt;Créditos&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/nav&gt;
+    &lt;div class="fluxa-user-menu"&gt;
+      &lt;span class="fluxa-user-menu__name"&gt;{{ user.get_full_name }}&lt;/span&gt;
+      &lt;span class="fluxa-user-menu__email"&gt;{{ user.email }}&lt;/span&gt;
+      &lt;form method="post" action="{% url 'logout' %}"&gt;{% csrf_token %}
+        &lt;button class="fluxa-button" type="submit"&gt;Sair&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+  &lt;main class="fluxa-app-shell__main" id="conteudo"&gt;
+    &lt;div class="fluxa-page-container"&gt;{% block content %}{% endblock %}&lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="page-header">
+          <h2>PageHeader</h2>
+          <p>Abre todo conteúdo de tela: um único <code>&lt;h1&gt;</code>, subtítulo opcional e as ações da página à direita.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-page-header" style="margin:0">
+                <div class="fluxa-page-header__text">
+                  <p class="fluxa-page-header__title">Planejamento</p>
+                  <p class="fluxa-page-header__subtitle">Monte o plano das disciplinas de cada período.</p>
+                </div>
+                <div class="fluxa-page-actions">
+                  <button class="fluxa-button fluxa-button--secondary" type="button">Limpar seleção</button>
+                  <button class="fluxa-button fluxa-button--primary" type="button">Salvar planejamento</button>
+                </div>
+              </div>
+            </div>
+<pre>&lt;header class="fluxa-page-header"&gt;
+  &lt;div class="fluxa-page-header__text"&gt;
+    &lt;h1 class="fluxa-page-header__title"&gt;Planejamento&lt;/h1&gt;
+    &lt;p class="fluxa-page-header__subtitle"&gt;Monte o plano das disciplinas de cada período.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="fluxa-page-actions"&gt;
+    &lt;button class="fluxa-button fluxa-button--secondary" type="button"&gt;Limpar seleção&lt;/button&gt;
+    &lt;button class="fluxa-button fluxa-button--primary" type="submit" form="form-planejamento"&gt;Salvar planejamento&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="card">
+          <h2>Card</h2>
+          <p>Agrupa conteúdo relacionado: fundo <code>surface-default</code>, borda 1px <code>border-default</code>, raio <code>container</code> (16px), padding 24px, sem sombra. Variações: <code>--flush</code> (sem padding, para tabelas) e <code>--interactive</code> (o card inteiro é um link; no hover a borda fica <code>action-primary</code>).</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-grid fluxa-grid--3">
+                <div class="fluxa-card"><div class="fluxa-stat"><span class="fluxa-stat__label">Créditos do currículo</span><span class="fluxa-stat__value">240</span></div></div>
+                <div class="fluxa-card"><div class="fluxa-stat"><span class="fluxa-stat__label">Cumpridos</span><span class="fluxa-stat__value">96</span></div></div>
+                <div class="fluxa-card"><div class="fluxa-stat"><span class="fluxa-stat__label">Pendentes</span><span class="fluxa-stat__value">144</span></div></div>
+              </div>
+              <div class="fluxa-grid fluxa-grid--2">
+                <div class="fluxa-card">
+                  <p class="fluxa-card__title">Calendário de matrícula</p>
+                  <dl class="fluxa-key-value">
+                    <dt>Início da matrícula</dt><dd>01/08/2026</dd>
+                    <dt>Fim da matrícula</dt><dd>15/08/2026</dd>
+                  </dl>
+                </div>
+                <a class="fluxa-card fluxa-card--interactive" href="#card">
+                  <p class="fluxa-card__title">Simulador de matrícula</p>
+                  <p class="fluxa-card__description">Monte sua grade antes da matrícula.</p>
+                </a>
+              </div>
+            </div>
+<pre>&lt;div class="fluxa-grid fluxa-grid--3"&gt;
+  &lt;div class="fluxa-card"&gt;
+    &lt;div class="fluxa-stat"&gt;
+      &lt;span class="fluxa-stat__label"&gt;Cumpridos&lt;/span&gt;
+      &lt;span class="fluxa-stat__value"&gt;{{ total_cumprido }}&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="fluxa-card"&gt;
+  &lt;h2 class="fluxa-card__title"&gt;Calendário de matrícula&lt;/h2&gt;
+  &lt;dl class="fluxa-key-value"&gt;
+    &lt;dt&gt;Início da matrícula&lt;/dt&gt;&lt;dd&gt;{{ calendario.inicio_matricula|date:"d/m/Y" }}&lt;/dd&gt;
+  &lt;/dl&gt;
+&lt;/div&gt;</pre>
+          </div>
+          <p>Grade de cards: <code>.fluxa-grid--2</code>, <code>--3</code> ou <code>--4</code>; reduz sozinha em 1024px e 768px.</p>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="tabela">
+          <h2>Tabela e estado vazio</h2>
+          <p>Tabela sempre dentro de <code>.fluxa-card--flush</code> + <code>.fluxa-table-area</code>. Texto 14px; cabeçalho em <code>surface-subtle</code>, 600. Números com <code>.fluxa-table__number</code> (à direita, fonte de código); códigos com <code>.fluxa-table__code</code>. Toda lista tem estado vazio.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-card fluxa-card--flush">
+                <div class="fluxa-card__header"><p class="fluxa-card__title">Notas de 2026.2</p></div>
+                <div class="fluxa-table-area">
+                  <table class="fluxa-table">
+                    <thead><tr><th scope="col">Código</th><th scope="col">Disciplina</th><th scope="col" class="fluxa-table__number">Média</th><th scope="col">Situação</th></tr></thead>
+                    <tbody>
+                      <tr><td class="fluxa-table__code">INF1037</td><td>Programação em C</td><td class="fluxa-table__number">7,75</td><td><span class="fluxa-badge fluxa-badge--success">Aprovado</span></td></tr>
+                      <tr><td class="fluxa-table__code">MAT4161</td><td>Cálculo a uma Variável</td><td class="fluxa-table__number">3,75</td><td><span class="fluxa-badge fluxa-badge--danger">Reprovado</span></td></tr>
+                      <tr><td class="fluxa-table__code">FIS4001</td><td>Física I</td><td class="fluxa-table__number">—</td><td><span class="fluxa-badge fluxa-badge--warning">Em curso</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="fluxa-card">
+                <div class="fluxa-empty-state">
+                  <p class="fluxa-empty-state__title">Nenhuma nota lançada</p>
+                  <p class="fluxa-empty-state__description">Use o formulário acima para lançar as notas deste período.</p>
+                </div>
+              </div>
+            </div>
+<pre>&lt;div class="fluxa-card fluxa-card--flush"&gt;
+  &lt;div class="fluxa-card__header"&gt;&lt;h2 class="fluxa-card__title"&gt;Notas&lt;/h2&gt;&lt;/div&gt;
+  {% if graus %}
+  &lt;div class="fluxa-table-area"&gt;
+    &lt;table class="fluxa-table"&gt;
+      &lt;thead&gt;&lt;tr&gt;&lt;th scope="col"&gt;Código&lt;/th&gt;&lt;th scope="col" class="fluxa-table__number"&gt;Média&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+      &lt;tbody&gt;
+        {% for g in graus %}
+        &lt;tr&gt;&lt;td class="fluxa-table__code"&gt;{{ g.disciplina.codigo }}&lt;/td&gt;&lt;td class="fluxa-table__number"&gt;{{ g.media|default:"—" }}&lt;/td&gt;&lt;/tr&gt;
+        {% endfor %}
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  {% else %}
+  &lt;div class="fluxa-empty-state"&gt;
+    &lt;p class="fluxa-empty-state__title"&gt;Nenhuma nota lançada&lt;/p&gt;
+    &lt;p class="fluxa-empty-state__description"&gt;Use o formulário acima para lançar as notas deste período.&lt;/p&gt;
+  &lt;/div&gt;
+  {% endif %}
+&lt;/div&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="filter-panel">
+          <h2>FilterPanel</h2>
+          <p>Filtros de uma listagem. Envia por <code>GET</code>, para o filtro ficar na URL. “Limpar” é terciário; “Filtrar” é primário.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <form class="fluxa-filter-panel" role="search" onsubmit="return false">
+                <div class="fluxa-field">
+                  <label class="fluxa-field__label" for="ex-busca">Buscar disciplina</label>
+                  <input class="fluxa-input" id="ex-busca" type="search" placeholder="Nome ou código">
+                </div>
+                <div class="fluxa-page-actions">
+                  <button class="fluxa-button fluxa-button--tertiary" type="reset">Limpar</button>
+                  <button class="fluxa-button fluxa-button--primary" type="submit">Filtrar</button>
+                </div>
+              </form>
+            </div>
+<pre>&lt;form class="fluxa-filter-panel" role="search" method="get" action="{% url 'filtrar_disciplinas' %}"&gt;
+  &lt;div class="fluxa-field"&gt;
+    &lt;label class="fluxa-field__label" for="busca"&gt;Buscar disciplina&lt;/label&gt;
+    &lt;input class="fluxa-input" id="busca" name="q" type="search" value="{{ request.GET.q }}"&gt;
+  &lt;/div&gt;
+  &lt;div class="fluxa-page-actions"&gt;
+    &lt;a class="fluxa-button fluxa-button--tertiary" href="{% url 'fluxograma' %}"&gt;Limpar&lt;/a&gt;
+    &lt;button class="fluxa-button fluxa-button--primary" type="submit"&gt;Filtrar&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="accordion">
+          <h2>Accordion</h2>
+          <p>Conteúdo longo dividido em partes que o usuário abre sob demanda (ex.: disciplinas por período no planejamento). Usa <code>&lt;details&gt;</code>, sem JavaScript.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-accordion">
+                <details class="fluxa-accordion__item" open>
+                  <summary class="fluxa-accordion__summary">1º período <span class="fluxa-accordion__meta">7 disciplinas · 24 cr.</span></summary>
+                  <div class="fluxa-accordion__content">
+                    <div class="fluxa-choice-list">
+                      <label class="fluxa-checkbox"><input type="checkbox"> <span><code>ENG4010</code> Projeto Integrado – Sustentabilidade</span></label>
+                      <label class="fluxa-checkbox"><input type="checkbox"> <span><code>EMP1310</code> Comunicação e Trabalho em Equipe</span></label>
+                    </div>
+                  </div>
+                </details>
+                <details class="fluxa-accordion__item">
+                  <summary class="fluxa-accordion__summary">2º período <span class="fluxa-accordion__meta">7 disciplinas · 27 cr.</span></summary>
+                  <div class="fluxa-accordion__content"><p>…</p></div>
+                </details>
+              </div>
+            </div>
+<pre>&lt;div class="fluxa-accordion"&gt;
+  {% for periodo, disciplinas in periodos %}
+  &lt;details class="fluxa-accordion__item"{% if forloop.first %} open{% endif %}&gt;
+    &lt;summary class="fluxa-accordion__summary"&gt;
+      {{ periodo }}º período &lt;span class="fluxa-accordion__meta"&gt;{{ disciplinas|length }} disciplinas&lt;/span&gt;
+    &lt;/summary&gt;
+    &lt;div class="fluxa-accordion__content"&gt;
+      &lt;div class="fluxa-choice-list"&gt;
+        {% for d in disciplinas %}
+        &lt;label class="fluxa-checkbox"&gt;
+          &lt;input type="checkbox" name="disciplina" value="{{ d.codigo }}"&gt;
+          &lt;span&gt;&lt;code&gt;{{ d.codigo }}&lt;/code&gt; {{ d.nome }}&lt;/span&gt;
+        &lt;/label&gt;
+        {% endfor %}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/details&gt;
+  {% endfor %}
+&lt;/div&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="dialog">
+          <h2>Dialog</h2>
+          <p>Janela modal com <code>&lt;dialog&gt;</code> nativo. Uso obrigatório para confirmar ações que apagam ou sobrescrevem dados. Título em forma de pergunta; o botão de confirmação (primário) repete o verbo; “Cancelar” é secundário.</p>
+          <div class="doc-example">
+            <div class="doc-example__preview">
+              <button class="fluxa-button fluxa-button--secondary" type="button" data-open-dialog="ex-dialog">Excluir planejamento</button>
+            </div>
+<pre>&lt;button class="fluxa-button fluxa-button--secondary" type="button" data-open-dialog="confirmar-exclusao"&gt;Excluir&lt;/button&gt;
+
+&lt;dialog class="fluxa-dialog" id="confirmar-exclusao" aria-labelledby="confirmar-exclusao-titulo"&gt;
+  &lt;form method="post" action="…"&gt;{% csrf_token %}
+    &lt;div class="fluxa-dialog__header"&gt;&lt;h2 class="fluxa-dialog__title" id="confirmar-exclusao-titulo"&gt;Excluir “Plano 2027”?&lt;/h2&gt;&lt;/div&gt;
+    &lt;div class="fluxa-dialog__body"&gt;&lt;p&gt;Esta ação não pode ser desfeita.&lt;/p&gt;&lt;/div&gt;
+    &lt;div class="fluxa-dialog__footer"&gt;
+      &lt;button class="fluxa-button fluxa-button--secondary" type="submit" formmethod="dialog"&gt;Cancelar&lt;/button&gt;
+      &lt;button class="fluxa-button fluxa-button--primary" type="submit"&gt;Excluir&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/dialog&gt;
+
+&lt;script&gt;
+  document.addEventListener('click', (e) =&gt; {
+    const id = e.target.closest('[data-open-dialog]')?.dataset.openDialog;
+    if (id) document.getElementById(id).showModal();
+  });
+&lt;/script&gt;</pre>
+          </div>
+        </section>
+
+        <!-- ================================================================ -->
+        <section class="doc-section" id="error-page">
+          <h2>ErrorPage</h2>
+          <p>Telas de 404, 500 e acesso negado. Diz o que aconteceu e oferece um caminho de volta (botão primário).</p>
+          <div class="doc-example">
+            <div class="doc-example__preview doc-example__preview--stack">
+              <div class="fluxa-error-page" style="min-height:0">
+                <div class="fluxa-error-page__content">
+                  <span class="fluxa-error-page__code">Erro 404</span>
+                  <p class="fluxa-page-header__title">Página não encontrada</p>
+                  <p class="fluxa-page-header__subtitle">O endereço acessado não existe.</p>
+                  <a class="fluxa-button fluxa-button--primary" href="#error-page">Voltar ao início</a>
+                </div>
+              </div>
+            </div>
+<pre>&lt;main class="fluxa-error-page" id="conteudo"&gt;
+  &lt;div class="fluxa-error-page__content"&gt;
+    &lt;span class="fluxa-error-page__code"&gt;Erro {{ status }}&lt;/span&gt;
+    &lt;h1 class="fluxa-page-header__title"&gt;{{ titulo }}&lt;/h1&gt;
+    &lt;p class="fluxa-page-header__subtitle"&gt;{{ mensagem }}&lt;/p&gt;
+    &lt;a class="fluxa-button fluxa-button--primary" href="{% url 'telaInicio' %}"&gt;Voltar ao início&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/main&gt;</pre>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog class="fluxa-dialog" id="ex-dialog" aria-labelledby="ex-dialog-titulo">
+  <form method="dialog">
+    <div class="fluxa-dialog__header"><h2 class="fluxa-dialog__title" id="ex-dialog-titulo">Excluir “Plano 2027”?</h2></div>
+    <div class="fluxa-dialog__body"><p>O planejamento e as disciplinas selecionadas serão apagados. Esta ação não pode ser desfeita.</p></div>
+    <div class="fluxa-dialog__footer">
+      <button class="fluxa-button fluxa-button--secondary" type="submit">Cancelar</button>
+      <button class="fluxa-button fluxa-button--primary" type="submit">Excluir</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // Apenas para a documentação: amostras de cor, tema e dialog.
+  function desenharAmostras() {
+    const css = getComputedStyle(document.documentElement);
+    document.querySelectorAll('[data-swatches]').forEach((grupo) => {
+      grupo.innerHTML = '';
+      grupo.dataset.swatches.split(' ').forEach((item) => {
+        const [nome, nota] = item.split(':');
+        const token = `--fluxa-color-${nome}`;
+        grupo.insertAdjacentHTML('beforeend',
+          `<div class="doc-swatch" style="--doc-swatch: var(${token})">
+             <span class="doc-swatch__color"></span>
+             <span class="doc-swatch__name">${nome}${nota ? ' (tema escuro)' : ''}</span>
+             <span class="doc-swatch__value">${css.getPropertyValue(token).trim()}</span>
+           </div>`);
+      });
+    });
+  }
+  desenharAmostras();
+
+  const botaoTema = document.getElementById('alternar-tema');
+  botaoTema.addEventListener('click', () => {
+    const escuro = document.body.classList.toggle('dark-mode');
+    botaoTema.setAttribute('aria-pressed', String(escuro));
+    botaoTema.textContent = escuro ? 'Tema claro' : 'Tema escuro';
+  });
+
+  document.addEventListener('click', (e) => {
+    const id = e.target.closest('[data-open-dialog]')?.dataset.openDialog;
+    if (id) document.getElementById(id).showModal();
+  });
+
+  const links = [...document.querySelectorAll('.fluxa-app-shell__nav .fluxa-primary-nav__item')];
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((entrada) => {
+      if (!entrada.isIntersecting) return;
+      links.forEach((l) => l.removeAttribute('aria-current'));
+      links.find((l) => l.hash === `#${entrada.target.id}`)?.setAttribute('aria-current', 'page');
+    });
+  }, { rootMargin: '0px 0px -75% 0px' });
+  links.forEach((l) => { const alvo = document.querySelector(l.hash); if (alvo) observador.observe(alvo); });
+</script>
+</body>
+</html>

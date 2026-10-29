@@ -1,0 +1,205 @@
+/* =========================================================================
+   Fluxa — Tokens de design (--fluxa-*)
+   -------------------------------------------------------------------------
+   Este arquivo é a ÚNICA fonte de valores visuais da aplicação.
+
+   Regras:
+   1. Componentes e telas usam apenas tokens SEMÂNTICOS (seção 2).
+      Primitivos (seção 1) só alimentam os semânticos.
+   2. Não existe cor, tamanho de fonte, raio ou espaçamento fora desta lista.
+      Precisa de um valor novo? Ele entra aqui, não na tela.
+   3. Nunca sobrescreva um token dentro de uma página.
+
+   Fontes (carregar no <head> de toda página):
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+   ========================================================================= */
+
+:root {
+  /* -----------------------------------------------------------------------
+     1. Cores primitivas (não usar fora deste arquivo)
+     ----------------------------------------------------------------------- */
+  --fluxa-color-blue-50: #F0F4FA;
+  --fluxa-color-blue-700: #1D4E78;
+  --fluxa-color-blue-900: #0F2C4C;
+
+  --fluxa-color-gray-0: #FFFFFF;
+  --fluxa-color-gray-100: #F1F5F9;
+  --fluxa-color-gray-300: #CBD5E1;
+  --fluxa-color-gray-600: #475569;
+
+  --fluxa-color-green-100: #DCFCE7;
+  --fluxa-color-green-700: #166534;
+  --fluxa-color-yellow-100: #FEF3C7;
+  --fluxa-color-yellow-700: #92400E;
+  --fluxa-color-red-100: #FEE2E2;
+  --fluxa-color-red-700: #B91C1C;
+
+  /* Usados só pelo tema escuro */
+  --fluxa-color-blue-300: #8DB3D9;
+  --fluxa-color-gray-800: #1E293B;
+  --fluxa-color-gray-900: #0F172A;
+
+  /* -----------------------------------------------------------------------
+     2. Cores semânticas
+     ----------------------------------------------------------------------- */
+  /* Superfícies */
+  --fluxa-color-surface-page: var(--fluxa-color-blue-50);        /* fundo da página */
+  --fluxa-color-surface-default: var(--fluxa-color-gray-0);      /* cards, campos, tabelas, dialog */
+  --fluxa-color-surface-subtle: var(--fluxa-color-gray-100);     /* cabeçalho e hover de tabela */
+  --fluxa-color-surface-navigation: var(--fluxa-color-blue-700); /* barra lateral */
+  --fluxa-color-surface-navigation-active: var(--fluxa-color-blue-900); /* item ativo/hover da barra */
+
+  /* Texto */
+  --fluxa-color-text-primary: var(--fluxa-color-blue-900);       /* títulos e corpo */
+  --fluxa-color-text-secondary: var(--fluxa-color-gray-600);     /* subtítulos, ajuda, rótulos de dado */
+  --fluxa-color-text-on-primary: var(--fluxa-color-gray-0);      /* sobre botão primário */
+  --fluxa-color-text-on-navigation: var(--fluxa-color-gray-0);   /* sobre a barra lateral */
+
+  /* Borda */
+  --fluxa-color-border-default: var(--fluxa-color-gray-300);     /* cards, campos, divisórias */
+
+  /* Ação (botões, links, item ativo, foco) */
+  --fluxa-color-action-primary: var(--fluxa-color-blue-700);
+  --fluxa-color-action-primary-hover: var(--fluxa-color-blue-900);
+  --fluxa-color-action-hover-bg: var(--fluxa-color-blue-50);     /* hover de secundário e terciário */
+
+  /* Desabilitado (igual para botões e campos) */
+  --fluxa-color-disabled-bg: var(--fluxa-color-gray-100);
+  --fluxa-color-disabled-text: var(--fluxa-color-gray-600);
+  --fluxa-color-disabled-border: var(--fluxa-color-gray-300);
+
+  /* Feedback: só três estados */
+  --fluxa-color-success-text: var(--fluxa-color-green-700);
+  --fluxa-color-success-bg: var(--fluxa-color-green-100);
+  --fluxa-color-warning-text: var(--fluxa-color-yellow-700);
+  --fluxa-color-warning-bg: var(--fluxa-color-yellow-100);
+  --fluxa-color-danger-text: var(--fluxa-color-red-700);
+  --fluxa-color-danger-bg: var(--fluxa-color-red-100);
+
+  /* Foco e overlay */
+  --fluxa-color-focus: var(--fluxa-color-blue-700);
+  --fluxa-color-overlay: rgb(15 23 42 / 0.55);
+
+  /* -----------------------------------------------------------------------
+     3. Tipografia: 2 famílias, 5 tamanhos, 2 pesos, 2 alturas de linha
+     ----------------------------------------------------------------------- */
+  --fluxa-font-family-text: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fluxa-font-family-code: 'Roboto Mono', ui-monospace, 'Courier New', monospace; /* códigos, notas, créditos */
+
+  --fluxa-font-size-caption: 0.75rem;       /* 12px: legenda, ajuda, erro de campo, badge */
+  --fluxa-font-size-small: 0.875rem;        /* 14px: rótulo, botão, tabela, navegação */
+  --fluxa-font-size-body: 1rem;             /* 16px: texto corrido, valor de campo */
+  --fluxa-font-size-section-title: 1.25rem; /* 20px: título de card/seção */
+  --fluxa-font-size-page-title: 2rem;       /* 32px: <h1> da página */
+
+  --fluxa-font-weight-regular: 400;
+  --fluxa-font-weight-semibold: 600;        /* títulos, rótulos, botões */
+
+  --fluxa-line-height-heading: 1.25;
+  --fluxa-line-height-text: 1.5;
+
+  /* -----------------------------------------------------------------------
+     4. Forma: 3 raios, 1 borda, 1 sombra, 1 foco
+     ----------------------------------------------------------------------- */
+  --fluxa-radius-control: 8px;       /* botões, campos, alertas */
+  --fluxa-radius-container: 16px;    /* cards, tabelas, accordion, dialog */
+  --fluxa-radius-pill: 9999px;       /* badges */
+
+  --fluxa-border-width: 1px;
+  --fluxa-shadow-overlay: 0 12px 32px rgb(15 23 42 / 0.18); /* só dialog */
+
+  --fluxa-focus-width: 2px;
+  --fluxa-focus-offset: 2px;
+
+  /* -----------------------------------------------------------------------
+     5. Espaçamento: múltiplos de 8 (+ 4)
+     ----------------------------------------------------------------------- */
+  --fluxa-space-1: 0.25rem;  /*  4px */
+  --fluxa-space-2: 0.5rem;   /*  8px */
+  --fluxa-space-3: 1rem;     /* 16px */
+  --fluxa-space-4: 1.5rem;   /* 24px */
+  --fluxa-space-5: 2rem;     /* 32px */
+  --fluxa-space-6: 3rem;     /* 48px */
+
+  /* Por relação: use estes sempre que se aplicarem */
+  --fluxa-space-inline: var(--fluxa-space-2);         /* ícone↔texto, rótulo↔campo, botão↔botão */
+  --fluxa-space-field-gap: var(--fluxa-space-3);      /* entre campos */
+  --fluxa-space-card-padding: var(--fluxa-space-4);   /* padding interno de card */
+  --fluxa-space-grid-gap: var(--fluxa-space-4);       /* entre cards */
+  --fluxa-space-section-gap: var(--fluxa-space-6);    /* entre seções da página */
+
+  /* -----------------------------------------------------------------------
+     6. Layout
+     Breakpoints (valores literais nas @media): 480 · 768 · 1024 · 1200 · 1440
+     ----------------------------------------------------------------------- */
+  --fluxa-layout-max-width: 1440px;
+  --fluxa-layout-form-max-width: 1200px;
+  --fluxa-layout-reading-max-width: 768px;
+  --fluxa-layout-navigation-width: 256px;
+  --fluxa-layout-padding-x: 72px;
+  --fluxa-layout-padding-y: var(--fluxa-space-5);
+
+  /* -----------------------------------------------------------------------
+     7. Controles, camadas, movimento
+     ----------------------------------------------------------------------- */
+  --fluxa-control-height: 40px;      /* botões e campos: altura única */
+  --fluxa-touch-target: 44px;        /* área mínima clicável de itens de lista/navegação */
+
+  --fluxa-z-navigation: 200;
+  --fluxa-z-skip-link: 1000;
+
+  --fluxa-duration: 150ms;
+  --fluxa-easing: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (max-width: 1200px) {
+  :root { --fluxa-layout-padding-x: var(--fluxa-space-5); }
+}
+@media (max-width: 768px) {
+  :root {
+    --fluxa-layout-padding-x: var(--fluxa-space-3);
+    --fluxa-font-size-page-title: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --fluxa-duration: 0ms; }
+}
+
+/* =========================================================================
+   Tema escuro: redefine SOMENTE tokens semânticos.
+   Feedback inverte o par: tom claro vira texto, tom escuro vira fundo.
+   ========================================================================= */
+body.dark-mode {
+  --fluxa-color-surface-page: var(--fluxa-color-gray-900);
+  --fluxa-color-surface-default: var(--fluxa-color-gray-800);
+  --fluxa-color-surface-subtle: var(--fluxa-color-blue-900);
+  --fluxa-color-surface-navigation: var(--fluxa-color-gray-800);
+  --fluxa-color-surface-navigation-active: var(--fluxa-color-blue-900);
+
+  --fluxa-color-text-primary: var(--fluxa-color-gray-100);
+  --fluxa-color-text-secondary: var(--fluxa-color-gray-300);
+  --fluxa-color-text-on-primary: var(--fluxa-color-blue-900);
+  --fluxa-color-text-on-navigation: var(--fluxa-color-gray-100);
+
+  --fluxa-color-border-default: var(--fluxa-color-gray-600);
+
+  --fluxa-color-action-primary: var(--fluxa-color-blue-300);
+  --fluxa-color-action-primary-hover: var(--fluxa-color-blue-50);
+  --fluxa-color-action-hover-bg: var(--fluxa-color-blue-900);
+
+  --fluxa-color-disabled-bg: var(--fluxa-color-gray-900);
+  --fluxa-color-disabled-text: var(--fluxa-color-gray-300);
+  --fluxa-color-disabled-border: var(--fluxa-color-gray-600);
+
+  --fluxa-color-success-text: var(--fluxa-color-green-100);
+  --fluxa-color-success-bg: var(--fluxa-color-green-700);
+  --fluxa-color-warning-text: var(--fluxa-color-yellow-100);
+  --fluxa-color-warning-bg: var(--fluxa-color-yellow-700);
+  --fluxa-color-danger-text: var(--fluxa-color-red-100);
+  --fluxa-color-danger-bg: var(--fluxa-color-red-700);
+
+  --fluxa-color-focus: var(--fluxa-color-blue-300);
+  --fluxa-color-overlay: rgb(0 0 0 / 0.7);
+}
