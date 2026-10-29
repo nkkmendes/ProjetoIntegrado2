@@ -6,6 +6,8 @@ from django.views.decorators.http import require_POST
 from .models import CalendarioMatricula, Disciplina
 from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
 
+from .forms import CreditosAlunoForm, GrauAlunoForm
+
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
 from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
 
