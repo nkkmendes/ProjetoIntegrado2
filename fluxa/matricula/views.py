@@ -88,7 +88,7 @@ def planejamento(request):
             form.save()
             return redirect('planejamento')
 
-    registros = PlanejamentoSalvo.objects.all()
+    registros = PlanejamentoSalvo.objects.order_by('-id')
 
     return render(request, 'planejamento (1).html', {
         'form': form,
