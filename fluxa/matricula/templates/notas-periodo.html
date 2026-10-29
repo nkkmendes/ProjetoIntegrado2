@@ -1,143 +1,264 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notas do Período - Consulta de Graus</title>
-  <link rel="stylesheet" href="../static/styles.css">
+  <title>Consulta de Graus</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .campo-form {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      background: white;
+      font-family: inherit;
+    }
+
+    .btn.salvar {
+      background: #1D4E78;
+      color: white;
+    }
+
+    .erro {
+      color: #b91c1c;
+      font-size: 12px;
+    }
+
+    @media (max-width: 750px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="page-container">
 
     <div class="page-header tight">
       <div>
         <h1 class="page-title">Consulta de Graus</h1>
-        <p class="page-sub">Acompanhe o rendimento acadêmico, notas e avaliações do período atual.</p>
+
+        <p class="page-sub">
+          Acompanhe notas e avaliações das disciplinas.
+        </p>
       </div>
+
       <div class="page-actions">
-        <button class="btn ghost" onclick="alert('Critérios de avaliação de cada disciplina.')">📋 Critérios de Avaliação</button>
-        <button class="btn ghost" onclick="window.print()">🖨️ Imprimir</button>
-        <a href="inicio_html.html"><button class="btn ghost">Voltar ao início</button></a>
+        <button class="btn ghost" onclick="window.print()">
+          Imprimir
+        </button>
+
+        <a class="btn ghost" href="{% url 'telaInicio' %}">
+          Voltar ao início
+        </a>
       </div>
     </div>
 
     <div class="card notice mb-20">
       <p>
-        <strong>Aviso:</strong> Mantenha o seu e-mail de contacto atualizado no sistema, pois as notificações sobre a atualização de graus serão enviadas diretamente para ele.
+        <strong>Aviso:</strong>
+        Os graus cadastrados nesta página são registros
+        informados pelo aluno.
       </p>
     </div>
 
-    <div class="period-bar">
-      <div class="period-label">
-        Período Letivo: <span class="pill lg">2026.2</span>
-      </div>
+    <!-- Formulário de notas -->
+    <div class="card mb-24">
+
+      <h2>Cadastrar Notas</h2>
+
+      <p class="page-sub">
+        Informe a disciplina e os graus recebidos.
+      </p>
+
+      <form method="POST" action="{% url 'notas_periodo' %}">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+
+          <div class="form-field">
+            {{ form.disciplina.label_tag }}
+            {{ form.disciplina }}
+            <div class="erro">
+              {{ form.disciplina.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.turma.label_tag }}
+            {{ form.turma }}
+            <div class="erro">
+              {{ form.turma.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.periodo_letivo.label_tag }}
+            {{ form.periodo_letivo }}
+            <div class="erro">
+              {{ form.periodo_letivo.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.situacao.label_tag }}
+            {{ form.situacao }}
+            <div class="erro">
+              {{ form.situacao.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.g1.label_tag }}
+            {{ form.g1 }}
+            <div class="erro">
+              {{ form.g1.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.g2.label_tag }}
+            {{ form.g2 }}
+            <div class="erro">
+              {{ form.g2.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.g3.label_tag }}
+            {{ form.g3 }}
+            <div class="erro">
+              {{ form.g3.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            {{ form.media.label_tag }}
+            {{ form.media }}
+            <div class="erro">
+              {{ form.media.errors }}
+            </div>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn salvar">
+          Salvar Notas
+        </button>
+
+      </form>
     </div>
 
+    <!-- Tabela de notas -->
     <div class="card flush mb-20">
+
+      <div class="card-header">
+        Notas Cadastradas
+      </div>
+
       <div class="table-responsive">
+
         <table class="list">
+
           <thead>
             <tr>
-              <th class="col-code">Disciplina</th>
-              <th class="col-name">Nome</th>
+              <th>Disciplina</th>
+              <th>Nome</th>
               <th class="center">Turma</th>
-              <th class="center col-grade">G1</th>
-              <th class="center col-grade">G2</th>
-              <th class="center col-grade">G3</th>
-              <th class="center col-final">Prova Final</th>
-              <th class="center col-avg">Média</th>
+              <th class="center">Período</th>
+              <th class="center">G1</th>
+              <th class="center">G2</th>
+              <th class="center">G3</th>
+              <th class="center">Média</th>
               <th class="center">Situação</th>
-              <th class="center">Critério</th>
-              <th class="center">Programa</th>
-              <th class="center">Registro Aulas</th>
             </tr>
           </thead>
+
           <tbody>
+            {% for grau in graus %}
             <tr>
-              <td><strong>AAA0000</strong></td>
-              <td>NOME DA DISCIPLINA</td>
-              <td class="center">00A</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="cell-disabled"></td>
-              <td class="cell-disabled"></td>
-              <td class="center">-</td>
-              <td class="center"><span class="status">Em curso</span></td>
-              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
-              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
-              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+              <td>
+                <strong>
+                  {{ grau.disciplina.codigo }}
+                </strong>
+              </td>
+
+              <td>
+                {{ grau.disciplina.nome }}
+              </td>
+
+              <td class="center">
+                {{ grau.turma }}
+              </td>
+
+              <td class="center">
+                {{ grau.periodo_letivo }}
+              </td>
+
+              <td class="center">
+                {{ grau.g1|default_if_none:"-" }}
+              </td>
+
+              <td class="center">
+                {{ grau.g2|default_if_none:"-" }}
+              </td>
+
+              <td class="center">
+                {{ grau.g3|default_if_none:"-" }}
+              </td>
+
+              <td class="center">
+                {{ grau.media|default_if_none:"-" }}
+              </td>
+
+              <td class="center">
+                <span class="status">
+                  {{ grau.situacao }}
+                </span>
+              </td>
             </tr>
 
+            {% empty %}
             <tr>
-              <td><strong>AAA0000</strong></td>
-              <td>NOME DA DISCIPLINA</td>
-              <td class="center">00A</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="cell-disabled"></td>
-              <td class="cell-disabled"></td>
-              <td class="center">-</td>
-              <td class="center"><span class="status">Em curso</span></td>
-              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
-              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
-              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
+              <td colspan="9" class="center">
+                Nenhuma nota cadastrada.
+              </td>
             </tr>
-
-            <tr>
-              <td><strong>AAA0000</strong></td>
-              <td>NOME DA DISCIPLINA</td>
-              <td class="center">00A</td>
-              <td class="center emph">-</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="center"><span class="status">Em curso</span></td>
-              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
-              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
-              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
-            </tr>
-
-            <tr>
-              <td><strong>AAA0000</strong></td>
-              <td>NOME DA DISCIPLINA</td>
-              <td class="center">00A</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="cell-disabled"></td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="center"><span class="status">Em curso</span></td>
-              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
-              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
-              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
-            </tr>
-
-            <tr>
-              <td><strong>AAA0000</strong></td>
-              <td>NOME DA DISCIPLINA</td>
-              <td class="center">00A</td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="cell-disabled"></td>
-              <td class="center">-</td>
-              <td class="center">-</td>
-              <td class="center"><span class="status">Em curso</span></td>
-              <td class="center"><a class="action-link" title="Ver critério">0</a></td>
-              <td class="center"><button class="icon-btn" title="Ver Programa da Disciplina">📄</button></td>
-              <td class="center"><button class="icon-btn" title="Ver Frequência e Aulas">📊</button></td>
-            </tr>
+            {% endfor %}
           </tbody>
+
         </table>
       </div>
     </div>
 
     <div class="disclaimer">
-      <p class="alert">
-        Obs.: O número de graus parciais depende do critério de avaliação adotado por cada disciplina. Verifique o critério de avaliação clicando no respetivo código na penúltima coluna da tabela.
-      </p>
       <p>
-        Todos e quaisquer dados obtidos através deste sistema de consulta têm finalidade mera e exclusivamente informativa e não podem ser usados como documentos oficiais para qualquer fim de direito. Todo e qualquer documento de carácter oficial e comprovativo deverá ser necessariamente obtido junto da Coordenação Central de Admissão e Registro (CCAR) da PUC-Rio, conforme as normas estatutárias e regimentais em vigor.
+        <strong>Aviso:</strong>
+        Os dados exibidos são informativos e não substituem
+        as notas ou documentos oficiais da PUC-Rio.
+        A média deve ser informada pelo aluno, conforme
+        o critério de avaliação da disciplina.
       </p>
     </div>
 
