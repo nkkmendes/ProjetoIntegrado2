@@ -1,6 +1,14 @@
 
 from django import forms
-from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
+
+from .models import (
+    PlanejamentoSalvo,
+    SimulacaoSalva,
+    NivelamentoSalvo,
+    CreditosAluno,
+    GrauAluno
+)
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
