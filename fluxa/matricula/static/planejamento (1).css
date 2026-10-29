@@ -21,10 +21,27 @@ aside > strong {
     font-size: 30px;
     letter-spacing: 3px;
 }
+nav {
+    margin-top: 30px;
+}
 nav a {
     display: block;
-    margin-top: 15px;
+    padding: 13px 12px;
+    margin-bottom: 8px;
+    border-radius: 5px;
     color: white;
+    text-decoration: none;
+}
+nav a:hover {
+    background: #0F2C4C;
+}
+nav a[aria-current="page"] {
+    background: #F0F4FA;
+    color: #0F2C4C;
+    font-weight: bold;
+}
+main a {
+    color: #1D4E78;
 }
 main {
     flex: 1;
@@ -68,6 +85,14 @@ label {
 }
 input {
     accent-color: #1D4E78;
+}
+input[type="text"], input[type="number"] {
+    padding: 11px;
+    border: 1px solid #475569;
+    border-radius: 5px;
+    color: #475569;
+    font-family: inherit;
+    font-size: 14px;
 }
 @media (max-width: 750px) {
     body {

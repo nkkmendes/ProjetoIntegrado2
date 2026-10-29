@@ -73,7 +73,7 @@ main {
 
 h1 {
   margin: 0 0 10px;
-  font-size: 30px;
+  font-size: 28px;
 }
 
 .descricao {
@@ -108,8 +108,30 @@ th:last-child, td:last-child {
   text-align: center;
 }
 
+input, select, textarea {
+  padding: 11px;
+  border: 1px solid #475569;
+  border-radius: 5px;
+  background: white;
+  color: #475569;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+button {
+  padding: 11px 16px;
+  border: 1px solid #1D4E78;
+  border-radius: 5px;
+  background: #1D4E78;
+  color: white;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 @media (max-width: 750px) {
   body { flex-direction: column; }
   .menu { width: 100%; }
   main { padding: 22px 16px; }
+  h1 { font-size: 24px; }
 }

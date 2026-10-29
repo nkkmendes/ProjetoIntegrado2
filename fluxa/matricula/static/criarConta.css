@@ -12,7 +12,7 @@ body {
     align-items: center;
     font-family: 'Courier New', Courier, monospace;
     font-optical-sizing: auto;
-    font-weight: 100;
+    font-weight: 300;
     font-style: normal;
     font-variation-settings:
         "wdth" 100;
@@ -68,6 +68,7 @@ input {
     padding: 15px;
     width: 310px;
     border: 1px solid #475569;
+    font-family: inherit;
     font-weight: 300;
     font-size: 13px;
     color: #475569;
@@ -83,6 +84,7 @@ button {
     background-color: #1D4E78;
     color: #0F2C4C;
     border: 1px solid #1D4E78;
+    font-family: inherit;
     font-weight: bold;
     cursor: pointer;
     color: #FFFFFF;
@@ -104,4 +106,19 @@ button {
 .link-extra {
     margin: 15px 0 0 5px;
     font-size: 14px;
+}
+
+@media (max-width: 750px) {
+    body > div {
+        width: auto;
+        max-width: 350px;
+        height: auto;
+        margin: 16px;
+        padding: 25px;
+    }
+
+    input, button {
+        box-sizing: border-box;
+        width: calc(100% - 5px);
+    }
 }

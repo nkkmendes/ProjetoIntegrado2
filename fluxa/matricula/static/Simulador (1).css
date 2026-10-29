@@ -48,7 +48,7 @@ nav {
 
 nav a {
     display: block;
-    padding: 15px 12px;
+    padding: 13px 12px;
     margin-bottom: 10px;
     border-radius: 5px;
     color: white;
@@ -79,7 +79,7 @@ main {
 }
 
 h1 {
-    font-size: 30px;
+    font-size: 28px;
     margin: 0 0 12px;
 }
 
@@ -131,7 +131,7 @@ label {
     margin-bottom: 7px;
 }
 
-input, select {
+input, select, textarea {
     padding: 11px;
     border: 1px solid #475569;
     border-radius: 5px;
@@ -201,7 +201,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 }
 
 .verde {
-    color: #27834a;
+    color: #166534;
 }
 
 /* Tabela de horários */
@@ -299,6 +299,6 @@ tbody th {
     }
 
     h1 {
-        font-size: 26px;
+        font-size: 24px;
     }
 }
