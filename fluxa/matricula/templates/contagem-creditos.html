@@ -1,189 +1,238 @@
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contagem de Créditos</title>
-  <link rel="stylesheet" href="../static/styles.css">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .campo-form {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      background: white;
+      font-family: inherit;
+    }
+
+    .btn.salvar {
+      background: #1D4E78;
+      color: white;
+    }
+
+    .erro {
+      color: #b91c1c;
+      font-size: 12px;
+    }
+
+    .status-ok {
+      color: #166534;
+      font-weight: bold;
+    }
+
+    .status-pendente {
+      color: #475569;
+    }
+
+    @media (max-width: 750px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="page-container">
-    <!-- Cabeçalho da Página -->
+
     <div class="page-header">
       <div>
         <h1 class="page-title">Contagem de Créditos</h1>
-        <p class="page-sub">Acompanhe o progresso de créditos obrigatórios, eletivos e optativos no seu currículo.</p>
+        <p class="page-sub">
+          Acompanhe os créditos das disciplinas cadastradas.
+        </p>
       </div>
+
       <div class="page-actions">
-        <button class="btn ghost" onclick="window.print()">Imprimir</button>
-        <a href="inicio_html.html"><button class="btn ghost">Voltar ao início</button></a>
+        <button class="btn ghost" onclick="window.print()">
+          Imprimir
+        </button>
+
+        <a class="btn ghost" href="{% url 'telaInicio' %}">
+          Voltar ao início
+        </a>
       </div>
     </div>
 
-    <!-- Informações Gerais do Aluno -->
+    <!-- Formulário de créditos -->
+    <div class="card mb-24">
+
+      <h2>Registrar Disciplina</h2>
+
+      <p class="page-sub">
+        Selecione uma disciplina e informe se já foi concluída.
+      </p>
+
+      <form method="POST" action="{% url 'creditos' %}">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-grid">
+
+          <div class="form-field">
+            {{ form.disciplina.label_tag }}
+            {{ form.disciplina }}
+
+            <div class="erro">
+              {{ form.disciplina.errors }}
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Conclusão</label>
+
+            <label>
+              {{ form.concluida }}
+              Disciplina concluída
+            </label>
+
+            <div class="erro">
+              {{ form.concluida.errors }}
+            </div>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn salvar">
+          Salvar Disciplina
+        </button>
+      </form>
+    </div>
+
+    <!-- Totais -->
+    <div class="grid2 mb-24">
+
+      <div class="card highlight">
+        <div class="stat-label">
+          Créditos Cadastrados no Catálogo
+        </div>
+
+        <div class="stat-value">
+          {{ total_curriculo }} cr.
+        </div>
+      </div>
+
+      <div class="card highlight">
+        <div class="stat-label">
+          Total Cumprido
+        </div>
+
+        <div class="stat-value ok">
+          {{ total_cumprido }} cr.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Créditos pendentes -->
+    <div class="card mb-24">
+      <div class="stat-label">
+        Créditos Ainda Não Concluídos do Catálogo
+      </div>
+
+      <div class="stat-value">
+        {{ total_pendente }} cr.
+      </div>
+    </div>
+
+    <!-- Tabela de disciplinas -->
     <div class="card flush mb-24">
-      <table class="list">
-        <thead>
-          <tr>
-            <th>Centro</th>
-            <th>Curso</th>
-            <th>Habilitação</th>
-            <th>Ênfase</th>
-            <th>Currículo</th>
-            <th class="center">CR Acumulado</th>
-            <th class="center">CR Período</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>AAA</strong></td>
-            <td>AAA</td>
-            <td>AAA</td>
-            <td>AAA</td>
-            <td>0/0</td>
-            <td class="center"><span class="pill">0</span></td>
-            <td class="center"><span class="pill">0</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <!-- Layout em 2 Colunas -->
-    <div class="grid2">
-
-      <!-- Coluna Esquerda: Obrigatórias e Extensão -->
-      <div>
-        <div class="card flush mb-24">
-          <div class="card-header">Obrigatórias</div>
-          <table class="list">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th class="center">Cumpridos</th>
-                <th class="center">A cumprir</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Básicas</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Religiosas</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Pedagógicas</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Do curso</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Da habilitação</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Da ênfase</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>De formação geral</td><td class="center">0</td><td class="center">0</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="grid2 mb-24">
-          <div class="card flush">
-            <div class="card-header sm">Atividades Complementares</div>
-            <table class="list">
-              <thead>
-                <tr><th class="center">Cumpridas</th><th class="center">A cumprir</th></tr>
-              </thead>
-              <tbody>
-                <tr><td class="center">0</td><td class="center">0</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card flush">
-            <div class="card-header sm">Horas de Extensão</div>
-            <table class="list">
-              <thead>
-                <tr><th class="center">Cumpridas</th><th class="center">A cumprir</th></tr>
-              </thead>
-              <tbody>
-                <tr><td class="center">0</td><td class="center">0</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card highlight mb-24">
-          <div class="totals">
-            <div>
-              <div class="stat-label">Total do Currículo</div>
-              <div class="stat-value">0 cr.</div>
-            </div>
-            <div class="end">
-              <div class="stat-label">Total Cumprido</div>
-              <div class="stat-value ok">0 cr.</div>
-            </div>
-          </div>
-        </div>
+      <div class="card-header">
+        Disciplinas Registradas
       </div>
 
-      <!-- Coluna Direita: Eletivas, Optativas e Duração -->
-      <div>
-        <div class="card flush mb-24">
-          <div class="card-header">Eletivas</div>
-          <table class="list">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th class="center">Cumpridos</th>
-                <th class="center">A cumprir</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Do departamento</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Fora do departamento</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Livres</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>De orientação</td><td class="center">0</td><td class="center">0</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="table-responsive">
+        <table class="list">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Disciplina</th>
+              <th class="center">Créditos</th>
+              <th class="center">Situação</th>
+            </tr>
+          </thead>
 
-        <div class="card flush mb-24">
-          <div class="card-header">Optativas</div>
-          <table class="list">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th class="center">Cumpridos</th>
-                <th class="center">A cumprir</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Básicas</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Religiosas</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Do curso</td><td class="center">0</td><td class="center">0</td></tr>
-              <tr><td>Da habilitação</td><td class="center">0</td><td class="center">0</td></tr>
-            </tbody>
-          </table>
-        </div>
+          <tbody>
+            {% for registro in registros %}
+            <tr>
+              <td>
+                <strong>
+                  {{ registro.disciplina.codigo }}
+                </strong>
+              </td>
 
-        <div class="card flush mb-24">
-          <div class="card-header">Duração do Curso</div>
-          <table class="list">
-            <thead>
-              <tr>
-                <th class="center">Máx. Períodos</th>
-                <th class="center">Utilizados</th>
-                <th class="center">Restantes</th>
-                <th class="center">Horas Cumpridas</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="center">0</td>
-                <td class="center">0</td>
-                <td class="center">0</td>
-                <td class="center">0</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              <td>
+                {{ registro.disciplina.nome }}
+              </td>
+
+              <td class="center">
+                {{ registro.disciplina.creditos }}
+              </td>
+
+              <td class="center">
+                {% if registro.concluida %}
+                  <span class="status-ok">
+                    Concluída
+                  </span>
+                {% else %}
+                  <span class="status-pendente">
+                    Pendente
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+              <td colspan="4" class="center">
+                Nenhuma disciplina registrada.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
       </div>
-
     </div>
 
-    <!-- Nota Informativa -->
     <div class="disclaimer mt-16">
-      <p><strong>Aviso:</strong> Todos os dados exibidos têm caráter estritamente informativo e não substituem os documentos oficiais emitidos pela Coordenação Central de Admissão e Registro (CCAR) da PUC-Rio.</p>
+      <p>
+        <strong>Aviso:</strong>
+        Os valores são calculados com base nas disciplinas
+        cadastradas no sistema e nas marcações do aluno.
+        Não substituem o histórico oficial da PUC-Rio.
+      </p>
     </div>
+
   </div>
 </body>
 </html>
