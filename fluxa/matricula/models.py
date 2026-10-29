@@ -1,5 +1,9 @@
 from django.db import models
 
+
+from django.conf import settings
+
+
 class PlanejamentoSalvo(models.Model):
     nome = models.CharField(max_length=100)
     periodo = models.IntegerField()
