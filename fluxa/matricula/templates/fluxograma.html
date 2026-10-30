@@ -5,9 +5,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fluxograma de Engenharia de Computação</title>
-  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=2">
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=3">
 </head>
 <body>
+<div class="layout-fluxa">
+  <aside class="menu-fluxa">
+    <div class="marca-fluxa">FLUXA</div>
+    <h2>Meu planejamento</h2>
+    <p>PUC-Rio · Engenharia de Computação</p>
+    <nav aria-label="Navegação principal">
+      <a href="{% url 'telaInicio' %}">Início</a>
+      <a href="{% url 'planejamento' %}">Planejamento</a>
+      <a href="{% url 'simulacao' %}">Simulador de matrícula</a>
+      <a href="{% url 'fluxograma' %}" class="ativo" aria-current="page">Fluxograma</a>
+      <a href="{% url 'notas_periodo' %}">Consulta de Graus</a>
+      <a href="{% url 'creditos' %}">Contagem de Créditos</a>
+      <a href="{% url 'nivelamento' %}">Nivelamento</a>
+    </nav>
+    <p class="rodape-fluxa">FLUXA<br>Organize seu próximo semestre.</p>
+  </aside>
 <main>
   <h1>Fluxograma de matérias</h1>
   <p>Engenharia de Computação — PUC-Rio</p>
@@ -74,5 +90,6 @@
     <p>As marcações não são salvas ao sair.</p>
   </form>
 </main>
+</div>
 </body>
 </html>
