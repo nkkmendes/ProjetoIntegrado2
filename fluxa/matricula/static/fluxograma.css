@@ -221,3 +221,19 @@ footer { color: #475569; }
 .ponto-status.disponivel { background: #79a93c; }
 .ponto-status.bloqueada { background: #cbd5e1; }
 .ponto-status.concluida-status { background: #0f2c4c; }
+
+/* Escolha de curso acima do fluxograma */
+form.selecionar-curso {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: 14px 18px; margin: 18px 0;
+  border: 1px solid #cbd5e1; border-radius: 10px; background: white;
+}
+.selecionar-curso select {
+  min-width: 220px; padding: 10px; font: inherit;
+  color: #0f2c4c; border: 1px solid #94a3b8; border-radius: 5px;
+}
+.selecionar-curso button { padding: 10px 18px; }
+.aviso-grade {
+  border-left: 4px solid #c48230; padding: 12px 16px;
+  background: #fff7e7; color: #6a4615;
+}

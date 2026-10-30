@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fluxograma de Engenharia de Computação</title>
-  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=4">
+  <title>Fluxograma — {{ nome_curso }}</title>
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=5">
 </head>
 <body>
 <div class="layout-fluxa">
   <aside class="menu-fluxa">
     <div class="marca-fluxa">FLUXA</div>
     <h2>Meu planejamento</h2>
-    <p>PUC-Rio · Engenharia de Computação</p>
+    <p>PUC-Rio · {{ nome_curso }}</p>
     <nav aria-label="Navegação principal">
       <a href="{% url 'telaInicio' %}">Início</a>
       <a href="{% url 'planejamento' %}">Planejamento</a>
@@ -26,8 +26,19 @@
   </aside>
 <main>
   <h1>Fluxograma de matérias</h1>
-  <p>Engenharia de Computação — PUC-Rio</p>
+  <p>{{ nome_curso }} — PUC-Rio</p>
+  <form class="selecionar-curso" method="get" action="{% url 'fluxograma' %}">
+    <label for="curso-fluxograma"><strong>Escolha seu curso:</strong></label>
+    <select name="curso" id="curso-fluxograma">
+      <option value="computacao" {% if curso == 'computacao' %}selected{% endif %}>Engenharia de Computação</option>
+      <option value="producao" {% if curso == 'producao' %}selected{% endif %}>Engenharia de Produção</option>
+    </select>
+    <button type="submit">Ver fluxograma</button>
+  </form>
   <p>Passe o mouse para ver as relações entre matérias. Clique para abrir os detalhes.</p>
+  {% if curso == 'producao' and not disciplinas %}
+  <p class="aviso-grade">A grade de Engenharia de Produção ainda não foi importada. Para não mostrar requisitos incorretos, é necessário usar a matriz oficial da PUC-Rio.</p>
+  {% endif %}
   <form>
     <fieldset><legend>Tamanho dos cartões</legend>
       <label><input type="radio" name="zoom" id="zoom75"> 75%</label>

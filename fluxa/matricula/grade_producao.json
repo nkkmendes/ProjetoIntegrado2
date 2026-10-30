@@ -1,0 +1,522 @@
+[
+  {
+    "periodo": 1,
+    "codigo": "EMP1310",
+    "nome": "Comunicação e Trabalho em Equipe",
+    "creditos": 2,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Desenvolvimento pessoal e corporativo",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 1,
+    "codigo": "ENG4010",
+    "nome": "Projeto Integrado - Sustentabilidade",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Prática inicial em sustentabilidade (60h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 1,
+    "codigo": "ENG4025",
+    "nome": "Ciências Ambientais",
+    "creditos": 2,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Fundamentos ecológicos para engenharia",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 1,
+    "codigo": "CTC4001",
+    "nome": "Instrumentação e Medição",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Laboratório e fundamentos de medidas",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 1,
+    "codigo": "CTC4002",
+    "nome": "Modelagem e Programação",
+    "creditos": 6,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Introdução à lógica e programação computacional",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 1,
+    "codigo": "CTC4003",
+    "nome": "Desenho Técnico e Geometria Analítica",
+    "creditos": 2,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Visão espacial e representação gráfica",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 1,
+    "codigo": "CRE1200",
+    "nome": "O Humano e o Fenômeno Religioso",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Formação humanística (40h Extensão)",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 2,
+    "codigo": "EMP1320",
+    "nome": "Criação de Oportunidade",
+    "creditos": 2,
+    "pre": "EMP1310",
+    "co": "Nenhum",
+    "foco": "Empreendedorismo inicial",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 2,
+    "codigo": "ENG4020",
+    "nome": "Projeto Integrado - Materiais",
+    "creditos": 2,
+    "pre": "ENG4010",
+    "co": "Nenhum",
+    "foco": "Aplicação prática de propriedades dos materiais",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 2,
+    "codigo": "ENG4015",
+    "nome": "Introdução à Especificação e Seleção de Materiais",
+    "creditos": 2,
+    "pre": "CTC4001",
+    "co": "Nenhum",
+    "foco": "Estudo de ligas, polímeros e metais",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 2,
+    "codigo": "FIS4001",
+    "nome": "Física I",
+    "creditos": 5,
+    "pre": "Nenhum",
+    "co": "MAT4161",
+    "foco": "Mecânica clássica, cinemática e dinâmica",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 2,
+    "codigo": "MAT4161",
+    "nome": "Cálculo de Uma Variável",
+    "creditos": 6,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Limites, derivadas e integrais",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 2,
+    "codigo": "INF0307",
+    "nome": "Optativas de Programação",
+    "creditos": 4,
+    "pre": "CTC4002",
+    "co": "Nenhum",
+    "foco": "Aprofundamento computacional",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 2,
+    "codigo": "ENG4021",
+    "nome": "Projeto Integrado - Software",
+    "creditos": 2,
+    "pre": "CTC4002",
+    "co": "Nenhum",
+    "foco": "Desenvolvimento de software aplicado (15h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 3,
+    "codigo": "EMP1330",
+    "nome": "Mentalidade Empreendedora",
+    "creditos": 2,
+    "pre": "EMP1320",
+    "co": "Nenhum",
+    "foco": "Gestão de negócios e inovação",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 3,
+    "codigo": "ENG4030",
+    "nome": "Projeto Integrado - Empreendedorismo",
+    "creditos": 3,
+    "pre": "ENG4020",
+    "co": "Nenhum",
+    "foco": "Concepção de projetos de base tecnológica",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 3,
+    "codigo": "ENG0561",
+    "nome": "Optativas de Administração e Economia para Engenheiros",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Introdução à administração industrial",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 3,
+    "codigo": "FIS4002",
+    "nome": "Física II",
+    "creditos": 5,
+    "pre": "FIS4001, MAT4161",
+    "co": "Nenhum",
+    "foco": "Termodinâmica e ondas",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 3,
+    "codigo": "MAT4162",
+    "nome": "Cálculo a Várias Variáveis I",
+    "creditos": 4,
+    "pre": "MAT4161",
+    "co": "Nenhum",
+    "foco": "Funções de várias variáveis, otimização",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 3,
+    "codigo": "MAT4200",
+    "nome": "Álgebra Linear I",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Matrizes, espaços vetoriais e transformações",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 3,
+    "codigo": "CRE0712",
+    "nome": "Optativas de Cristianismo",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Formação humanística (40h Extensão)",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 4,
+    "codigo": "ENG4501",
+    "nome": "Probabilidade e Estatística Computacional",
+    "creditos": 4,
+    "pre": "MAT4162",
+    "co": "Nenhum",
+    "foco": "Estatística descritiva, inferência e probabilidade",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 4,
+    "codigo": "ENG4040",
+    "nome": "Projeto Integrado - Ciência de Dados",
+    "creditos": 3,
+    "pre": "CTC4002, MAT4200",
+    "co": "Nenhum",
+    "foco": "Análise de dados aplicada (45h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 4,
+    "codigo": "ENG0562",
+    "nome": "Optativas de Introdução à Ciência de Dados",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "ENG4501",
+    "foco": "Manipulação e visualização de dados industriais",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 4,
+    "codigo": "MAT4164",
+    "nome": "Equações Diferenciais e de Diferenças e Matemática Discreta",
+    "creditos": 6,
+    "pre": "MAT4162, MAT4200",
+    "co": "Nenhum",
+    "foco": "Métodos analíticos para modelagem dinâmica",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 4,
+    "codigo": "ENG0563",
+    "nome": "Optativas de Modelagem dos Fenômenos",
+    "creditos": 4,
+    "pre": "FIS4001, MAT4162",
+    "co": "Nenhum",
+    "foco": "Simulação de sistemas físicos e industriais",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 4,
+    "codigo": "ENG0564",
+    "nome": "Optativas de Pesquisa Operacional I",
+    "creditos": 4,
+    "pre": "MAT4200",
+    "co": "Nenhum",
+    "foco": "Programação Linear e Otimização Determinística",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG4504",
+    "nome": "Pesquisa Operacional II",
+    "creditos": 4,
+    "pre": "ENG0564",
+    "co": "Nenhum",
+    "foco": "Redes, filas, otimização não linear e inteira",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG4550",
+    "nome": "Projeto Integrado em Sistemas Produtivos",
+    "creditos": 2,
+    "pre": "ENG4040",
+    "co": "Nenhum",
+    "foco": "Projeto focado em manufatura e processos (15h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG0565",
+    "nome": "Optativas de Planejamento e Controle da Produção",
+    "creditos": 4,
+    "pre": "ENG0564",
+    "co": "Nenhum",
+    "foco": "Gestão de estoques, MRP e programação da produção",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG0566",
+    "nome": "Optativas de Métodos Estatísticos",
+    "creditos": 4,
+    "pre": "ENG4501",
+    "co": "Nenhum",
+    "foco": "Controle estatístico de qualidade e DOE",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG4507",
+    "nome": "Contabilidade Gerencial",
+    "creditos": 3,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Custos, balanços e análise financeira básica",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG0567",
+    "nome": "Optativas de Ciências Humanas e Sociais",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Ergonomia e relações de trabalho",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG4011",
+    "nome": "Fenômenos de Transportes I",
+    "creditos": 2,
+    "pre": "FIS4001, MAT4162",
+    "co": "Nenhum",
+    "foco": "Mecânica dos fluidos aplicada",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 5,
+    "codigo": "ENG4007",
+    "nome": "Introdução à Mecânica dos Sólidos",
+    "creditos": 2,
+    "pre": "FIS4001, MAT4162",
+    "co": "Nenhum",
+    "foco": "Resistência dos materiais",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG0568",
+    "nome": "Optativas de Distribuição Física",
+    "creditos": 3,
+    "pre": "ENG4504",
+    "co": "Nenhum",
+    "foco": "Logística, transporte e localização de instalações",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG4560",
+    "nome": "Projeto Integrado em Distribuição Física",
+    "creditos": 2,
+    "pre": "ENG4550",
+    "co": "Nenhum",
+    "foco": "Projeto de redes logísticas (15h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG0569",
+    "nome": "Optativas de Heurísticas",
+    "creditos": 3,
+    "pre": "ENG4504",
+    "co": "Nenhum",
+    "foco": "Algoritmos de otimização combinatória",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG0570",
+    "nome": "Optativas de Simulação",
+    "creditos": 2,
+    "pre": "ENG4501, ENG4504",
+    "co": "Nenhum",
+    "foco": "Simulação de eventos discretos (Arena/Simul8)",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG0571",
+    "nome": "Optativas de Teoria Econômica",
+    "creditos": 6,
+    "pre": "ENG0561",
+    "co": "Nenhum",
+    "foco": "Microeconomia e Macroeconomia aplicadas",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 6,
+    "codigo": "ENG4018",
+    "nome": "Eletrotécnica",
+    "creditos": 3,
+    "pre": "FIS4002",
+    "co": "Nenhum",
+    "foco": "Circuitos elétricos e máquinas industriais",
+    "categoria": "Ciclo Básico"
+  },
+  {
+    "periodo": 6,
+    "codigo": "FIL0300",
+    "nome": "Optativas de Filosofia",
+    "creditos": 4,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Ética e epistemologia",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 6,
+    "codigo": "CRE1241",
+    "nome": "Ética Cristã",
+    "creditos": 2,
+    "pre": "CRE0712",
+    "co": "Nenhum",
+    "foco": "Formação ética (20h Extensão)",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG0572",
+    "nome": "Optativas de Análise de Decisão e Risco",
+    "creditos": 4,
+    "pre": "ENG4501",
+    "co": "Nenhum",
+    "foco": "Árvores de decisão e incerteza",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG4570",
+    "nome": "Projeto Integrado em Finanças e Análise de Risco",
+    "creditos": 2,
+    "pre": "ENG4560",
+    "co": "Nenhum",
+    "foco": "Projeto aplicado da ênfase financeira (15h Extensão)",
+    "categoria": "Projeto Integrado"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG0573",
+    "nome": "Optativas de Finanças e Análise de Investimentos",
+    "creditos": 4,
+    "pre": "ENG4507",
+    "co": "Nenhum",
+    "foco": "Engenharia econômica, VPL, TIR e valuation",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG4514",
+    "nome": "Sistemas de Informação Gerenciais",
+    "creditos": 3,
+    "pre": "CTC4002",
+    "co": "Nenhum",
+    "foco": "ERPs (SAP), arquitetura de dados corporativos",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG0574",
+    "nome": "Optativas de Estratégia da Produção",
+    "creditos": 2,
+    "pre": "ENG0565",
+    "co": "Nenhum",
+    "foco": "Posicionamento competitivo e manufatura enxuta (15h Extensão)",
+    "categoria": "Profissional"
+  },
+  {
+    "periodo": 7,
+    "codigo": "ENG0575",
+    "nome": "Optativas de Ênfase",
+    "creditos": 4,
+    "pre": "Variável",
+    "co": "Nenhum",
+    "foco": "Disciplinas específicas da trilha (SPR ou FAR)",
+    "categoria": "Ênfase"
+  },
+  {
+    "periodo": 7,
+    "codigo": "CRE1275",
+    "nome": "Ética Socioambiental e Direitos Humanos",
+    "creditos": 2,
+    "pre": "Nenhum",
+    "co": "Nenhum",
+    "foco": "Cidadania e sustentabilidade global (20h Extensão)",
+    "categoria": "Humanidades / CRE"
+  },
+  {
+    "periodo": 8,
+    "codigo": "ENG4140",
+    "nome": "Projeto de Graduação em Engenharia de Produção I",
+    "creditos": 2,
+    "pre": "Período Avançado",
+    "co": "Nenhum",
+    "foco": "Trabalho de Conclusão de Curso (TCC I)",
+    "categoria": "TCC / Estágio"
+  },
+  {
+    "periodo": 8,
+    "codigo": "ENG0581",
+    "nome": "Optativas da Ênfase / Estágio Supervisionado",
+    "creditos": 6,
+    "pre": "Conforme Regulamento",
+    "co": "Nenhum",
+    "foco": "Conclusão de créditos optativos, estágio e horas complementares",
+    "categoria": "Ênfase / Estágio"
+  }
+]

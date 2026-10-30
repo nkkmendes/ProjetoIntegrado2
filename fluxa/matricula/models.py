@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.conf import settings
 
@@ -46,29 +45,17 @@ class Disciplina(models.Model):
         return self.nome
 
     pre_requisitos = models.ManyToManyField(
-        'self',
-        blank=True,
-        symmetrical=False,
-        related_name='dependentes'
+        'self', blank=True, symmetrical=False, related_name='dependentes'
     )
 
     co_requisitos = models.ManyToManyField(
-        'self',
-        blank=True,
-        symmetrical=False,
-        related_name='associadas'
+        'self', blank=True, symmetrical=False, related_name='associadas'
     )
 
 
 class CreditosAluno(models.Model):
-    aluno = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
-    disciplina = models.ForeignKey(
-        Disciplina,
-        on_delete=models.CASCADE
-    )
+    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
     concluida = models.BooleanField(default=False)
 
     class Meta:
@@ -79,29 +66,33 @@ class CreditosAluno(models.Model):
 
 
 class GrauAluno(models.Model):
-    aluno = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
-    disciplina = models.ForeignKey(
-        Disciplina,
-        on_delete=models.CASCADE
-    )
+    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
     turma = models.CharField(max_length=10, default='-')
     periodo_letivo = models.CharField(max_length=10, default='2026.2')
-    g1 = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
-    )
-    g2 = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
-    )
-    g3 = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
-    )
-    media = models.DecimalField(
-        max_digits=4, decimal_places=2, null=True, blank=True
-    )
+    g1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    media = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     situacao = models.CharField(max_length=30, default='Em curso')
 
     def __str__(self):
         return self.disciplina.nome
+
+
+class DisciplinaProducao(models.Model):
+    """Grade independente da Computação, incluindo requisitos próprios."""
+    codigo = models.CharField(max_length=20, unique=True)
+    nome = models.CharField(max_length=200)
+    periodo = models.IntegerField(null=True, blank=True)
+    creditos = models.IntegerField()
+    creditos_minimos = models.IntegerField(default=0)
+    pre_requisitos = models.ManyToManyField(
+        'self', blank=True, symmetrical=False, related_name='dependentes'
+    )
+    co_requisitos = models.ManyToManyField(
+        'self', blank=True, symmetrical=False, related_name='associadas'
+    )
+
+    def __str__(self):
+        return self.nome
