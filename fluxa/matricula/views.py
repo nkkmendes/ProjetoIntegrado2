@@ -8,7 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
-from .models import CalendarioMatricula, Disciplina
+from .models import CalendarioMatricula, Disciplina, Curso, PerfilAluno
 from .forms import LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm
 
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
@@ -174,6 +174,10 @@ def erro_500(request):
 def perfil(request):
     form_nome = PerfilNomeForm(initial={'nome': request.user.get_full_name()})
     form_senha = TrocarSenhaForm(request.user)
+    perfil_aluno, _ = PerfilAluno.objects.get_or_create(
+        user=request.user,
+        defaults={'curso': Curso.objects.first()},
+    )
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
@@ -196,17 +200,43 @@ def perfil(request):
     return render(request, 'perfil.html', {
         'form_nome': form_nome,
         'form_senha': form_senha,
+        'perfil_aluno': perfil_aluno,
     })
+
+def ordenar_por_camada(disciplinas):
+    """Camada 0 = sem pré-requisito; senão 1 + a maior camada entre as matérias
+    exigidas. Organização provisória: nenhuma matéria tem período ideal."""
+    todas = list(disciplinas)
+    exigidas = {d.codigo: set() for d in todas}
+    for d in todas:
+        for grupo in d.grupos_pre_requisito.all():
+            for item in grupo.disciplinas.all():
+                exigidas[d.codigo].add(item.codigo)
+
+    camadas = {}
+
+    def camada_de(codigo, visitando=()):
+        if codigo in camadas:
+            return camadas[codigo]
+        if codigo in visitando or codigo not in exigidas:
+            return 0
+        pais = [camada_de(c, visitando + (codigo,)) for c in exigidas[codigo]]
+        camadas[codigo] = 1 + max(pais) if pais else 0
+        return camadas[codigo]
+
+    for d in todas:
+        d.camada = camada_de(d.codigo)
+
+    return sorted(todas, key=lambda d: (d.camada, d.codigo))
 
 @login_required
 def fluxograma(request):
-    disciplinas = Disciplina.objects.all().order_by(
-        F('periodo').asc(nulls_last=True),
-        'nome'
+    disciplinas = Disciplina.objects.prefetch_related(
+        'grupos_pre_requisito__disciplinas'
     )
 
     return render(request, 'fluxograma.html', {
-        'disciplinas': disciplinas
+        'disciplinas': ordenar_por_camada(disciplinas)
     })
 
 @login_required
@@ -221,26 +251,22 @@ def filtrar_disciplinas(request):
             Q(codigo__icontains=busca)
         )
 
-    disciplinas = disciplinas.order_by(
-        F('periodo').asc(nulls_last=True),
-        'nome'
-    )
+    disciplinas = disciplinas.prefetch_related('grupos_pre_requisito__disciplinas')
 
     return render(request, 'fluxograma.html', {
-        'disciplinas': disciplinas
+        'disciplinas': ordenar_por_camada(disciplinas)
     })
 
 @login_required
 def detalhes_disciplina(request, codigo):
     try:
-        disciplina = Disciplina.objects.get(codigo=codigo)
+        disciplina = Disciplina.objects.get(codigo__iexact=codigo)
     except Disciplina.DoesNotExist:
         return telaErro(request, 'Disciplina não encontrada', f'Não existe disciplina com o código {codigo}.', 404)
 
     dados = {
         'codigo': disciplina.codigo,
         'nome': disciplina.nome,
-        'periodo': disciplina.periodo,
         'creditos': disciplina.creditos,
         'pre_requisitos': [
             d.codigo for d in disciplina.pre_requisitos.all()

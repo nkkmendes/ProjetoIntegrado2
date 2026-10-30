@@ -51,7 +51,7 @@ form:where(:has(#feito-INF1037:checked)) .materia:where(#INF1010) summary { back
 form:where(:has(#feito-INF1037:checked)) .materia:where(#INF1018) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-FIS4001:checked)) .materia:where(#ENG4011) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-ENG0425:checked)) .materia:where(#ENG0434) summary { background: #dae7f5; color: #324d73; }
-form:where(:has(#feito-INF1010:checked)) .materia:where(#ENG0382) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF1010:checked)) .materia:where(#INF0382) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-ENG4033:checked):has(#feito-ENG4420:checked)) .materia:where(#ENG4051) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-ENG4420:checked)) .materia:where(#ENG4421) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-INF1009:checked)) .materia:where(#MAT1320) summary { background: #dae7f5; color: #324d73; }
@@ -67,8 +67,8 @@ form:where(:has(#feito-ENG4421:checked)) .materia:where(#ENG4405) summary { back
 form:where(:has(#feito-INF1010:checked):has(#feito-INF1631:checked)) .materia:where(#INF1721) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-ENG4448:checked):has(#feito-INF1018:checked)) .materia:where(#ENG4451) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-INF1316:checked)) .materia:where(#INF1643) summary { background: #dae7f5; color: #324d73; }
-form:where(:has(#feito-ENG0382:checked)) .materia:where(#INF1027) summary { background: #dae7f5; color: #324d73; }
-form:where(:has(#feito-ENG0382:checked)) .materia:where(#ENG0383) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF0382:checked)) .materia:where(#INF1027) summary { background: #dae7f5; color: #324d73; }
+form:where(:has(#feito-INF0382:checked)) .materia:where(#INF0383) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-CRE0712:checked)) .materia:where(#CRE1241) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-EMP1320:checked)) .materia:where(#EMP1330) summary { background: #dae7f5; color: #324d73; }
 form:where(:has(#feito-INF1636:checked)) .materia:where(#INF0312) summary { background: #dae7f5; color: #324d73; }
@@ -110,7 +110,7 @@ form:where(:has(#feito-ENG4134:checked)) .materia:where(#ENG4135) summary { back
 .grade:has(#INF1018:hover, #INF1018 > summary:focus-visible) .rel-INF1018 { background: #496b91; color: white; }
 .grade:has(#ENG4011:hover, #ENG4011 > summary:focus-visible) .rel-ENG4011 { background: #496b91; color: white; }
 .grade:has(#ENG0434:hover, #ENG0434 > summary:focus-visible) .rel-ENG0434 { background: #496b91; color: white; }
-.grade:has(#ENG0382:hover, #ENG0382 > summary:focus-visible) .rel-ENG0382 { background: #496b91; color: white; }
+.grade:has(#INF0382:hover, #INF0382 > summary:focus-visible) .rel-INF0382 { background: #496b91; color: white; }
 .grade:has(#ENG4051:hover, #ENG4051 > summary:focus-visible) .rel-ENG4051 { background: #496b91; color: white; }
 .grade:has(#ENG4421:hover, #ENG4421 > summary:focus-visible) .rel-ENG4421 { background: #496b91; color: white; }
 .grade:has(#MAT1320:hover, #MAT1320 > summary:focus-visible) .rel-MAT1320 { background: #496b91; color: white; }
@@ -127,7 +127,7 @@ form:where(:has(#feito-ENG4134:checked)) .materia:where(#ENG4135) summary { back
 .grade:has(#ENG4451:hover, #ENG4451 > summary:focus-visible) .rel-ENG4451 { background: #496b91; color: white; }
 .grade:has(#INF1643:hover, #INF1643 > summary:focus-visible) .rel-INF1643 { background: #496b91; color: white; }
 .grade:has(#INF1027:hover, #INF1027 > summary:focus-visible) .rel-INF1027 { background: #496b91; color: white; }
-.grade:has(#ENG0383:hover, #ENG0383 > summary:focus-visible) .rel-ENG0383 { background: #496b91; color: white; }
+.grade:has(#INF0383:hover, #INF0383 > summary:focus-visible) .rel-INF0383 { background: #496b91; color: white; }
 .grade:has(#CRE1241:hover, #CRE1241 > summary:focus-visible) .rel-CRE1241 { background: #496b91; color: white; }
 .grade:has(#ENG4030:hover, #ENG4030 > summary:focus-visible) .rel-ENG4030 { background: #496b91; color: white; }
 .grade:has(#EMP1330:hover, #EMP1330 > summary:focus-visible) .rel-EMP1330 { background: #496b91; color: white; }

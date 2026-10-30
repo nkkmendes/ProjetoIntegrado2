@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
+from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo, Curso, PerfilAluno
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib.auth.models import User
@@ -66,13 +66,15 @@ class CadastroForm(forms.Form):
 
     def save(self):
         primeiro_nome, _, sobrenome = self.cleaned_data['nome'].strip().partition(' ')
-        return User.objects.create_user(
+        usuario = User.objects.create_user(
             username=self.cleaned_data['email'],
             email=self.cleaned_data['email'],
             password=self.cleaned_data['senha'],
             first_name=primeiro_nome,
             last_name=sobrenome,
         )
+        PerfilAluno.objects.create(user=usuario, curso=Curso.objects.first())
+        return usuario
 
 class RecuperarSenhaForm(PasswordResetForm):
     email = forms.EmailField(
