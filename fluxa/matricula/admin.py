@@ -117,7 +117,7 @@ class TurmaGradeAdmin(admin.ModelAdmin):
     list_display = ("grade", "turma")
     autocomplete_fields = ("grade", "turma")
 
-from django.contrib import admin
+
 
 from .models import (
     CalendarioMatricula,
