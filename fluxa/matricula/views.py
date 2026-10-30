@@ -1,24 +1,37 @@
+
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from django.views.decorators.http import require_POST
-from .models import CalendarioMatricula, Disciplina
-from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
-
-from .forms import CreditosAlunoForm, GrauAlunoForm
-
-from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
-from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
-
-from .models import CreditosAluno, GrauAluno
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.views.decorators.http import require_POST
+from django.db.models import Sum, F, Q
 
-from django.db.models import F, Q
+from .models import (
+    CalendarioMatricula,
+    Disciplina,
+    PlanejamentoSalvo,
+    SimulacaoSalva,
+    NivelamentoSalvo,
+    CreditosAluno,
+    GrauAluno
+)
+
+from .forms import (
+    LoginForm,
+    CadastroForm,
+    RecuperarSenhaForm,
+    PlanejamentoForm,
+    SimulacaoForm,
+    NivelamentoForm,
+    CreditosAlunoForm,
+    GrauAlunoForm
+)
+
 
 def inicio(request):
     return render(request, 'index.html')
+
 
 def telaInicio(request):
     calendario = CalendarioMatricula.objects.first()
@@ -27,12 +40,14 @@ def telaInicio(request):
         'calendario': calendario
     })
 
+
 def login(request):
     if request.user.is_authenticated:
         return redirect('telaInicio')
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
+
         if form.is_valid():
             auth_login(request, form.usuario)
             return redirect('telaInicio')
@@ -41,9 +56,11 @@ def login(request):
 
     return render(request, 'login.html', {'form': form})
 
+
 def criarConta(request):
     if request.method == 'POST':
         form = CadastroForm(request.POST)
+
         if form.is_valid():
             usuario = form.save()
             auth_login(request, usuario)
@@ -53,20 +70,30 @@ def criarConta(request):
 
     return render(request, 'criarConta.html', {'form': form})
 
+
 def recuperar_senha(request):
     if request.method == 'POST':
         form = RecuperarSenhaForm(request.POST)
+
         if form.is_valid():
-            form.save(request=request, use_https=request.is_secure())
+            form.save(
+                request=request,
+                use_https=request.is_secure()
+            )
+
             messages.success(
                 request,
                 'Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha.'
             )
+
             return redirect('login')
     else:
         form = RecuperarSenhaForm()
 
-    return render(request, 'recuperar_senha.html', {'form': form})
+    return render(request, 'recuperar_senha.html', {
+        'form': form
+    })
+
 
 @require_POST
 def logout_view(request):
@@ -74,21 +101,30 @@ def logout_view(request):
     return redirect('login')
 
 
+@login_required(login_url='login')
 def planejamento(request):
-    form = PlanejamentoForm(request.POST or None)
+    form = PlanejamentoForm()
 
     if request.method == 'POST':
         dados = request.POST.copy()
+
         dados['disciplinas'] = ', '.join(
             request.POST.getlist('disciplina')
         )
+
         form = PlanejamentoForm(dados)
 
         if form.is_valid():
-            form.save()
+            planejamento_salvo = form.save(commit=False)
+
+            planejamento_salvo.usuario = request.user
+            planejamento_salvo.save()
+
             return redirect('planejamento')
 
-    registros = PlanejamentoSalvo.objects.order_by('-id')
+    registros = PlanejamentoSalvo.objects.filter(
+        usuario=request.user
+    ).order_by('-id')
 
     return render(request, 'planejamento (1).html', {
         'form': form,
@@ -127,8 +163,6 @@ def nivelamento(request):
 
 
 @login_required(login_url='login')
-
-
 def contagem_creditos(request):
     form = CreditosAlunoForm(request.POST or None)
 
@@ -175,7 +209,6 @@ def contagem_creditos(request):
 
 
 @login_required(login_url='login')
-
 def notas_periodo(request):
     form = GrauAlunoForm(request.POST or None)
 
@@ -208,20 +241,39 @@ def notas_periodo(request):
     })
 
 
-def telaErro(request, titulo='Algo deu errado', mensagem='Não foi possível carregar esta página.', status=200):
+def telaErro(
+    request,
+    titulo='Algo deu errado',
+    mensagem='Não foi possível carregar esta página.',
+    status=200
+):
     return render(request, 'erro.html', {
         'titulo': titulo,
         'mensagem': mensagem
     }, status=status)
 
+
 def erro_404(request, exception):
-    return telaErro(request, 'Página não encontrada', 'O endereço acessado não existe.', 404)
+    return telaErro(
+        request,
+        'Página não encontrada',
+        'O endereço acessado não existe.',
+        404
+    )
+
 
 def erro_500(request):
-    return telaErro(request, 'Algo deu errado', 'Ocorreu um erro no servidor. Tente novamente em alguns instantes.', 500)
+    return telaErro(
+        request,
+        'Algo deu errado',
+        'Ocorreu um erro no servidor. Tente novamente em alguns instantes.',
+        500
+    )
+
 
 def perfil(request):
     return render(request, 'perfil.html')
+
 
 def fluxograma(request):
     disciplinas = Disciplina.objects.all().order_by(
@@ -232,6 +284,7 @@ def fluxograma(request):
     return render(request, 'fluxograma.html', {
         'disciplinas': disciplinas
     })
+
 
 def filtrar_disciplinas(request):
     busca = request.GET.get('q', '').strip()
@@ -253,11 +306,18 @@ def filtrar_disciplinas(request):
         'disciplinas': disciplinas
     })
 
+
 def detalhes_disciplina(request, codigo):
     try:
         disciplina = Disciplina.objects.get(codigo=codigo)
+
     except Disciplina.DoesNotExist:
-        return telaErro(request, 'Disciplina não encontrada', f'Não existe disciplina com o código {codigo}.', 404)
+        return telaErro(
+            request,
+            'Disciplina não encontrada',
+            f'Não existe disciplina com o código {codigo}.',
+            404
+        )
 
     dados = {
         'codigo': disciplina.codigo,
