@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fluxograma de Engenharia de Computação</title>
-  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=4">
 </head>
 <body>
 <div class="layout-fluxa">
@@ -36,7 +36,8 @@
       <button type="reset">Limpar marcações e tamanho</button>
     </fieldset>
     <div class="quadro" tabindex="0" role="region" aria-label="Disciplinas por período, com rolagem">
-      <div class="grade">
+      <div class="grade" id="grade-fluxograma">
+        <svg class="conexoes-fluxa" id="conexoes-fluxa" aria-hidden="true"></svg>
         {% regroup disciplinas by periodo as grupos %}
         {% for grupo in grupos %}
         <section class="periodo">
@@ -47,7 +48,7 @@
           {% endif %}
 
           {% for disciplina in grupo.list %}
-          <details class="materia{% if not disciplina.pre_requisitos.all %} livre{% endif %}" id="{{ disciplina.codigo }}">
+          <details class="materia{% if not disciplina.pre_requisitos.all %} livre{% endif %}" id="{{ disciplina.codigo }}" data-codigo="{{ disciplina.codigo }}" data-pre="{% for item in disciplina.pre_requisitos.all %}{{ item.codigo }}{% if not forloop.last %},{% endif %}{% endfor %}" data-co="{% for item in disciplina.co_requisitos.all %}{{ item.codigo }}{% if not forloop.last %},{% endif %}{% endfor %}">
             <summary class="rel-{{ disciplina.codigo }}{% for item in disciplina.pre_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.co_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.dependentes.all %} rel-{{ item.codigo }}{% endfor %}">
               <strong>{{ disciplina.codigo }}</strong> — {{ disciplina.nome }}
             </summary>
@@ -87,9 +88,19 @@
         {% endfor %}
       </div>
     </div>
+    <div class="legenda-conexoes" aria-label="Legenda das conexões">
+      <span><i class="amostra-linha"></i> Linha contínua = Pré-requisito</span>
+      <span><i class="amostra-linha tracejada"></i> Linha tracejada = Co-requisito</span>
+    </div>
+    <div class="legenda-estados" aria-label="Legenda das disciplinas">
+      <span><i class="ponto-status disponivel"></i> Disponível</span>
+      <span><i class="ponto-status bloqueada"></i> Bloqueada</span>
+      <span><i class="ponto-status concluida-status"></i> Concluída</span>
+    </div>
     <p>As marcações não são salvas ao sair.</p>
   </form>
 </main>
 </div>
+  <script src="{% static 'fluxograma.js' %}?v=1" defer></script>
 </body>
 </html>
