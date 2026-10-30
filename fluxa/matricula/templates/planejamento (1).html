@@ -8,25 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FLUXA - Planejamento</title>
     <link rel="stylesheet" href="{% static 'planejamento (1).css' %}">
+    <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
 
 <body>
 
-    <aside>
-        <strong>FLUXA</strong>
-        <h2>Meu planejamento</h2>
-        <p>PUC-Rio · Engenharia de Computação</p>
-
-        <nav>
-            <a href="{% url 'telaInicio' %}">Início</a>
-            <a href="{% url 'planejamento' %}" aria-current="page">Planejamento</a>
-            <a href="{% url 'simulacao' %}">Simulador de matrícula</a>
-            <a href="{% url 'fluxograma' %}">Fluxograma</a>
-            <a href="{% url 'notas_periodo' %}">Consulta de Graus</a>
-            <a href="{% url 'creditos' %}">Contagem de Créditos</a>
-        </nav>
-    </aside>
-
+    {% include 'menu.html' %}
+    
     <main>
 
         <h1>Planejamento personalizado</h1>
@@ -200,6 +188,8 @@
         <p>O envio automático ao simulador ainda não está disponível.</p>
 
     </main>
+
+    {% include 'mensagens.html' %}
 
 </body>
 </html>

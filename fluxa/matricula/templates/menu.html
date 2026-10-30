@@ -1,0 +1,38 @@
+{% load static %}
+{% with tela=request.resolver_match.url_name %}
+<aside class="fx-menu">
+    <img class="fx-logo" src="{% static 'Logo.jpeg' %}" alt="FLUXA">
+
+    <div class="fx-titulo">Meu planejamento</div>
+    <div class="fx-sub">PUC-Rio · Engenharia de Computação</div>
+
+    {% if user.is_authenticated %}
+    <div class="fx-aluno">
+        <div class="fx-aluno-nome">{{ user.get_full_name|default:user.username }}</div>
+        <div class="fx-aluno-email">{{ user.email }}</div>
+    </div>
+    {% endif %}
+
+    <nav class="fx-nav">
+        <a href="{% url 'telaInicio' %}"{% if tela == 'telaInicio' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">⌂</span>Início</a>
+        <a href="{% url 'planejamento' %}"{% if tela == 'planejamento' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">▤</span>Planejamento</a>
+        <a href="{% url 'simulacao' %}"{% if tela == 'simulacao' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">▦</span>Simulador de matrícula</a>
+        <a href="{% url 'fluxograma' %}"{% if tela == 'fluxograma' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">⤳</span>Fluxograma</a>
+        <a href="{% url 'notas_periodo' %}"{% if tela == 'notas_periodo' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">✎</span>Consulta de Graus</a>
+        <a href="{% url 'creditos' %}"{% if tela == 'creditos' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">∑</span>Contagem de Créditos</a>
+        <a href="{% url 'nivelamento' %}"{% if tela == 'nivelamento' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">✓</span>Nivelamento</a>
+        <a href="{% url 'perfil' %}"{% if tela == 'perfil' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">◉</span>Meu perfil</a>
+    </nav>
+
+    <div class="fx-rodape">
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="fx-logout">Logout</button>
+        </form>
+        {% else %}
+        <a class="fx-entrar" href="{% url 'login' %}">Entrar</a>
+        {% endif %}
+    </div>
+</aside>
+{% endwith %}

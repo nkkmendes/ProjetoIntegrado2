@@ -1,0 +1,199 @@
+/* ===== Menu lateral compartilhado (menu.html) ===== */
+.fx-menu {
+    box-sizing: border-box;
+    width: 245px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 30px 22px;
+    background: #1D4E78;
+    color: #FFFFFF;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+.fx-menu * {
+    box-sizing: border-box;
+}
+
+.fx-logo {
+    display: block;
+    width: 80px;
+    height: 80px;
+    margin: 0;
+    padding: 7px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    object-fit: contain;
+}
+
+.fx-titulo {
+    margin: 18px 0 4px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.fx-sub {
+    font-size: 13px;
+    color: #F0F4FA;
+}
+
+.fx-aluno {
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow-wrap: anywhere;
+}
+
+.fx-aluno-nome {
+    font-weight: bold;
+}
+
+.fx-aluno-email {
+    font-size: 12px;
+    color: #F0F4FA;
+}
+
+.fx-nav {
+    margin: 25px 0 0;
+    padding: 0;
+}
+
+.fx-nav a {
+    display: block;
+    margin: 0 0 8px;
+    padding: 12px;
+    border-radius: 5px;
+    color: #FFFFFF;
+    font-weight: 300;
+    text-decoration: none;
+}
+
+.fx-nav a:hover {
+    background: #0F2C4C;
+    color: #FFFFFF;
+}
+
+.fx-nav a.ativo {
+    background: #F0F4FA;
+    color: #0F2C4C;
+    font-weight: bold;
+}
+
+.fx-ic {
+    display: inline-block;
+    width: 22px;
+    margin-right: 8px;
+    text-align: center;
+}
+
+.fx-rodape {
+    margin-top: auto;
+    padding-top: 30px;
+}
+
+.fx-rodape form {
+    margin: 0;
+}
+
+.fx-logout,
+.fx-entrar {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #FFFFFF;
+    border-radius: 5px;
+    background: transparent;
+    color: #FFFFFF;
+    font: inherit;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fx-logout:hover,
+.fx-entrar:hover {
+    background: #FFFFFF;
+    color: #1D4E78;
+}
+
+/* Fluxograma: não tinha menu, então ganha um contêiner ao lado dele */
+.fx-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.fx-layout > main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ===== Mensagens de aviso (mensagens.html) ===== */
+.fx-mensagens {
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.fx-mensagens li {
+    margin: 0 0 8px;
+    padding: 12px 16px;
+    border: 1px solid #166534;
+    border-radius: 5px;
+    background: #E7F5EC;
+    color: #166534;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.fx-mensagens li.fx-msg-error {
+    border-color: #B91C1C;
+    background: #FDECEC;
+    color: #B91C1C;
+}
+
+.fx-mensagens li.fx-msg-warning {
+    border-color: #92400E;
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.fx-mensagens li.fx-msg-info {
+    border-color: #1D4E78;
+    background: #E6EFF8;
+    color: #1D4E78;
+}
+
+/* ===== Telas pequenas: o menu vai para o topo ===== */
+@media (max-width: 850px) {
+    .shell,
+    .fx-layout {
+        flex-direction: column;
+    }
+
+    .shell > .fx-menu,
+    .fx-layout > .fx-menu {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+}
+
+@media (max-width: 750px) {
+    body > .fx-menu {
+        width: 100%;
+        height: auto;
+        position: static;
+    }
+}

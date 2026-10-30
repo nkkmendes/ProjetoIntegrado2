@@ -6,9 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fluxograma de Engenharia de Computação</title>
   <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=2">
+  <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
 <body>
+<div class="fx-layout">
+{% include 'menu.html' %}
 <main>
+{% include 'mensagens.html' %}
   <h1>Fluxograma de matérias</h1>
   <p>Engenharia de Computação — PUC-Rio</p>
   <p>Passe o mouse para ver as relações entre matérias. Clique para abrir os detalhes.</p>
@@ -74,5 +78,6 @@
     <p>As marcações não são salvas ao sair.</p>
   </form>
 </main>
+</div>
 </body>
 </html>
