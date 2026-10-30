@@ -116,3 +116,86 @@ class RequisitoAdmin(admin.ModelAdmin):
 class TurmaGradeAdmin(admin.ModelAdmin):
     list_display = ("grade", "turma")
     autocomplete_fields = ("grade", "turma")
+
+from django.contrib import admin
+
+from .models import (
+    CalendarioMatricula,
+    PlanejamentoSalvo,
+    NivelamentoSalvo,
+    Disciplina,
+    DisciplinaProducao
+)
+
+
+# TELA DE INICIO
+@admin.register(CalendarioMatricula)
+class CalendarioMatriculaAdmin(admin.ModelAdmin):
+    list_display = (
+        'periodo',
+        'inicio_matricula',
+        'fim_matricula',
+        'inicio_aulas'
+    )
+    search_fields = ('periodo',)
+
+
+# TELA DE PLANEJAMENTO
+@admin.register(PlanejamentoSalvo)
+class PlanejamentoSalvoAdmin(admin.ModelAdmin):
+    list_display = (
+        'nome',
+        'usuario',
+        'periodo'
+    )
+    search_fields = (
+        'nome',
+        'usuario__username'
+    )
+    list_filter = ('periodo',)
+
+
+# TELA DE NIVELAMENTO
+@admin.register(NivelamentoSalvo)
+class NivelamentoSalvoAdmin(admin.ModelAdmin):
+    list_display = (
+        'nome',
+        'area',
+        'resultado'
+    )
+    search_fields = ('nome', 'area')
+    list_filter = ('area',)
+
+
+# FLUXOGRAMA DE ENGENHARIA DE COMPUTACAO
+@admin.register(Disciplina)
+class DisciplinaAdmin(admin.ModelAdmin):
+    list_display = (
+        'codigo',
+        'nome',
+        'periodo',
+        'creditos'
+    )
+    search_fields = ('codigo', 'nome')
+    list_filter = ('periodo',)
+    filter_horizontal = (
+        'pre_requisitos',
+        'co_requisitos'
+    )
+
+
+# FLUXOGRAMA DE ENGENHARIA DE PRODUCAO
+@admin.register(DisciplinaProducao)
+class DisciplinaProducaoAdmin(admin.ModelAdmin):
+    list_display = (
+        'codigo',
+        'nome',
+        'periodo',
+        'creditos'
+    )
+    search_fields = ('codigo', 'nome')
+    list_filter = ('periodo',)
+    filter_horizontal = (
+        'pre_requisitos',
+        'co_requisitos'
+    )
