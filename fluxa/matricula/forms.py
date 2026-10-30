@@ -2,7 +2,7 @@
 from django import forms
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
@@ -36,9 +36,9 @@ class CadastroForm(forms.Form):
         widget=forms.TextInput(attrs={'placeholder': 'Ex: Ana Souza'}),
     )
     email = forms.EmailField(
-        label='E-mail institucional',
+        label='E-mail',
         max_length=150,
-        widget=forms.EmailInput(attrs={'placeholder': 'usuario@aluno.puc-rio.br'}),
+        widget=forms.EmailInput(attrs={'placeholder': 'seu.email@exemplo.com'}),
     )
     senha = forms.CharField(
         label='Senha',
@@ -81,6 +81,28 @@ class RecuperarSenhaForm(PasswordResetForm):
         widget=forms.EmailInput(attrs={'placeholder': 'seu.email@exemplo.com'}),
     )
 
+class PerfilNomeForm(forms.Form):
+    nome = forms.CharField(
+        label='Nome completo',
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': 'Ex: Ana Souza'}),
+    )
+
+    def save(self, usuario):
+        primeiro_nome, _, sobrenome = self.cleaned_data['nome'].partition(' ')
+        usuario.first_name = primeiro_nome
+        usuario.last_name = sobrenome.strip()
+        usuario.save(update_fields=['first_name', 'last_name'])
+        return usuario
+
+class TrocarSenhaForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].label = 'Senha atual'
+        self.fields['new_password1'].label = 'Nova senha'
+        self.fields['new_password1'].help_text = ''
+        self.fields['new_password2'].label = 'Confirmar nova senha'
+
 class PlanejamentoForm(forms.ModelForm):
     class Meta:
         model = PlanejamentoSalvo
@@ -101,3 +123,8 @@ class NivelamentoForm(forms.ModelForm):
     class Meta:
         model = NivelamentoSalvo
         fields = ['nome', 'area', 'resultado']
+        labels = {
+            'nome': 'Nome',
+            'area': 'Área',
+            'resultado': 'Resultado',
+        }

@@ -1,10 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
 from django.http import JsonResponse
 from django.contrib import messages
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.urls import reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import CalendarioMatricula, Disciplina
-from .forms import LoginForm, CadastroForm, RecuperarSenhaForm
+from .forms import LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm
 
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
 from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
@@ -14,6 +19,7 @@ from django.db.models import F, Q
 def inicio(request):
     return render(request, 'index.html')
 
+@login_required
 def telaInicio(request):
     calendario = CalendarioMatricula.objects.first()
 
@@ -21,19 +27,34 @@ def telaInicio(request):
         'calendario': calendario
     })
 
+def destino_seguro(request):
+    proximo = request.POST.get('next') or request.GET.get('next') or ''
+    if proximo and url_has_allowed_host_and_scheme(
+        proximo,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return proximo
+    return resolve_url('telaInicio')
+
 def login(request):
+    destino = destino_seguro(request)
+
     if request.user.is_authenticated:
-        return redirect('telaInicio')
+        return redirect(destino)
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             auth_login(request, form.usuario)
-            return redirect('telaInicio')
+            return redirect(destino)
     else:
         form = LoginForm()
 
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'login.html', {
+        'form': form,
+        'next': request.POST.get('next') or request.GET.get('next') or '',
+    })
 
 def criarConta(request):
     if request.method == 'POST':
@@ -51,7 +72,11 @@ def recuperar_senha(request):
     if request.method == 'POST':
         form = RecuperarSenhaForm(request.POST)
         if form.is_valid():
-            form.save(request=request, use_https=request.is_secure())
+            form.save(
+                request=request,
+                use_https=request.is_secure(),
+                extra_email_context={'site_name': 'Fluxa'},
+            )
             messages.success(
                 request,
                 'Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha.'
@@ -62,12 +87,18 @@ def recuperar_senha(request):
 
     return render(request, 'recuperar_senha.html', {'form': form})
 
+class RedefinirSenhaView(SuccessMessageMixin, PasswordResetConfirmView):
+    template_name = 'redefinir_senha.html'
+    success_url = reverse_lazy('login')
+    success_message = 'Senha alterada com sucesso. Entre com a nova senha.'
+
 @require_POST
 def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
 
+@login_required
 def planejamento(request):
     form = PlanejamentoForm(request.POST or None)
 
@@ -90,6 +121,7 @@ def planejamento(request):
     })
 
 
+@login_required
 def simulacao(request):
     form = SimulacaoForm(request.POST or None)
 
@@ -105,6 +137,7 @@ def simulacao(request):
     })
 
 
+@login_required
 def nivelamento(request):
     form = NivelamentoForm(request.POST or None)
 
@@ -137,9 +170,35 @@ def erro_404(request, exception):
 def erro_500(request):
     return telaErro(request, 'Algo deu errado', 'Ocorreu um erro no servidor. Tente novamente em alguns instantes.', 500)
 
+@login_required
 def perfil(request):
-    return render(request, 'perfil.html')
+    form_nome = PerfilNomeForm(initial={'nome': request.user.get_full_name()})
+    form_senha = TrocarSenhaForm(request.user)
 
+    if request.method == 'POST':
+        acao = request.POST.get('acao')
+
+        if acao == 'nome':
+            form_nome = PerfilNomeForm(request.POST)
+            if form_nome.is_valid():
+                form_nome.save(request.user)
+                messages.success(request, 'Nome atualizado com sucesso.')
+                return redirect('perfil')
+
+        elif acao == 'senha':
+            form_senha = TrocarSenhaForm(request.user, request.POST)
+            if form_senha.is_valid():
+                usuario = form_senha.save()
+                update_session_auth_hash(request, usuario)
+                messages.success(request, 'Senha alterada com sucesso.')
+                return redirect('perfil')
+
+    return render(request, 'perfil.html', {
+        'form_nome': form_nome,
+        'form_senha': form_senha,
+    })
+
+@login_required
 def fluxograma(request):
     disciplinas = Disciplina.objects.all().order_by(
         F('periodo').asc(nulls_last=True),
@@ -150,6 +209,7 @@ def fluxograma(request):
         'disciplinas': disciplinas
     })
 
+@login_required
 def filtrar_disciplinas(request):
     busca = request.GET.get('q', '').strip()
 
@@ -170,6 +230,7 @@ def filtrar_disciplinas(request):
         'disciplinas': disciplinas
     })
 
+@login_required
 def detalhes_disciplina(request, codigo):
     try:
         disciplina = Disciplina.objects.get(codigo=codigo)

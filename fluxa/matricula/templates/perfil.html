@@ -12,12 +12,23 @@
 <body>
     {% include 'menu.html' %}
     <main>
+        {% include 'mensagens.html' %}
         <h1>Perfil do aluno</h1>
         <p>Veja seus dados pessoais e acadêmicos.</p>
         <div>
-            <h2>Nome do Aluno</h2>
-            <p>usuario@aluno.puc-rio.br</p>
-            <button>Editar dados</button>
+            <h2>{{ user.get_full_name|default:user.username }}</h2>
+            <p>{{ user.email }}</p>
+            <details{% if form_nome.errors %} open{% endif %}>
+                <summary>Editar nome</summary>
+                <form method="post" action="{% url 'perfil' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="acao" value="nome">
+                    <h4>Nome completo</h4>
+                    {{ form_nome.nome }}
+                    {{ form_nome.nome.errors }}
+                    <button type="submit">Salvar nome</button>
+                </form>
+            </details>
         </div>
         <div>
             <h2>Dados acadêmicos</h2>
@@ -34,9 +45,27 @@
             <h4>Período atual</h4>
             <p>1º</p>
         </div>
+        <div>
+            <h2>Segurança</h2>
+            <details{% if form_senha.errors %} open{% endif %}>
+                <summary>Alterar senha</summary>
+                <form method="post" action="{% url 'perfil' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="acao" value="senha">
+                    {{ form_senha.non_field_errors }}
+                    <h4>Senha atual</h4>
+                    {{ form_senha.old_password }}
+                    {{ form_senha.old_password.errors }}
+                    <h4>Nova senha</h4>
+                    {{ form_senha.new_password1 }}
+                    {{ form_senha.new_password1.errors }}
+                    <h4>Confirmar nova senha</h4>
+                    {{ form_senha.new_password2 }}
+                    {{ form_senha.new_password2.errors }}
+                    <button type="submit">Salvar senha</button>
+                </form>
+            </details>
+        </div>
     </main>
-
-    {% include 'mensagens.html' %}
-    
 </body>
 </html>
