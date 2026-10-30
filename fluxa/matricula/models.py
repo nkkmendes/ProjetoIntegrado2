@@ -1,22 +1,30 @@
+
 from django.db import models
-
-
 from django.conf import settings
 
 
 class PlanejamentoSalvo(models.Model):
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     nome = models.CharField(max_length=100)
     periodo = models.IntegerField()
     disciplinas = models.TextField()
+
 
 class SimulacaoSalva(models.Model):
     nome = models.CharField(max_length=100)
     disciplinas = models.TextField()
 
+
 class NivelamentoSalvo(models.Model):
     nome = models.CharField(max_length=100)
     area = models.CharField(max_length=100)
     resultado = models.CharField(max_length=100)
+
 
 class CalendarioMatricula(models.Model):
     periodo = models.CharField(max_length=10)
@@ -52,8 +60,6 @@ class Disciplina(models.Model):
     )
 
 
-
-
 class CreditosAluno(models.Model):
     aluno = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -83,13 +89,19 @@ class GrauAluno(models.Model):
     )
     turma = models.CharField(max_length=10, default='-')
     periodo_letivo = models.CharField(max_length=10, default='2026.2')
-    g1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    g2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    g3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    media = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g1 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    g2 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    g3 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    media = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
     situacao = models.CharField(max_length=30, default='Em curso')
 
     def __str__(self):
         return self.disciplina.nome
-
-   
