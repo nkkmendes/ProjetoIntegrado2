@@ -1,3 +1,6 @@
+import unicodedata
+from urllib.parse import urlencode
+
 from django.shortcuts import render, redirect, resolve_url
 from django.http import JsonResponse
 from django.contrib import messages
@@ -5,10 +8,10 @@ from django.contrib.auth import login as auth_login, logout as auth_logout, upda
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
-from .models import CalendarioMatricula, Disciplina, Curso, PerfilAluno
+from .models import CalendarioMatricula, Disciplina, Curso, PerfilAluno, DisciplinaCursada
 from .forms import LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm
 
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
@@ -204,8 +207,10 @@ def perfil(request):
     })
 
 def ordenar_por_camada(disciplinas):
-    """Camada 0 = sem pré-requisito; senão 1 + a maior camada entre as matérias
-    exigidas. Organização provisória: nenhuma matéria tem período ideal."""
+    """Calcula a "camada" de cada matéria (0 = sem pré-requisito; senão 1 + a
+    maior camada entre as matérias que ela exige) e devolve a lista ordenada
+    por camada e código. É uma organização provisória: nenhuma matéria tem
+    período ideal."""
     todas = list(disciplinas)
     exigidas = {d.codigo: set() for d in todas}
     for d in todas:
@@ -229,40 +234,277 @@ def ordenar_por_camada(disciplinas):
 
     return sorted(todas, key=lambda d: (d.camada, d.codigo))
 
+CARTA_L = 210
+CARTA_A = 74
+ESPACO_H = 90
+ESPACO_V = 18
+MARGEM_X = 24
+TOPO = 44
+
+COR_PADRAO = '#6b86a8'
+COR_CO = '#7c3aed'
+PALETA = ['#2563eb', '#059669', '#d97706', '#db2777', '#0891b2']
+
+
+def _normalizar(texto):
+    sem_acento = unicodedata.normalize('NFD', texto)
+    sem_acento = ''.join(c for c in sem_acento if not unicodedata.combining(c))
+    return sem_acento.lower().strip()
+
+
+def _url_fluxograma(foco=None, ancora=None):
+    url = reverse('fluxograma')
+    if foco:
+        url += '?' + urlencode({'foco': foco})
+    if ancora:
+        url += '#c-' + ancora
+    return url
+
+
+def _cor_do_grupo(indice, total):
+    return PALETA[indice % len(PALETA)] if total > 1 else COR_PADRAO
+
+
+def _cadeia(codigo, grupos, concluidas):
+    """Todos os pré-requisitos (de todos os grupos), até o começo ou até
+    uma matéria concluída."""
+    achados = set()
+    fila = [codigo]
+    while fila:
+        atual = fila.pop()
+        for membros in grupos.get(atual, []):
+            for c in membros:
+                if c not in concluidas and c not in achados:
+                    achados.add(c)
+                    fila.append(c)
+    return achados
+
+
+def _desenhar_setas(foco, cadeia, co_foco, info):
+    """Monta as setas (SVG) só da matéria selecionada."""
+    def caixa(c):
+        d = info[c]['obj']
+        return d.x, d.x + CARTA_L, d.y + CARTA_A // 2
+
+    setas = []
+    cores = set()
+
+    for codigo in [foco] + sorted(cadeia):
+        dados = info[codigo]
+        if dados['concluida']:
+            continue
+        grupos_vivos = []
+        for indice, membros in enumerate(dados['grupos']):
+            vivos = [m for m in membros if m in info and not info[m]['concluida']]
+            if vivos:
+                grupos_vivos.append((indice, vivos))
+
+        esq, _, meio = caixa(codigo)
+        for pos, (indice, vivos) in enumerate(grupos_vivos):
+            cor = _cor_do_grupo(indice, len(dados['grupos']))
+            cores.add(cor)
+            jx = esq - 22
+            jy = meio + int(round((pos - (len(grupos_vivos) - 1) / 2) * 12))
+
+            for m in vivos:
+                _, dir_m, meio_m = caixa(m)
+                folga = max(30, (jx - dir_m) // 2)
+                setas.append({
+                    'tipo': 'linha', 'classe': 'pre',
+                    'd': f'M{dir_m},{meio_m} C{dir_m + folga},{meio_m} {jx - folga},{jy} {jx},{jy}',
+                    'cor': cor, 'marcador': '',
+                })
+            setas.append({
+                'tipo': 'linha', 'classe': 'pre',
+                'd': f'M{jx},{jy} L{esq - 2},{meio}',
+                'cor': cor, 'marcador': 'seta-' + cor.lstrip('#'),
+            })
+            setas.append({'tipo': 'ponto', 'cx': str(jx), 'cy': str(jy), 'cor': cor})
+
+    for c in sorted(co_foco):
+        a_esq, a_dir, a_meio = caixa(foco)
+        b_esq, b_dir, b_meio = caixa(c)
+        if a_esq == b_esq:
+            x = a_dir + 6
+            d = (f'M{a_dir},{a_meio} C{x + 34},{a_meio} {x + 34},{b_meio} {b_dir},{b_meio}')
+        else:
+            if a_esq < b_esq:
+                ini_dir, ini_meio, fim_esq, fim_meio = a_dir, a_meio, b_esq, b_meio
+            else:
+                ini_dir, ini_meio, fim_esq, fim_meio = b_dir, b_meio, a_esq, a_meio
+            f = max(30, (fim_esq - ini_dir) // 2)
+            d = (f'M{ini_dir},{ini_meio} C{ini_dir + f},{ini_meio} '
+                 f'{fim_esq - f},{fim_meio} {fim_esq},{fim_meio}')
+        setas.append({'tipo': 'linha', 'classe': 'co', 'd': d, 'cor': COR_CO, 'marcador': ''})
+
+    marcadores = [{'id': 'seta-' + c.lstrip('#'), 'cor': c} for c in sorted(cores)]
+    return setas, marcadores
+
+
 @login_required
 def fluxograma(request):
     disciplinas = Disciplina.objects.prefetch_related(
-        'grupos_pre_requisito__disciplinas'
+        'grupos_pre_requisito__disciplinas',
+        'co_requisitos',
+        'associadas',
+    )
+    lista = ordenar_por_camada(disciplinas)
+
+    concluidas = set(
+        DisciplinaCursada.objects.filter(
+            user=request.user, status=DisciplinaCursada.CONCLUIDA
+        ).values_list('disciplina__codigo', flat=True)
     )
 
+    info = {}
+    usadas = set()
+    for d in lista:
+        grupos = [
+            sorted(i.codigo for i in grupo.disciplinas.all())
+            for grupo in d.grupos_pre_requisito.all()
+        ]
+        for membros in grupos:
+            usadas.update(membros)
+        co = sorted(
+            {i.codigo for i in d.co_requisitos.all()} |
+            {i.codigo for i in d.associadas.all()}
+        )
+        info[d.codigo] = {'obj': d, 'grupos': grupos, 'co': co}
+
+    dependentes = {c: set() for c in info}
+    for codigo, dados in info.items():
+        for membros in dados['grupos']:
+            for m in membros:
+                dependentes.setdefault(m, set()).add(codigo)
+
+    for codigo, dados in info.items():
+        d = dados['obj']
+        d.isolada = not dados['grupos'] and not dados['co'] and codigo not in usadas
+        d.concluida = codigo in concluidas
+        d.classe = ''
+        dados['concluida'] = d.concluida
+
+    foco = request.GET.get('foco', '').strip().upper()
+    if foco not in info or info[foco]['concluida']:
+        foco = ''
+
+    busca = request.GET.get('q', '').strip()
+    aviso = ''
+    resultados = []
+    if busca:
+        termo = _normalizar(busca)
+        achadas = [
+            d for d in lista
+            if termo in _normalizar(d.codigo) or termo in _normalizar(d.nome)
+        ]
+        if not achadas:
+            aviso = f'Nenhuma matéria encontrada para "{busca}".'
+        elif len(achadas) == 1:
+            d = achadas[0]
+            if d.concluida:
+                aviso = (f'{d.codigo} — {d.nome} já está concluída. '
+                         'Veja a lista "Concluídas" para desfazer.')
+            else:
+                return redirect(_url_fluxograma(d.codigo, d.codigo))
+        else:
+            aviso = f'{len(achadas)} matérias encontradas. Escolha uma:'
+            resultados = achadas
+
+    colunas = {}
+    for d in lista:
+        if not d.isolada and not d.concluida:
+            colunas.setdefault(d.camada, []).append(d)
+    camadas = sorted(colunas)
+
+    cabecalhos = []
+    for i, camada in enumerate(camadas):
+        x = MARGEM_X + i * (CARTA_L + ESPACO_H)
+        cabecalhos.append({
+            'x': x,
+            'titulo': 'Sem pré-requisito' if camada == 0 else f'Nível {camada}',
+        })
+        for j, d in enumerate(colunas[camada]):
+            d.x = x
+            d.y = TOPO + j * (CARTA_A + ESPACO_V)
+
+    largura = altura = 0
+    if camadas:
+        largura = 2 * MARGEM_X + len(camadas) * CARTA_L + (len(camadas) - 1) * ESPACO_H
+        altura = TOPO + max(len(v) for v in colunas.values()) * (CARTA_A + ESPACO_V)
+
+    painel = None
+    setas, marcadores = [], []
+    grupos_por_codigo = {c: dados['grupos'] for c, dados in info.items()}
+    if foco:
+        cadeia = _cadeia(foco, grupos_por_codigo, concluidas)
+        co_foco = {c for c in info[foco]['co'] if c not in concluidas and c not in cadeia}
+
+        info[foco]['obj'].classe = 'alvo'
+        for c in cadeia:
+            info[c]['obj'].classe = 'cadeia'
+        for c in co_foco:
+            info[c]['obj'].classe = 'co'
+
+        if not info[foco]['obj'].isolada:
+            setas, marcadores = _desenhar_setas(foco, cadeia, co_foco, info)
+
+        def itens(codigos):
+            return [{'codigo': c, 'concluida': info[c]['concluida']} for c in sorted(codigos)]
+
+        total_grupos = len(info[foco]['grupos'])
+        d = info[foco]['obj']
+        painel = {
+            'codigo': d.codigo,
+            'nome': d.nome,
+            'creditos': d.creditos,
+            'creditos_minimos': d.creditos_minimos,
+            'grupos': [
+                {'cor': _cor_do_grupo(i, total_grupos), 'itens': itens(membros)}
+                for i, membros in enumerate(info[foco]['grupos'])
+            ],
+            'co': itens(info[foco]['co']),
+            'dependentes': itens(dependentes.get(foco, [])),
+            'sem_relacoes': d.isolada,
+        }
+
+    feitas = [info[c]['obj'] for c in sorted(concluidas) if c in info]
+
     return render(request, 'fluxograma.html', {
-        'disciplinas': ordenar_por_camada(disciplinas)
+        'cabecalhos': cabecalhos,
+        'cartas': [d for d in lista if not d.isolada and not d.concluida],
+        'isoladas': [d for d in lista if d.isolada and not d.concluida],
+        'largura': largura,
+        'altura': altura,
+        'setas': setas,
+        'marcadores': marcadores,
+        'painel': painel,
+        'foco': foco,
+        'busca': busca,
+        'aviso': aviso,
+        'resultados': resultados,
+        'concluidas': feitas,
     })
 
 @login_required
 def filtrar_disciplinas(request):
-    busca = request.GET.get('q', '').strip()
+    return redirect('fluxograma')
 
-    disciplinas = Disciplina.objects.all()
-
-    if busca:
-        disciplinas = disciplinas.filter(
-            Q(nome__icontains=busca) |
-            Q(codigo__icontains=busca)
-        )
-
-    disciplinas = disciplinas.prefetch_related('grupos_pre_requisito__disciplinas')
-
-    return render(request, 'fluxograma.html', {
-        'disciplinas': ordenar_por_camada(disciplinas)
-    })
+def _buscar_disciplina(codigo):
+    try:
+        return Disciplina.objects.get(codigo__iexact=codigo)
+    except Disciplina.DoesNotExist:
+        return None
 
 @login_required
 def detalhes_disciplina(request, codigo):
-    try:
-        disciplina = Disciplina.objects.get(codigo__iexact=codigo)
-    except Disciplina.DoesNotExist:
-        return telaErro(request, 'Disciplina não encontrada', f'Não existe disciplina com o código {codigo}.', 404)
+    disciplina = _buscar_disciplina(codigo)
+    if disciplina is None:
+        return JsonResponse({'erro': f'Não existe disciplina com o código {codigo}.'}, status=404)
+
+    grupos = [
+        sorted(d.codigo for d in grupo.disciplinas.all())
+        for grupo in disciplina.grupos_pre_requisito.prefetch_related('disciplinas')
+    ]
 
     dados = {
         'codigo': disciplina.codigo,
@@ -271,10 +513,43 @@ def detalhes_disciplina(request, codigo):
         'pre_requisitos': [
             d.codigo for d in disciplina.pre_requisitos.all()
         ],
-        'co_requisitos': [
-            d.codigo for d in disciplina.co_requisitos.all()
-        ],
-        'creditos_minimos': disciplina.creditos_minimos
+        'grupos_pre_requisitos': grupos,
+        'co_requisitos': sorted(
+            {d.codigo for d in disciplina.co_requisitos.all()} |
+            {d.codigo for d in disciplina.associadas.all()}
+        ),
+        'dependentes': [d.codigo for d in disciplina.dependentes.all()],
+        'creditos_minimos': disciplina.creditos_minimos,
+        'concluida': DisciplinaCursada.objects.filter(
+            user=request.user,
+            disciplina=disciplina,
+            status=DisciplinaCursada.CONCLUIDA,
+        ).exists(),
     }
 
     return JsonResponse(dados)
+
+@login_required
+@require_POST
+def marcar_concluida(request, codigo):
+    disciplina = _buscar_disciplina(codigo)
+    if disciplina is None:
+        messages.error(request, f'Não existe disciplina com o código {codigo}.')
+        return redirect('fluxograma')
+
+    foco = request.POST.get('foco', '').strip().upper()
+
+    if request.POST.get('acao') == 'concluir':
+        DisciplinaCursada.objects.update_or_create(
+            user=request.user,
+            disciplina=disciplina,
+            defaults={'status': DisciplinaCursada.CONCLUIDA},
+        )
+        messages.success(request, f'{disciplina.codigo} marcada como concluída.')
+        if foco == disciplina.codigo:
+            foco = ''
+        return redirect(_url_fluxograma(foco))
+
+    DisciplinaCursada.objects.filter(user=request.user, disciplina=disciplina).delete()
+    messages.success(request, f'{disciplina.codigo} voltou para o fluxograma.')
+    return redirect(_url_fluxograma(foco, disciplina.codigo))

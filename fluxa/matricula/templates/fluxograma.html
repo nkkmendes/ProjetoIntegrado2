@@ -5,74 +5,164 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fluxograma de Engenharia de Computação</title>
-  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=2">
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=4">
   <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
 <body>
 <div class="fx-layout">
 {% include 'menu.html' %}
 <main>
-{% include 'mensagens.html' %}
+  {% include 'mensagens.html' %}
   <h1>Fluxograma de matérias</h1>
   <p>Engenharia de Computação — PUC-Rio</p>
-  <p>Passe o mouse para ver as relações entre matérias. Clique para abrir os detalhes.</p>
-  <form>
-    <fieldset><legend>Tamanho dos cartões</legend>
-      <label><input type="radio" name="zoom" id="zoom75"> 75%</label>
-      <label><input type="radio" name="zoom" id="zoom100" checked> 100%</label>
-      <label><input type="radio" name="zoom" id="zoom125"> 125%</label>
-      <button type="reset">Limpar marcações e tamanho</button>
-    </fieldset>
-    <div class="quadro" tabindex="0" role="region" aria-label="Disciplinas por período, com rolagem">
-      <div class="grade">
-        {% regroup disciplinas by camada as grupos %}
-        {% for grupo in grupos %}
-        <section class="periodo">
-          <h2>{% if grupo.grouper == 0 %}Sem pré-requisito{% else %}Nível {{ grupo.grouper }}{% endif %}</h2>
+  <p>Clique numa matéria para ver tudo o que ela exige: a cadeia de pré-requisitos fica em azul, os co-requisitos em roxo, e as setas mostram o caminho.</p>
 
-          {% for disciplina in grupo.list %}
-          <details class="materia{% if not disciplina.pre_requisitos.all %} livre{% endif %}" id="{{ disciplina.codigo }}">
-            <summary class="rel-{{ disciplina.codigo }}{% for item in disciplina.pre_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.co_requisitos.all %} rel-{{ item.codigo }}{% endfor %}{% for item in disciplina.dependentes.all %} rel-{{ item.codigo }}{% endfor %}">
-              <strong>{{ disciplina.codigo }}</strong> — {{ disciplina.nome }}
-            </summary>
-            <div class="detalhes">
-              <p>{{ disciplina.creditos }} créditos</p>
-              <p>Pré-requisitos:
-                {% for item in disciplina.pre_requisitos.all %}
-                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                  Nenhum
-                {% endfor %}
-              </p>
-              <p>Co-requisitos:
-                {% for item in disciplina.co_requisitos.all %}
-                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                  Nenhum
-                {% endfor %}
-              </p>
-              <p>É pré-requisito de:
-                {% for item in disciplina.dependentes.all %}
-                  <a href="#{{ item.codigo }}">{{ item.codigo }}</a>{% if not forloop.last %}, {% endif %}
-                {% empty %}
-                  Nenhum
-                {% endfor %}
-              </p>
-              {% if disciplina.creditos_minimos %}
-              <p>Mínimo de {{ disciplina.creditos_minimos }} créditos concluídos.</p>
-              {% endif %}
-              <label><input class="feito" id="feito-{{ disciplina.codigo }}" type="checkbox"> Concluída</label>
-            </div>
-          </details>
+  <form class="busca" method="get" action="{% url 'fluxograma' %}" role="search">
+    {% if foco %}<input type="hidden" name="foco" value="{{ foco }}">{% endif %}
+    <label for="busca-texto">Buscar matéria</label>
+    <input id="busca-texto" type="search" name="q" value="{{ busca }}" placeholder="Código ou nome" autocomplete="off">
+    <button type="submit">Buscar</button>
+  </form>
+  {% if aviso %}<p class="busca-aviso" role="status">{{ aviso }}</p>{% endif %}
+  {% if resultados %}
+  <ul class="busca-lista">
+    {% for d in resultados %}
+    <li>
+      {% if d.concluida %}
+      <a href="#concluidas">{{ d.codigo }} — {{ d.nome }} (concluída)</a>
+      {% else %}
+      <a href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}">{{ d.codigo }} — {{ d.nome }}</a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <details id="concluidas" class="concluidas"{% if concluidas and aviso %} open{% endif %}>
+    <summary>Concluídas ({{ concluidas|length }})</summary>
+    {% if concluidas %}
+    <ul>
+      {% for d in concluidas %}
+      <li>
+        <span>{{ d.codigo }} — {{ d.nome }}</span>
+        <form method="post" action="{% url 'marcar_concluida' d.codigo %}">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="desfazer">
+          <input type="hidden" name="foco" value="{{ foco }}">
+          <button type="submit" aria-label="Desfazer conclusão de {{ d.codigo }}">Desfazer</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="vazio">Nenhuma matéria concluída.</p>
+    {% endif %}
+  </details>
+
+  <ul class="legenda" aria-label="Legenda">
+    <li><span class="leg leg-alvo"></span> Selecionada</li>
+    <li><span class="leg leg-cadeia"></span> Pré-requisito (direto ou indireto)</li>
+    <li><span class="leg leg-co"></span> Co-requisito</li>
+  </ul>
+
+  <div class="area">
+    <div class="quadro" tabindex="0" role="region" aria-label="Fluxograma com rolagem">
+      <div class="grade{% if foco %} com-foco{% endif %}" style="width: {{ largura }}px; height: {{ altura }}px;">
+        <svg class="setas" width="{{ largura }}" height="{{ altura }}" aria-hidden="true">
+          <defs>
+            {% for m in marcadores %}
+            <marker id="{{ m.id }}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="{{ m.cor }}"/>
+            </marker>
+            {% endfor %}
+          </defs>
+          {% for s in setas %}
+          {% if s.tipo == 'ponto' %}
+          <circle cx="{{ s.cx }}" cy="{{ s.cy }}" r="4.5" fill="{{ s.cor }}"/>
+          {% else %}
+          <path class="{{ s.classe }}" d="{{ s.d }}" stroke="{{ s.cor }}"{% if s.marcador %} marker-end="url(#{{ s.marcador }})"{% endif %}/>
+          {% endif %}
           {% endfor %}
-        </section>
+        </svg>
+
+        {% for c in cabecalhos %}
+        <h2 class="cabecalho" style="left: {{ c.x }}px;">{{ c.titulo }}</h2>
+        {% endfor %}
+
+        {% for d in cartas %}
+        <a class="carta {{ d.classe }}" id="c-{{ d.codigo }}" style="left: {{ d.x }}px; top: {{ d.y }}px;"
+           href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}">
+          <strong>{{ d.codigo }}</strong>
+          <span>{{ d.nome }}</span>
+        </a>
         {% empty %}
-        <p>Nenhuma disciplina cadastrada.</p>
+        <p class="vazio">Nenhuma disciplina para mostrar.</p>
         {% endfor %}
       </div>
     </div>
-    <p>As marcações não são salvas ao sair.</p>
-  </form>
+
+    {% if painel %}
+    <aside class="painel" aria-label="Detalhes da matéria selecionada">
+      <h2>{{ painel.codigo }} — {{ painel.nome }}</h2>
+      <p>{{ painel.creditos }} créditos</p>
+
+      {% if painel.sem_relacoes %}
+      <p>Esta matéria não exige nem é exigida por nenhuma outra.</p>
+      {% else %}
+      <h3>Pré-requisitos</h3>
+      {% for g in painel.grupos %}
+      <div class="grupo" style="border-left-color: {{ g.cor }};">
+        {% for i in g.itens %}
+        {% if i.concluida %}<span class="item-feito">{{ i.codigo }} (concluída)</span>{% else %}<a href="{% url 'fluxograma' %}?foco={{ i.codigo }}#c-{{ i.codigo }}">{{ i.codigo }}</a>{% endif %}
+        {% endfor %}
+      </div>
+      {% empty %}
+      <p>Nenhum</p>
+      {% endfor %}
+
+      <h3>Co-requisitos</h3>
+      {% if painel.co %}
+      <p class="codigos">{% for i in painel.co %}{% if i.concluida %}<span class="item-feito">{{ i.codigo }} (concluída)</span>{% else %}<a href="{% url 'fluxograma' %}?foco={{ i.codigo }}#c-{{ i.codigo }}">{{ i.codigo }}</a>{% endif %} {% endfor %}</p>
+      {% else %}<p>Nenhum</p>{% endif %}
+
+      <h3>É pré-requisito de</h3>
+      {% if painel.dependentes %}
+      <p class="codigos">{% for i in painel.dependentes %}{% if i.concluida %}<span class="item-feito">{{ i.codigo }} (concluída)</span>{% else %}<a href="{% url 'fluxograma' %}?foco={{ i.codigo }}#c-{{ i.codigo }}">{{ i.codigo }}</a>{% endif %} {% endfor %}</p>
+      {% else %}<p>Nenhuma</p>{% endif %}
+      {% endif %}
+
+      {% if painel.creditos_minimos %}
+      <p>Exige no mínimo {{ painel.creditos_minimos }} créditos concluídos.</p>
+      {% endif %}
+
+      <div class="rodape">
+        <form method="post" action="{% url 'marcar_concluida' painel.codigo %}">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="concluir">
+          <input type="hidden" name="foco" value="{{ foco }}">
+          <button type="submit" class="acao">Marcar como concluída</button>
+        </form>
+        <a class="sec" href="{% url 'fluxograma' %}">Limpar seleção</a>
+      </div>
+    </aside>
+    {% endif %}
+  </div>
+
+  {% if isoladas %}
+  <section class="isoladas" id="isoladas">
+    <h2>Matérias independentes</h2>
+    <p>Não exigem nem são exigidas por nenhuma outra matéria.</p>
+    <div class="isoladas-lista">
+      {% for d in isoladas %}
+      <a class="carta {{ d.classe }}" id="c-{{ d.codigo }}"
+         href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}">
+        <strong>{{ d.codigo }}</strong>
+        <span>{{ d.nome }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 </main>
 </div>
 </body>
