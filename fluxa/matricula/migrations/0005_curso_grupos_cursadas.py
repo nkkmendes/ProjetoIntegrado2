@@ -22,7 +22,7 @@ def preparar_dados(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("matricula", "0003_forms_salvos"),
+        ("matricula", "0004_planejamentosalvo_usuario_graualuno_creditosaluno"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
