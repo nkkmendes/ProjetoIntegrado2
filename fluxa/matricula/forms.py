@@ -1,6 +1,14 @@
 
 from django import forms
-from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo, Curso, PerfilAluno
+from .models import (
+    PlanejamentoSalvo,
+    SimulacaoSalva,
+    NivelamentoSalvo,
+    Curso,
+    PerfilAluno,
+    CreditosAluno,
+    GrauAluno,
+)
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib.auth.models import User
@@ -130,3 +138,121 @@ class NivelamentoForm(forms.ModelForm):
             'area': 'Área',
             'resultado': 'Resultado',
         }
+
+
+class CreditosAlunoForm(forms.ModelForm):
+    class Meta:
+        model = CreditosAluno
+        fields = ['disciplina', 'concluida']
+
+        labels = {
+            'disciplina': 'Disciplina',
+            'concluida': 'Disciplina concluída'
+        }
+
+        widgets = {
+            'disciplina': forms.Select(
+                attrs={'class': 'campo-form'}
+            )
+        }
+
+
+# Formulario de Consulta de Graus
+
+class GrauAlunoForm(forms.ModelForm):
+    class Meta:
+        model = GrauAluno
+
+        fields = [
+            'disciplina',
+            'turma',
+            'periodo_letivo',
+            'g1',
+            'g2',
+            'g3',
+            'media',
+            'situacao'
+        ]
+
+        labels = {
+            'disciplina': 'Disciplina',
+            'turma': 'Turma',
+            'periodo_letivo': 'Período letivo',
+            'g1': 'G1',
+            'g2': 'G2',
+            'g3': 'G3',
+            'media': 'Média',
+            'situacao': 'Situação'
+        }
+
+        widgets = {
+            'disciplina': forms.Select(
+                attrs={'class': 'campo-form'}
+            ),
+            'turma': forms.TextInput(
+                attrs={'class': 'campo-form'}
+            ),
+            'periodo_letivo': forms.TextInput(
+                attrs={'class': 'campo-form'}
+            ),
+            'g1': forms.NumberInput(
+                attrs={
+                    'class': 'campo-form',
+                    'min': 0,
+                    'max': 10,
+                    'step': '0.01'
+                }
+            ),
+            'g2': forms.NumberInput(
+                attrs={
+                    'class': 'campo-form',
+                    'min': 0,
+                    'max': 10,
+                    'step': '0.01'
+                }
+            ),
+            'g3': forms.NumberInput(
+                attrs={
+                    'class': 'campo-form',
+                    'min': 0,
+                    'max': 10,
+                    'step': '0.01'
+                }
+            ),
+            'media': forms.NumberInput(
+                attrs={
+                    'class': 'campo-form',
+                    'min': 0,
+                    'max': 10,
+                    'step': '0.01'
+                }
+            ),
+            'situacao': forms.Select(
+                choices=[
+                    ('Em curso', 'Em curso'),
+                    ('Aprovado', 'Aprovado'),
+                    ('Reprovado', 'Reprovado')
+                ],
+                attrs={'class': 'campo-form'}
+            )
+        }
+
+    def clean(self):
+        dados = super().clean()
+
+        for campo in ['g1', 'g2', 'g3', 'media']:
+            nota = dados.get(campo)
+
+            if nota is not None:
+                if nota < 0 or nota > 10:
+                    self.add_error(
+                        campo,
+                        'A nota deve estar entre 0 e 10.'
+                    )
+
+        return dados
+
+class NivelamentoForm(forms.ModelForm):
+    class Meta:
+        model = NivelamentoSalvo
+        fields = ['nome', 'area', 'resultado']

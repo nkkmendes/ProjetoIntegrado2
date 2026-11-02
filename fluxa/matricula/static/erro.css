@@ -11,7 +11,7 @@ body {
     background-color: #F0F4FA;
     font-family: 'Courier New', Courier, monospace;
     font-optical-sizing: auto;
-    font-weight: 100;
+    font-weight: 300;
     font-style: normal;
     font-variation-settings:
         "wdth" 100;
@@ -63,7 +63,27 @@ button {
     width: 342px;
     background-color: #1D4E78;
     border: 1px solid #1D4E78;
+    font-family: inherit;
     font-weight: bold;
     cursor: pointer;
     color: #FFFFFF;
+}
+
+@media (max-width: 750px) {
+    body > div {
+        width: auto;
+        max-width: 350px;
+        height: auto;
+        margin: 16px;
+        padding: 25px;
+    }
+
+    a {
+        width: 100%;
+    }
+
+    button {
+        box-sizing: border-box;
+        width: 100%;
+    }
 }

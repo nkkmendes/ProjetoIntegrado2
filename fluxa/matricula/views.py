@@ -11,13 +11,16 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
-from .models import CalendarioMatricula, Disciplina, Curso, PerfilAluno, DisciplinaCursada
+from .models import (
+    CalendarioMatricula, Disciplina, Curso, PerfilAluno,
+    DisciplinaCursada, CreditosAluno, GrauAluno,
+)
 from .forms import LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm
 
 from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
-from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm
+from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm, CreditosAlunoForm, GrauAlunoForm
 
-from django.db.models import F, Q
+from django.db.models import F, Q, Sum
 
 def inicio(request):
     return render(request, 'index.html')
@@ -113,10 +116,12 @@ def planejamento(request):
         form = PlanejamentoForm(dados)
 
         if form.is_valid():
-            form.save()
+            planejamento_salvo = form.save(commit=False)
+            planejamento_salvo.usuario = request.user
+            planejamento_salvo.save()
             return redirect('planejamento')
 
-    registros = PlanejamentoSalvo.objects.all()
+    registros = PlanejamentoSalvo.objects.filter(usuario=request.user).order_by('-id')
 
     return render(request, 'planejamento (1).html', {
         'form': form,
@@ -155,11 +160,46 @@ def nivelamento(request):
         'dados': registros
     })
 
+@login_required(login_url='login')
 def contagem_creditos(request):
-    return render(request, 'contagem-creditos.html')
+    form = CreditosAlunoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        credito = form.save(commit=False)
+        CreditosAluno.objects.update_or_create(
+            aluno=request.user,
+            disciplina=credito.disciplina,
+            defaults={'concluida': credito.concluida}
+        )
+        return redirect('creditos')
+    registros = CreditosAluno.objects.filter(aluno=request.user).select_related('disciplina').order_by('disciplina__nome')
+    total_cumprido = registros.filter(concluida=True).aggregate(total=Sum('disciplina__creditos'))['total'] or 0
+    total_curriculo = Disciplina.objects.aggregate(total=Sum('creditos'))['total'] or 0
+    total_pendente = max(total_curriculo - total_cumprido, 0)
+    return render(request, 'contagem-creditos.html', {
+        'form': form, 'registros': registros,
+        'total_curriculo': total_curriculo,
+        'total_cumprido': total_cumprido,
+        'total_pendente': total_pendente
+    })
 
+
+@login_required(login_url='login')
 def notas_periodo(request):
-    return render(request, 'notas-periodo.html')
+    form = GrauAlunoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        grau = form.save(commit=False)
+        grau.aluno = request.user
+        existente = GrauAluno.objects.filter(
+            aluno=request.user,
+            disciplina=grau.disciplina,
+            periodo_letivo=grau.periodo_letivo
+        ).first()
+        if existente:
+            grau.pk = existente.pk
+        grau.save()
+        return redirect('notas_periodo')
+    graus = GrauAluno.objects.filter(aluno=request.user).select_related('disciplina').order_by('-periodo_letivo', 'disciplina__nome')
+    return render(request, 'notas-periodo.html', {'form': form, 'graus': graus})
 
 def telaErro(request, titulo='Algo deu errado', mensagem='Não foi possível carregar esta página.', status=200):
     return render(request, 'erro.html', {
@@ -470,6 +510,7 @@ def fluxograma(request):
     feitas = [info[c]['obj'] for c in sorted(concluidas) if c in info]
 
     return render(request, 'fluxograma.html', {
+        'curso': 'computacao',
         'cabecalhos': cabecalhos,
         'cartas': [d for d in lista if not d.isolada and not d.concluida],
         'isoladas': [d for d in lista if d.isolada and not d.concluida],

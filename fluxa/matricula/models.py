@@ -2,6 +2,12 @@ from django.conf import settings
 from django.db import models
 
 class PlanejamentoSalvo(models.Model):
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     nome = models.CharField(max_length=100)
     periodo = models.IntegerField()
     disciplinas = models.TextField()
@@ -152,3 +158,30 @@ class DisciplinaCursada(models.Model):
 
     def __str__(self):
         return f'{self.user} — {self.disciplina.codigo} ({self.get_status_display()})'
+
+
+class CreditosAluno(models.Model):
+    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
+    concluida = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('aluno', 'disciplina')
+
+    def __str__(self):
+        return self.disciplina.nome
+
+
+class GrauAluno(models.Model):
+    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
+    turma = models.CharField(max_length=10, default='-')
+    periodo_letivo = models.CharField(max_length=10, default='2026.2')
+    g1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    media = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    situacao = models.CharField(max_length=30, default='Em curso')
+
+    def __str__(self):
+        return self.disciplina.nome

@@ -8,7 +8,7 @@
   --ink-1: #0F2C4C;
   --ink-2: #475569;
   --muted: #475569;
-  --ok: #16a34a;
+  --ok: #166534;
   --danger: #b91c1c;
   --highlight-bg: #F0F4FA;
   --highlight-line: #1D4E78;
@@ -176,7 +176,7 @@ html, body {
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   margin: 0 0 4px 0;
 }
@@ -455,3 +455,16 @@ html, body {
 .mt-16 { margin-top: 16px; }
 .mb-20 { margin-bottom: 20px; }
 .mb-24 { margin-bottom: 24px; }
+
+/* =========================================================
+   Telas pequenas
+   ========================================================= */
+@media (max-width: 750px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+}

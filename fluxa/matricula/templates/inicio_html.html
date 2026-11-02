@@ -15,8 +15,8 @@
       {% include 'mensagens.html' %}
       <h1 class="page-title">MatriculaFácil</h1>
       <p class="page-sub">Organize seus semestres e garanta uma trajetória acadêmica tranquila na PUC-Rio.</p>
+
       <div class="grid2">
-        
         <div class="card">
           {% if calendario %}
             <h2>Calendário da Matrícula {{ calendario.periodo }}</h2>
@@ -57,7 +57,9 @@
           </ol>
         </div>
       </div>
+
       <h2 class="section-title">Ferramentas de Apoio</h2>
+
       <div class="grid3">
         <a class="card tool" href="{% url 'planejamento' %}"><div class="ic">▤</div><h3>Planejamento</h3><p>Monte sua grade personalizada período a período de forma simples e intuitiva.</p></a>
         <a class="card tool" href="{% url 'simulacao' %}"><div class="ic">▦</div><h3>Simulador de Matrícula</h3><p>Simule diferentes cenários de horário e choque de matérias antes de confirmar no SAU.</p></a>
