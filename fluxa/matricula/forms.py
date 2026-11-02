@@ -1,16 +1,16 @@
 
 from django import forms
-
 from .models import (
     PlanejamentoSalvo,
     SimulacaoSalva,
     NivelamentoSalvo,
+    Curso,
+    PerfilAluno,
     CreditosAluno,
-    GrauAluno
+    GrauAluno,
 )
-
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.contrib.auth.models import User
 
 class LoginForm(forms.Form):
@@ -44,9 +44,9 @@ class CadastroForm(forms.Form):
         widget=forms.TextInput(attrs={'placeholder': 'Ex: Ana Souza'}),
     )
     email = forms.EmailField(
-        label='E-mail institucional',
+        label='E-mail',
         max_length=150,
-        widget=forms.EmailInput(attrs={'placeholder': 'usuario@aluno.puc-rio.br'}),
+        widget=forms.EmailInput(attrs={'placeholder': 'seu.email@exemplo.com'}),
     )
     senha = forms.CharField(
         label='Senha',
@@ -74,13 +74,15 @@ class CadastroForm(forms.Form):
 
     def save(self):
         primeiro_nome, _, sobrenome = self.cleaned_data['nome'].strip().partition(' ')
-        return User.objects.create_user(
+        usuario = User.objects.create_user(
             username=self.cleaned_data['email'],
             email=self.cleaned_data['email'],
             password=self.cleaned_data['senha'],
             first_name=primeiro_nome,
             last_name=sobrenome,
         )
+        PerfilAluno.objects.create(user=usuario, curso=Curso.objects.first())
+        return usuario
 
 class RecuperarSenhaForm(PasswordResetForm):
     email = forms.EmailField(
@@ -88,6 +90,28 @@ class RecuperarSenhaForm(PasswordResetForm):
         max_length=150,
         widget=forms.EmailInput(attrs={'placeholder': 'seu.email@exemplo.com'}),
     )
+
+class PerfilNomeForm(forms.Form):
+    nome = forms.CharField(
+        label='Nome completo',
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': 'Ex: Ana Souza'}),
+    )
+
+    def save(self, usuario):
+        primeiro_nome, _, sobrenome = self.cleaned_data['nome'].partition(' ')
+        usuario.first_name = primeiro_nome
+        usuario.last_name = sobrenome.strip()
+        usuario.save(update_fields=['first_name', 'last_name'])
+        return usuario
+
+class TrocarSenhaForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].label = 'Senha atual'
+        self.fields['new_password1'].label = 'Nova senha'
+        self.fields['new_password1'].help_text = ''
+        self.fields['new_password2'].label = 'Confirmar nova senha'
 
 class PlanejamentoForm(forms.ModelForm):
     class Meta:
@@ -103,6 +127,18 @@ class SimulacaoForm(forms.ModelForm):
     class Meta:
         model = SimulacaoSalva
         fields = ['nome', 'disciplinas']
+
+
+class NivelamentoForm(forms.ModelForm):
+    class Meta:
+        model = NivelamentoSalvo
+        fields = ['nome', 'area', 'resultado']
+        labels = {
+            'nome': 'Nome',
+            'area': 'Área',
+            'resultado': 'Resultado',
+        }
+
 
 class CreditosAlunoForm(forms.ModelForm):
     class Meta:

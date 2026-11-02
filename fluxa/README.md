@@ -8,6 +8,7 @@ Para rodar, abra o terminal dentro da pasta `fluxa`:
 python -m pip install -r requirements.txt
 python manage.py check
 python manage.py migrate
+python manage.py loaddata disciplinas_fluxograma
 python manage.py runserver
 ```
 

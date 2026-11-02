@@ -1,0 +1,7 @@
+{% if messages %}
+<ul class="fx-mensagens" role="status">
+    {% for mensagem in messages %}
+    <li class="fx-msg-{{ mensagem.tags }}">{{ mensagem }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
