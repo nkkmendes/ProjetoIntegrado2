@@ -3,11 +3,11 @@ from django import forms
 from .models import (
     PlanejamentoSalvo,
     SimulacaoSalva,
-    NivelamentoSalvo,
     Curso,
+    Disciplina,
     PerfilAluno,
-    CreditosAluno,
-    GrauAluno,
+    HistoricoDisciplina,
+    NivelamentoAluno,
 )
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
@@ -129,130 +129,102 @@ class SimulacaoForm(forms.ModelForm):
         fields = ['nome', 'disciplinas']
 
 
-class NivelamentoForm(forms.ModelForm):
+class PerfilCursoForm(forms.ModelForm):
+    """Deixa o aluno escolher (ou trocar) o curso do perfil.
+    É o curso do perfil que decide o que o Fluxograma mostra."""
+
     class Meta:
-        model = NivelamentoSalvo
-        fields = ['nome', 'area', 'resultado']
-        labels = {
-            'nome': 'Nome',
-            'area': 'Área',
-            'resultado': 'Resultado',
-        }
+        model = PerfilAluno
+        fields = ['curso']
+        labels = {'curso': 'Curso'}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['curso'].required = True
+        self.fields['curso'].empty_label = 'Escolha seu curso'
+        self.fields['curso'].queryset = Curso.objects.order_by('nome')
 
 
-class CreditosAlunoForm(forms.ModelForm):
+class DisciplinaChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, disciplina):
+        return f'{disciplina.codigo} — {disciplina.nome}'
+
+
+class HistoricoForm(forms.ModelForm):
+    """Registra uma disciplina no histórico do aluno, com notas (opcionais).
+    Registrar de novo a mesma disciplina atualiza o registro que já existe."""
+
+    disciplina = DisciplinaChoiceField(
+        queryset=Disciplina.objects.order_by('codigo'),
+        empty_label='Escolha a disciplina',
+        label='Disciplina',
+    )
+
     class Meta:
-        model = CreditosAluno
-        fields = ['disciplina', 'concluida']
-
+        model = HistoricoDisciplina
+        fields = ['disciplina', 'status', 'periodo_letivo', 'turma', 'g1', 'g2', 'g3', 'media']
         labels = {
-            'disciplina': 'Disciplina',
-            'concluida': 'Disciplina concluída'
-        }
-
-        widgets = {
-            'disciplina': forms.Select(
-                attrs={'class': 'campo-form'}
-            )
-        }
-
-
-# Formulario de Consulta de Graus
-
-class GrauAlunoForm(forms.ModelForm):
-    class Meta:
-        model = GrauAluno
-
-        fields = [
-            'disciplina',
-            'turma',
-            'periodo_letivo',
-            'g1',
-            'g2',
-            'g3',
-            'media',
-            'situacao'
-        ]
-
-        labels = {
-            'disciplina': 'Disciplina',
-            'turma': 'Turma',
+            'status': 'Situação',
             'periodo_letivo': 'Período letivo',
+            'turma': 'Turma',
             'g1': 'G1',
             'g2': 'G2',
             'g3': 'G3',
             'media': 'Média',
-            'situacao': 'Situação'
         }
-
         widgets = {
-            'disciplina': forms.Select(
-                attrs={'class': 'campo-form'}
-            ),
-            'turma': forms.TextInput(
-                attrs={'class': 'campo-form'}
-            ),
-            'periodo_letivo': forms.TextInput(
-                attrs={'class': 'campo-form'}
-            ),
-            'g1': forms.NumberInput(
-                attrs={
-                    'class': 'campo-form',
-                    'min': 0,
-                    'max': 10,
-                    'step': '0.01'
-                }
-            ),
-            'g2': forms.NumberInput(
-                attrs={
-                    'class': 'campo-form',
-                    'min': 0,
-                    'max': 10,
-                    'step': '0.01'
-                }
-            ),
-            'g3': forms.NumberInput(
-                attrs={
-                    'class': 'campo-form',
-                    'min': 0,
-                    'max': 10,
-                    'step': '0.01'
-                }
-            ),
-            'media': forms.NumberInput(
-                attrs={
-                    'class': 'campo-form',
-                    'min': 0,
-                    'max': 10,
-                    'step': '0.01'
-                }
-            ),
-            'situacao': forms.Select(
-                choices=[
-                    ('Em curso', 'Em curso'),
-                    ('Aprovado', 'Aprovado'),
-                    ('Reprovado', 'Reprovado')
-                ],
-                attrs={'class': 'campo-form'}
-            )
+            'periodo_letivo': forms.TextInput(attrs={'placeholder': 'Ex: 2025.1', 'maxlength': 10}),
+            'turma': forms.TextInput(attrs={'placeholder': 'Ex: 3WA', 'maxlength': 10}),
+            'g1': forms.NumberInput(attrs={'min': 0, 'max': 10, 'step': '0.01'}),
+            'g2': forms.NumberInput(attrs={'min': 0, 'max': 10, 'step': '0.01'}),
+            'g3': forms.NumberInput(attrs={'min': 0, 'max': 10, 'step': '0.01'}),
+            'media': forms.NumberInput(attrs={'min': 0, 'max': 10, 'step': '0.01'}),
         }
 
     def clean(self):
         dados = super().clean()
-
         for campo in ['g1', 'g2', 'g3', 'media']:
             nota = dados.get(campo)
-
-            if nota is not None:
-                if nota < 0 or nota > 10:
-                    self.add_error(
-                        campo,
-                        'A nota deve estar entre 0 e 10.'
-                    )
-
+            if nota is not None and (nota < 0 or nota > 10):
+                self.add_error(campo, 'A nota deve estar entre 0 e 10.')
         return dados
 
-class NivelamentoForm(forms.ModelForm):
+    def save(self, perfil):
+        dados = self.cleaned_data
+        registro, _ = HistoricoDisciplina.objects.update_or_create(
+            perfil=perfil,
+            disciplina=dados['disciplina'],
+            defaults={
+                'status': dados['status'],
+                'periodo_letivo': dados['periodo_letivo'].strip(),
+                'turma': dados['turma'].strip(),
+                'g1': dados['g1'],
+                'g2': dados['g2'],
+                'g3': dados['g3'],
+                'media': dados['media'],
+            },
+        )
+        return registro
+
+
+class NivelamentoAlunoForm(forms.ModelForm):
+    """Informa o nível do aluno numa área de nivelamento (um número)."""
+
     class Meta:
-        model = NivelamentoSalvo
-        fields = ['nome', 'area', 'resultado']
+        model = NivelamentoAluno
+        fields = ['area', 'nivel']
+        labels = {'area': 'Área', 'nivel': 'Seu nível'}
+        widgets = {'nivel': forms.NumberInput(attrs={'min': 0, 'max': 99})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['area'].empty_label = 'Escolha a área'
+
+    def save(self, perfil):
+        dados = self.cleaned_data
+        registro, _ = NivelamentoAluno.objects.update_or_create(
+            perfil=perfil,
+            area=dados['area'],
+            defaults={'nivel': dados['nivel']},
+        )
+        return registro

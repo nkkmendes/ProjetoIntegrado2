@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>Fluxa - Perfil</title>
+    <title>Fluxa — Perfil</title>
     <link href="{% static 'perfil.css' %}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
@@ -32,18 +32,28 @@
         </div>
         <div>
             <h2>Dados acadêmicos</h2>
-            <h4>Matrícula</h4>
-            <p>0000000</p>
             <h4>Curso</h4>
             <p>{{ perfil_aluno.curso.nome|default:"Não informado" }}</p>
-            <h4>Ingresso</h4>
-            <p>0000.0</p>
+            <details{% if form_curso.errors %} open{% endif %}>
+                <summary>Alterar curso</summary>
+                <form method="post" action="{% url 'perfil' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="acao" value="curso">
+                    <h4>Curso</h4>
+                    {{ form_curso.curso }}
+                    {{ form_curso.curso.errors }}
+                    <button type="submit">Salvar curso</button>
+                </form>
+            </details>
             <h4>CR acumulado</h4>
-            <p>0,0</p>
+            <p>{% if resumo.cr %}{{ resumo.cr|floatformat:2 }}{% else %}Ainda sem médias no histórico{% endif %}</p>
             <h4>Créditos cumpridos</h4>
-            <p>0 de 250</p>
-            <h4>Período atual</h4>
-            <p>1º</p>
+            <p>{% if resumo.total_curso %}{{ resumo.cumpridos_no_curso }} de {{ resumo.total_curso }} ({{ resumo.percentual }}% do currículo){% else %}{{ resumo.cumpridos }}{% endif %}{% if resumo.fora_do_curso and resumo.total_curso %} + {{ resumo.fora_do_curso }} fora do currículo{% endif %}</p>
+            <h4>Créditos em curso</h4>
+            <p>{{ resumo.em_curso }}</p>
+            <h4>Disciplinas concluídas</h4>
+            <p>{{ resumo.disciplinas_concluidas }}</p>
+            <p class="atalho"><a href="{% url 'historico' %}">Ver e editar meu histórico</a></p>
         </div>
         <div>
             <h2>Segurança</h2>

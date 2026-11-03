@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MatriculaFácil</title>
+  <title>Fluxa — Início</title>
   <link rel="stylesheet" href="{% static 'iniciocss.css' %}">
   <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
@@ -50,6 +50,7 @@
         <div class="card">
           <h2>Instruções Gerais</h2>
           <ol class="ol">
+            <li>Registre no Histórico as disciplinas que você já cursou e o seu nivelamento.</li>
             <li>Consulte o fluxograma do seu curso para entender os pré-requisitos.</li>
             <li>Planeje suas disciplinas usando a ferramenta de Planejamento.</li>
             <li>Simule sua grade de horários ideal no Simulador de Matrícula.</li>
@@ -64,7 +65,7 @@
         <a class="card tool" href="{% url 'planejamento' %}"><div class="ic">▤</div><h3>Planejamento</h3><p>Monte sua grade personalizada período a período de forma simples e intuitiva.</p></a>
         <a class="card tool" href="{% url 'simulacao' %}"><div class="ic">▦</div><h3>Simulador de Matrícula</h3><p>Simule diferentes cenários de horário e choque de matérias antes de confirmar no SAU.</p></a>
         <a class="card tool" href="{% url 'fluxograma' %}"><div class="ic">⤳</div><h3>Fluxograma</h3><p>Visualize graficamente o encadeamento, créditos e fluxos de disciplinas do seu curso.</p></a>
-        <a class="card tool" href="{% url 'nivelamento' %}"><div class="ic">✓</div><h3>Nivelamento</h3><p>Consulte e registre seus níveis de nivelamento.</p></a>
+        <a class="card tool" href="{% url 'historico' %}"><div class="ic">✎</div><h3>Histórico</h3><p>Registre as disciplinas que você já cursou, suas notas, seus créditos e seu nivelamento.</p></a>
         <a class="card tool" href="{% url 'perfil' %}"><div class="ic">◉</div><h3>Meu perfil</h3><p>Veja seus dados pessoais e acadêmicos.</p></a>
       </div>
     </main>

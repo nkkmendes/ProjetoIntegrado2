@@ -32,6 +32,7 @@ button { font: inherit; cursor: pointer; }
 .leg-alvo { border-color: #0f2c4c; }
 .leg-cadeia { border-color: #2563eb; }
 .leg-co { border-color: #7c3aed; }
+.leg-nivel { border-color: #b45309; border-style: dashed; background: #fef3c7; }
 
 .area { display: flex; align-items: flex-start; gap: 16px; }
 .quadro { flex: 1; min-width: 0; max-height: 74vh; min-height: 300px; overflow: auto; border: 1px solid #c3d2e8; background: #fff; scroll-behavior: smooth; }
@@ -45,6 +46,8 @@ button { font: inherit; cursor: pointer; }
 .carta strong { display: block; font-size: 14px; }
 .carta span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.35; }
 .carta:hover { background: #dae7f5; }
+.carta.bloqueada { background: #fef3c7; border: 2px dashed #b45309; }
+.carta .tag-nivel { position: absolute; top: -9px; right: 8px; padding: 1px 7px; background: #b45309; color: #fff; border-radius: 10px; font-size: 11px; font-style: normal; font-weight: bold; }
 
 .grade.com-foco .carta { opacity: .3; }
 .grade.com-foco .carta.alvo,
@@ -61,6 +64,8 @@ button { font: inherit; cursor: pointer; }
 .painel .grupo { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; padding: 4px 0 4px 10px; border-left: 5px solid #6b86a8; }
 .painel .grupo a, .painel .codigos a { padding: 3px 8px; background: #edf2f8; border: 1px solid #9db4d1; border-radius: 6px; font-size: 13px; text-decoration: none; }
 .painel .codigos { display: flex; flex-wrap: wrap; gap: 6px; }
+.aviso-nivel { padding: 6px 8px; background: #edf2f8; border-left: 4px solid #6b86a8; font-size: 13px; }
+.aviso-nivel.bloqueia { background: #fef3c7; border-left-color: #b45309; color: #92400e; font-weight: bold; }
 .item-feito { padding: 3px 8px; font-size: 13px; opacity: .6; }
 .painel .rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
 .painel .rodape form { margin: 0; }

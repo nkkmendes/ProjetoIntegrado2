@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxa — Histórico</title>
+  <link rel="stylesheet" href="{% static 'historico.css' %}">
+  <link rel="stylesheet" href="{% static 'navegacao.css' %}">
+</head>
+<body>
+<div class="fx-layout">
+{% include 'menu.html' %}
+<main>
+  {% include 'mensagens.html' %}
+  <h1>Histórico</h1>
+  <p class="intro">Aqui ficam as disciplinas que você já cursou, suas notas, a contagem de créditos e o seu nivelamento. O <a href="{% url 'fluxograma' %}">Fluxograma</a> usa estes dados: o que você concluiu some do desenho e o nivelamento avisa o que ainda está bloqueado.</p>
+
+  <nav class="atalhos" aria-label="Seções da página">
+    <a href="#resumo">Resumo</a>
+    <a href="#registrar">Registrar disciplina</a>
+    <a href="#cursadas">Disciplinas cursadas</a>
+    <a href="#nivelamento">Nivelamento</a>
+  </nav>
+
+  <section id="resumo" class="bloco">
+    <h2>Contagem de créditos</h2>
+    {% if not perfil.curso %}
+    <p class="aviso">Você ainda não escolheu um curso, então não há currículo para comparar. Escolha o seu em <a href="{% url 'perfil' %}">Meu perfil</a>.</p>
+    {% else %}
+    <p class="sub">Currículo: {{ perfil.curso.nome }}. Os números são calculados a partir das disciplinas abaixo.</p>
+    {% endif %}
+    <ul class="numeros">
+      <li><span class="rotulo">Créditos cumpridos</span><span class="valor ok">{{ resumo.cumpridos }}</span></li>
+      <li><span class="rotulo">Em curso</span><span class="valor">{{ resumo.em_curso }}</span></li>
+      <li><span class="rotulo">Faltam no currículo</span><span class="valor">{% if perfil.curso %}{{ resumo.pendentes }}{% else %}—{% endif %}</span></li>
+      <li><span class="rotulo">Currículo do curso</span><span class="valor">{% if perfil.curso %}{{ resumo.total_curso }}{% else %}—{% endif %}</span></li>
+      <li><span class="rotulo">CR acumulado</span><span class="valor">{% if resumo.cr %}{{ resumo.cr|floatformat:2 }}{% else %}—{% endif %}</span></li>
+    </ul>
+    {% if resumo.total_curso %}
+    <p class="progresso-texto">{{ resumo.percentual }}% do currículo cumprido</p>
+    <progress max="100" value="{{ resumo.percentual }}" aria-label="Progresso do currículo">{{ resumo.percentual }}%</progress>
+    {% endif %}
+    {% if resumo.fora_do_curso and resumo.total_curso %}
+    <p class="sub">{{ resumo.fora_do_curso }} dos créditos cumpridos são de disciplinas que não fazem parte do currículo do seu curso.</p>
+    {% endif %}
+    <p class="sub">O CR é a média das médias informadas, ponderada pelos créditos (disciplinas concluídas e reprovadas).</p>
+  </section>
+
+  <section id="registrar" class="bloco">
+    <h2>{% if editando %}Editando {{ editando.disciplina.codigo }}{% else %}Registrar disciplina{% endif %}</h2>
+    <p class="sub">Informe a disciplina e a situação. As notas são opcionais. Registrar de novo uma disciplina atualiza o registro que já existe.</p>
+    <form method="post" action="{% url 'historico' %}#cursadas">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="historico">
+      {{ form.non_field_errors }}
+      <div class="campos">
+        <p class="largo">{{ form.disciplina.label_tag }}{{ form.disciplina }}{{ form.disciplina.errors }}</p>
+        <p>{{ form.status.label_tag }}{{ form.status }}{{ form.status.errors }}</p>
+        <p>{{ form.periodo_letivo.label_tag }}{{ form.periodo_letivo }}{{ form.periodo_letivo.errors }}</p>
+        <p>{{ form.turma.label_tag }}{{ form.turma }}{{ form.turma.errors }}</p>
+        <p>{{ form.g1.label_tag }}{{ form.g1 }}{{ form.g1.errors }}</p>
+        <p>{{ form.g2.label_tag }}{{ form.g2 }}{{ form.g2.errors }}</p>
+        <p>{{ form.g3.label_tag }}{{ form.g3 }}{{ form.g3.errors }}</p>
+        <p>{{ form.media.label_tag }}{{ form.media }}{{ form.media.errors }}</p>
+      </div>
+      <button type="submit" class="acao">{% if editando %}Salvar alterações{% else %}Salvar no histórico{% endif %}</button>
+      {% if editando %}<a class="sec" href="{% url 'historico' %}">Cancelar edição</a>{% endif %}
+    </form>
+  </section>
+
+  <section id="cursadas" class="bloco">
+    <h2>Disciplinas cursadas ({{ registros|length }})</h2>
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Disciplina</th><th>Créd.</th><th>Período</th><th>Turma</th>
+            <th>G1</th><th>G2</th><th>G3</th><th>Média</th><th>Situação</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in registros %}
+          <tr>
+            <td><strong>{{ r.disciplina.codigo }}</strong></td>
+            <td>{{ r.disciplina.nome }}</td>
+            <td>{{ r.disciplina.creditos }}</td>
+            <td>{{ r.periodo_letivo|default:"—" }}</td>
+            <td>{{ r.turma|default:"—" }}</td>
+            <td>{{ r.g1|default_if_none:"—" }}</td>
+            <td>{{ r.g2|default_if_none:"—" }}</td>
+            <td>{{ r.g3|default_if_none:"—" }}</td>
+            <td>{{ r.media|default_if_none:"—" }}</td>
+            <td><span class="status status-{{ r.status }}">{{ r.get_status_display }}</span></td>
+            <td class="acoes">
+              <a href="{% url 'historico' %}?editar={{ r.disciplina.codigo }}#registrar">Editar</a>
+              <form method="post" action="{% url 'historico_remover' r.disciplina.codigo %}">
+                {% csrf_token %}
+                <button type="submit" aria-label="Remover {{ r.disciplina.codigo }} do histórico">Remover</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="11" class="vazio">Nenhuma disciplina registrada ainda. Use o formulário acima ou marque matérias como concluídas no <a href="{% url 'fluxograma' %}">Fluxograma</a>.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="nivelamento" class="bloco">
+    <h2>Nivelamento</h2>
+    <p class="sub">O nível é um número por área. Algumas disciplinas exigem um nível mínimo: se o seu nível for menor, a disciplina fica bloqueada no Fluxograma, com um aviso. Se você não informar o nível de uma área, nada é bloqueado.</p>
+
+    {% if quadro_nivel %}
+    <form method="post" action="{% url 'historico' %}#nivelamento" class="linha">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="nivel">
+      {{ form_nivel.non_field_errors }}
+      <p>{{ form_nivel.area.label_tag }}{{ form_nivel.area }}{{ form_nivel.area.errors }}</p>
+      <p>{{ form_nivel.nivel.label_tag }}{{ form_nivel.nivel }}{{ form_nivel.nivel.errors }}</p>
+      <button type="submit" class="acao">Salvar nível</button>
+    </form>
+
+    <div class="tabela">
+      <table>
+        <thead>
+          <tr><th>Área</th><th>Seu nível</th><th>Disciplinas que exigem nível</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for linha in quadro_nivel %}
+          <tr>
+            <td><strong>{{ linha.area.nome }}</strong></td>
+            <td>{% if linha.nivel is None %}<span class="neutro">não informado</span>{% else %}{{ linha.nivel }}{% endif %}</td>
+            <td>
+              {% for e in linha.exigencias %}
+              <span class="exige{% if e.bloqueia %} bloqueia{% endif %}">{{ e.codigo }} (nível ≥ {{ e.minimo }})</span>
+              {% empty %}—{% endfor %}
+            </td>
+            <td class="acoes">
+              {% if linha.nivel is not None %}
+              <form method="post" action="{% url 'nivelamento_remover' linha.area.id %}">
+                {% csrf_token %}
+                <button type="submit" aria-label="Remover o nível de {{ linha.area.nome }}">Remover</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="aviso">Ainda não há áreas de nivelamento cadastradas. Elas são cadastradas no painel administrativo (Áreas de nivelamento).</p>
+    {% endif %}
+  </section>
+</main>
+</div>
+</body>
+</html>
