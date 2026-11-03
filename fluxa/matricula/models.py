@@ -16,11 +16,6 @@ class SimulacaoSalva(models.Model):
     nome = models.CharField(max_length=100)
     disciplinas = models.TextField()
 
-class NivelamentoSalvo(models.Model):
-    nome = models.CharField(max_length=100)
-    area = models.CharField(max_length=100)
-    resultado = models.CharField(max_length=100)
-
 class CalendarioMatricula(models.Model):
     periodo = models.CharField(max_length=10)
     inicio_matricula = models.DateField()
@@ -56,11 +51,9 @@ class Disciplina(models.Model):
     codigo = models.CharField(max_length=20, unique=True)
     nome = models.CharField(max_length=200)
     creditos = models.IntegerField()
-    curso = models.ForeignKey(
+    cursos = models.ManyToManyField(
         Curso,
-        null=True,
         blank=True,
-        on_delete=models.SET_NULL,
         related_name='disciplinas'
     )
 
@@ -128,60 +121,130 @@ class PerfilAluno(models.Model):
         return str(self.user)
 
 
-class DisciplinaCursada(models.Model):
+class HistoricoDisciplina(models.Model):
+    """Uma disciplina que o aluno já cursou (ou está cursando), com as notas.
+
+    Substitui DisciplinaCursada, CreditosAluno e GrauAluno: o mesmo registro
+    diz se foi concluída, em que período, e com quais graus."""
+
     CONCLUIDA = 'concluida'
     EM_CURSO = 'em_curso'
+    REPROVADA = 'reprovada'
     STATUS = [
         (CONCLUIDA, 'Concluída'),
         (EM_CURSO, 'Em curso'),
+        (REPROVADA, 'Reprovada'),
     ]
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    perfil = models.ForeignKey(
+        PerfilAluno,
         on_delete=models.CASCADE,
-        related_name='disciplinas_cursadas'
+        related_name='historico'
     )
     disciplina = models.ForeignKey(
         Disciplina,
         on_delete=models.CASCADE,
-        related_name='cursadas'
+        related_name='historico'
     )
     status = models.CharField(max_length=10, choices=STATUS, default=CONCLUIDA)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'disciplina'],
-                name='disciplina_cursada_unica_por_aluno'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} — {self.disciplina.codigo} ({self.get_status_display()})'
-
-
-class CreditosAluno(models.Model):
-    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
-    concluida = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('aluno', 'disciplina')
-
-    def __str__(self):
-        return self.disciplina.nome
-
-
-class GrauAluno(models.Model):
-    aluno = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
-    turma = models.CharField(max_length=10, default='-')
-    periodo_letivo = models.CharField(max_length=10, default='2026.2')
+    periodo_letivo = models.CharField(max_length=10, blank=True, default='')
+    turma = models.CharField(max_length=10, blank=True, default='')
     g1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     g2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     g3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     media = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    situacao = models.CharField(max_length=30, default='Em curso')
+
+    class Meta:
+        ordering = ['-periodo_letivo', 'disciplina__codigo']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['perfil', 'disciplina'],
+                name='historico_unico_por_aluno_e_disciplina'
+            )
+        ]
+
+    @property
+    def tem_notas(self):
+        return any(n is not None for n in (self.g1, self.g2, self.g3, self.media))
 
     def __str__(self):
-        return self.disciplina.nome
+        return f'{self.perfil} — {self.disciplina.codigo} ({self.get_status_display()})'
+
+
+class AreaNivelamentoManager(models.Manager):
+    def get_by_natural_key(self, nome):
+        return self.get(nome=nome)
+
+
+class AreaNivelamento(models.Model):
+    """Uma área em que o aluno faz nivelamento (ex.: Matemática, Inglês)."""
+
+    nome = models.CharField(max_length=100, unique=True)
+
+    objects = AreaNivelamentoManager()
+
+    class Meta:
+        ordering = ['nome']
+
+    def natural_key(self):
+        return (self.nome,)
+
+    def __str__(self):
+        return self.nome
+
+
+class NivelamentoAluno(models.Model):
+    """O nível numérico do aluno numa área. Sem registro = "não informado"."""
+
+    perfil = models.ForeignKey(
+        PerfilAluno,
+        on_delete=models.CASCADE,
+        related_name='niveis'
+    )
+    area = models.ForeignKey(
+        AreaNivelamento,
+        on_delete=models.CASCADE,
+        related_name='niveis_de_alunos'
+    )
+    nivel = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['area__nome']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['perfil', 'area'],
+                name='nivel_unico_por_aluno_e_area'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.perfil} — {self.area}: nível {self.nivel}'
+
+
+class RequisitoNivelamento(models.Model):
+    """Nível mínimo numa área para poder cursar uma disciplina.
+    Vale para todos os cursos, como os pré-requisitos."""
+
+    disciplina = models.ForeignKey(
+        Disciplina,
+        on_delete=models.CASCADE,
+        related_name='requisitos_nivelamento'
+    )
+    area = models.ForeignKey(
+        AreaNivelamento,
+        on_delete=models.CASCADE,
+        related_name='requisitos'
+    )
+    nivel_minimo = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['disciplina__codigo', 'area__nome']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['disciplina', 'area'],
+                name='requisito_nivel_unico_por_disciplina_e_area'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.disciplina.codigo} exige {self.area} ≥ {self.nivel_minimo}'

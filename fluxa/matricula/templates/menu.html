@@ -4,7 +4,7 @@
     <img class="fx-logo" src="{% static 'Logo.jpeg' %}" alt="FLUXA">
 
     <div class="fx-titulo">Meu planejamento</div>
-    <div class="fx-sub">PUC-Rio · Engenharia de Computação</div>
+    <div class="fx-sub">PUC-Rio · {{ user.perfil_aluno.curso.nome|default:"curso não informado" }}</div>
 
     {% if user.is_authenticated %}
     <div class="fx-aluno">
@@ -18,9 +18,7 @@
         <a href="{% url 'planejamento' %}"{% if tela == 'planejamento' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">▤</span>Planejamento</a>
         <a href="{% url 'simulacao' %}"{% if tela == 'simulacao' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">▦</span>Simulador de matrícula</a>
         <a href="{% url 'fluxograma' %}"{% if tela == 'fluxograma' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">⤳</span>Fluxograma</a>
-        <a href="{% url 'notas_periodo' %}"{% if tela == 'notas_periodo' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">✎</span>Consulta de Graus</a>
-        <a href="{% url 'creditos' %}"{% if tela == 'creditos' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">∑</span>Contagem de Créditos</a>
-        <a href="{% url 'nivelamento' %}"{% if tela == 'nivelamento' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">✓</span>Nivelamento</a>
+        <a href="{% url 'historico' %}"{% if tela == 'historico' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">✎</span>Histórico</a>
         <a href="{% url 'perfil' %}"{% if tela == 'perfil' %} class="ativo" aria-current="page"{% endif %}><span class="fx-ic">◉</span>Meu perfil</a>
     </nav>
 

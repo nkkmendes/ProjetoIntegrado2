@@ -140,7 +140,8 @@ main summary {
     cursor: pointer;
 }
 
-main input {
+main input,
+main select {
     display: block;
     width: 100%;
     max-width: 360px;
@@ -159,4 +160,12 @@ main .errorlist {
     list-style: none;
     font-size: 13px;
     color: #B91C1C;
+}
+main a {
+    color: #1D4E78;
+    font-weight: bold;
+}
+
+main .atalho {
+    margin-top: 20px;
 }

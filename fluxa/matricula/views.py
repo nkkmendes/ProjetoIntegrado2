@@ -12,15 +12,16 @@ from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import (
-    CalendarioMatricula, Disciplina, Curso, PerfilAluno,
-    DisciplinaCursada, CreditosAluno, GrauAluno,
+    CalendarioMatricula, Disciplina, HistoricoDisciplina,
+    PlanejamentoSalvo, SimulacaoSalva,
 )
-from .forms import LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm
-
-from .models import PlanejamentoSalvo, SimulacaoSalva, NivelamentoSalvo
-from .forms import PlanejamentoForm, SimulacaoForm, NivelamentoForm, CreditosAlunoForm, GrauAlunoForm
-
-from django.db.models import F, Q, Sum
+from .forms import (
+    LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm,
+    PerfilCursoForm, PlanejamentoForm, SimulacaoForm, HistoricoForm, NivelamentoAlunoForm,
+)
+from .servicos import (
+    obter_perfil, resumo_creditos, avisos_de_nivel, quadro_de_nivelamento,
+)
 
 def inicio(request):
     return render(request, 'index.html')
@@ -146,60 +147,79 @@ def simulacao(request):
 
 
 @login_required
-def nivelamento(request):
-    form = NivelamentoForm(request.POST or None)
+def historico(request):
+    """Tela única do aluno: disciplinas já cursadas (com notas), contagem de
+    créditos e nivelamento. Une as antigas telas de Nivelamento, Consulta de
+    Graus e Contagem de Créditos."""
+    perfil = obter_perfil(request.user)
 
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('nivelamento')
+    editar = request.GET.get('editar', '').strip().upper()
+    registro_editado = None
+    if editar:
+        registro_editado = perfil.historico.filter(
+            disciplina__codigo=editar
+        ).select_related('disciplina').first()
 
-    registros = NivelamentoSalvo.objects.all()
+    form = HistoricoForm(instance=registro_editado) if registro_editado else HistoricoForm()
+    form_nivel = NivelamentoAlunoForm()
 
-    return render(request, 'nivelamento.html', {
+    if request.method == 'POST':
+        acao = request.POST.get('acao')
+
+        if acao == 'historico':
+            form = HistoricoForm(request.POST)
+            if form.is_valid():
+                registro = form.save(perfil)
+                messages.success(request, f'{registro.disciplina.codigo} salva no histórico.')
+                return redirect('historico')
+
+        elif acao == 'nivel':
+            form_nivel = NivelamentoAlunoForm(request.POST)
+            if form_nivel.is_valid():
+                registro = form_nivel.save(perfil)
+                messages.success(
+                    request, f'Nível de {registro.area.nome} salvo: {registro.nivel}.'
+                )
+                return redirect(reverse('historico') + '#nivelamento')
+
+    registros = perfil.historico.select_related('disciplina').order_by(
+        '-periodo_letivo', 'disciplina__codigo'
+    )
+
+    return render(request, 'historico.html', {
+        'perfil': perfil,
         'form': form,
-        'dados': registros
-    })
-
-@login_required(login_url='login')
-def contagem_creditos(request):
-    form = CreditosAlunoForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        credito = form.save(commit=False)
-        CreditosAluno.objects.update_or_create(
-            aluno=request.user,
-            disciplina=credito.disciplina,
-            defaults={'concluida': credito.concluida}
-        )
-        return redirect('creditos')
-    registros = CreditosAluno.objects.filter(aluno=request.user).select_related('disciplina').order_by('disciplina__nome')
-    total_cumprido = registros.filter(concluida=True).aggregate(total=Sum('disciplina__creditos'))['total'] or 0
-    total_curriculo = Disciplina.objects.aggregate(total=Sum('creditos'))['total'] or 0
-    total_pendente = max(total_curriculo - total_cumprido, 0)
-    return render(request, 'contagem-creditos.html', {
-        'form': form, 'registros': registros,
-        'total_curriculo': total_curriculo,
-        'total_cumprido': total_cumprido,
-        'total_pendente': total_pendente
+        'editando': registro_editado,
+        'form_nivel': form_nivel,
+        'registros': registros,
+        'resumo': resumo_creditos(perfil),
+        'quadro_nivel': quadro_de_nivelamento(perfil),
     })
 
 
-@login_required(login_url='login')
-def notas_periodo(request):
-    form = GrauAlunoForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        grau = form.save(commit=False)
-        grau.aluno = request.user
-        existente = GrauAluno.objects.filter(
-            aluno=request.user,
-            disciplina=grau.disciplina,
-            periodo_letivo=grau.periodo_letivo
-        ).first()
-        if existente:
-            grau.pk = existente.pk
-        grau.save()
-        return redirect('notas_periodo')
-    graus = GrauAluno.objects.filter(aluno=request.user).select_related('disciplina').order_by('-periodo_letivo', 'disciplina__nome')
-    return render(request, 'notas-periodo.html', {'form': form, 'graus': graus})
+@login_required
+@require_POST
+def historico_remover(request, codigo):
+    perfil = obter_perfil(request.user)
+    apagados, _ = perfil.historico.filter(disciplina__codigo__iexact=codigo).delete()
+    if apagados:
+        messages.success(request, f'{codigo.upper()} removida do histórico.')
+    else:
+        messages.error(request, f'{codigo.upper()} não estava no seu histórico.')
+    return redirect('historico')
+
+
+@login_required
+@require_POST
+def nivelamento_remover(request, area_id):
+    perfil = obter_perfil(request.user)
+    registro = perfil.niveis.filter(area_id=area_id).select_related('area').first()
+    if registro:
+        nome = registro.area.nome
+        registro.delete()
+        messages.success(request, f'Nível de {nome} removido (agora: não informado).')
+    return redirect(reverse('historico') + '#nivelamento')
+
 
 def telaErro(request, titulo='Algo deu errado', mensagem='Não foi possível carregar esta página.', status=200):
     return render(request, 'erro.html', {
@@ -215,12 +235,10 @@ def erro_500(request):
 
 @login_required
 def perfil(request):
+    perfil_aluno = obter_perfil(request.user)
     form_nome = PerfilNomeForm(initial={'nome': request.user.get_full_name()})
     form_senha = TrocarSenhaForm(request.user)
-    perfil_aluno, _ = PerfilAluno.objects.get_or_create(
-        user=request.user,
-        defaults={'curso': Curso.objects.first()},
-    )
+    form_curso = PerfilCursoForm(instance=perfil_aluno)
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
@@ -230,6 +248,13 @@ def perfil(request):
             if form_nome.is_valid():
                 form_nome.save(request.user)
                 messages.success(request, 'Nome atualizado com sucesso.')
+                return redirect('perfil')
+
+        elif acao == 'curso':
+            form_curso = PerfilCursoForm(request.POST, instance=perfil_aluno)
+            if form_curso.is_valid():
+                form_curso.save()
+                messages.success(request, 'Curso atualizado. O fluxograma já usa o novo curso.')
                 return redirect('perfil')
 
         elif acao == 'senha':
@@ -243,7 +268,9 @@ def perfil(request):
     return render(request, 'perfil.html', {
         'form_nome': form_nome,
         'form_senha': form_senha,
+        'form_curso': form_curso,
         'perfil_aluno': perfil_aluno,
+        'resumo': resumo_creditos(perfil_aluno),
     })
 
 def ordenar_por_camada(disciplinas):
@@ -256,7 +283,9 @@ def ordenar_por_camada(disciplinas):
     for d in todas:
         for grupo in d.grupos_pre_requisito.all():
             for item in grupo.disciplinas.all():
-                exigidas[d.codigo].add(item.codigo)
+                # só conta pré-requisito que também está no curso mostrado
+                if item.codigo in exigidas:
+                    exigidas[d.codigo].add(item.codigo)
 
     camadas = {}
 
@@ -383,31 +412,47 @@ def _desenhar_setas(foco, cadeia, co_foco, info):
 
 @login_required
 def fluxograma(request):
-    disciplinas = Disciplina.objects.prefetch_related(
-        'grupos_pre_requisito__disciplinas',
-        'co_requisitos',
-        'associadas',
-    )
-    lista = ordenar_por_camada(disciplinas)
+    perfil = obter_perfil(request.user)
+    curso = perfil.curso
 
-    concluidas = set(
-        DisciplinaCursada.objects.filter(
-            user=request.user, status=DisciplinaCursada.CONCLUIDA
-        ).values_list('disciplina__codigo', flat=True)
+    # O fluxograma é do curso guardado no perfil do aluno.
+    if curso is None:
+        disciplinas = Disciplina.objects.none()
+    else:
+        disciplinas = curso.disciplinas.prefetch_related(
+            'grupos_pre_requisito__disciplinas',
+            'co_requisitos',
+            'associadas',
+        )
+    lista = ordenar_por_camada(disciplinas)
+    codigos_curso = {d.codigo for d in lista}
+
+    # Situação do aluno no histórico: o que já passou e o que está cursando.
+    situacoes = dict(
+        perfil.historico.values_list('disciplina__codigo', 'status')
     )
+    concluidas = {c for c, st in situacoes.items() if st == HistoricoDisciplina.CONCLUIDA}
+    em_curso = {c for c, st in situacoes.items() if st == HistoricoDisciplina.EM_CURSO}
+
+    avisos = avisos_de_nivel(perfil, lista)
 
     info = {}
     usadas = set()
     for d in lista:
-        grupos = [
-            sorted(i.codigo for i in grupo.disciplinas.all())
-            for grupo in d.grupos_pre_requisito.all()
-        ]
+        # Pré-requisitos valem para todos os cursos, mas só desenhamos os que
+        # fazem parte do curso mostrado.
+        grupos = []
+        for grupo in d.grupos_pre_requisito.all():
+            membros = sorted(
+                i.codigo for i in grupo.disciplinas.all() if i.codigo in codigos_curso
+            )
+            if membros:
+                grupos.append(membros)
         for membros in grupos:
             usadas.update(membros)
         co = sorted(
-            {i.codigo for i in d.co_requisitos.all()} |
-            {i.codigo for i in d.associadas.all()}
+            ({i.codigo for i in d.co_requisitos.all()} |
+             {i.codigo for i in d.associadas.all()}) & codigos_curso
         )
         info[d.codigo] = {'obj': d, 'grupos': grupos, 'co': co}
 
@@ -422,6 +467,8 @@ def fluxograma(request):
         d.isolada = not dados['grupos'] and not dados['co'] and codigo not in usadas
         d.concluida = codigo in concluidas
         d.classe = ''
+        d.avisos_nivel = avisos.get(codigo, [])
+        d.bloqueada = any(a['bloqueia'] for a in d.avisos_nivel)
         dados['concluida'] = d.concluida
 
     foco = request.GET.get('foco', '').strip().upper()
@@ -505,12 +552,14 @@ def fluxograma(request):
             'co': itens(info[foco]['co']),
             'dependentes': itens(dependentes.get(foco, [])),
             'sem_relacoes': d.isolada,
+            'avisos_nivel': d.avisos_nivel,
+            'em_curso': foco in em_curso,
         }
 
     feitas = [info[c]['obj'] for c in sorted(concluidas) if c in info]
 
     return render(request, 'fluxograma.html', {
-        'curso': 'computacao',
+        'curso': curso,
         'cabecalhos': cabecalhos,
         'cartas': [d for d in lista if not d.isolada and not d.concluida],
         'isoladas': [d for d in lista if d.isolada and not d.concluida],
@@ -524,11 +573,8 @@ def fluxograma(request):
         'aviso': aviso,
         'resultados': resultados,
         'concluidas': feitas,
+        'total_disciplinas': len(lista),
     })
-
-@login_required
-def filtrar_disciplinas(request):
-    return redirect('fluxograma')
 
 def _buscar_disciplina(codigo):
     try:
@@ -542,6 +588,7 @@ def detalhes_disciplina(request, codigo):
     if disciplina is None:
         return JsonResponse({'erro': f'Não existe disciplina com o código {codigo}.'}, status=404)
 
+    perfil = obter_perfil(request.user)
     grupos = [
         sorted(d.codigo for d in grupo.disciplinas.all())
         for grupo in disciplina.grupos_pre_requisito.prefetch_related('disciplinas')
@@ -551,6 +598,7 @@ def detalhes_disciplina(request, codigo):
         'codigo': disciplina.codigo,
         'nome': disciplina.nome,
         'creditos': disciplina.creditos,
+        'cursos': [c.nome for c in disciplina.cursos.all()],
         'pre_requisitos': [
             d.codigo for d in disciplina.pre_requisitos.all()
         ],
@@ -561,10 +609,10 @@ def detalhes_disciplina(request, codigo):
         ),
         'dependentes': [d.codigo for d in disciplina.dependentes.all()],
         'creditos_minimos': disciplina.creditos_minimos,
-        'concluida': DisciplinaCursada.objects.filter(
-            user=request.user,
+        'avisos_nivel': avisos_de_nivel(perfil, [disciplina]).get(disciplina.codigo, []),
+        'concluida': perfil.historico.filter(
             disciplina=disciplina,
-            status=DisciplinaCursada.CONCLUIDA,
+            status=HistoricoDisciplina.CONCLUIDA,
         ).exists(),
     }
 
@@ -578,19 +626,33 @@ def marcar_concluida(request, codigo):
         messages.error(request, f'Não existe disciplina com o código {codigo}.')
         return redirect('fluxograma')
 
+    perfil = obter_perfil(request.user)
     foco = request.POST.get('foco', '').strip().upper()
 
     if request.POST.get('acao') == 'concluir':
-        DisciplinaCursada.objects.update_or_create(
-            user=request.user,
+        # Só muda a situação: se o aluno já tinha notas dessa disciplina, elas ficam.
+        HistoricoDisciplina.objects.update_or_create(
+            perfil=perfil,
             disciplina=disciplina,
-            defaults={'status': DisciplinaCursada.CONCLUIDA},
+            defaults={'status': HistoricoDisciplina.CONCLUIDA},
         )
         messages.success(request, f'{disciplina.codigo} marcada como concluída.')
         if foco == disciplina.codigo:
             foco = ''
         return redirect(_url_fluxograma(foco))
 
-    DisciplinaCursada.objects.filter(user=request.user, disciplina=disciplina).delete()
-    messages.success(request, f'{disciplina.codigo} voltou para o fluxograma.')
+    registro = perfil.historico.filter(disciplina=disciplina).first()
+    if registro and registro.status == HistoricoDisciplina.CONCLUIDA:
+        if registro.tem_notas:
+            # Não apaga as notas que o aluno digitou no Histórico.
+            registro.status = HistoricoDisciplina.EM_CURSO
+            registro.save(update_fields=['status'])
+            messages.success(
+                request,
+                f'{disciplina.codigo} voltou para o fluxograma '
+                '(as notas continuam no seu Histórico, como "Em curso").'
+            )
+        else:
+            registro.delete()
+            messages.success(request, f'{disciplina.codigo} voltou para o fluxograma.')
     return redirect(_url_fluxograma(foco, disciplina.codigo))

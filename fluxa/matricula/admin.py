@@ -1,13 +1,20 @@
 from django.contrib import admin
 
 from .models import (
+    AreaNivelamento,
     CalendarioMatricula,
-    PlanejamentoSalvo,
-    NivelamentoSalvo,
+    Curso,
     Disciplina,
-    GrupoPreRequisito
+    GrupoPreRequisito,
+    HistoricoDisciplina,
+    NivelamentoAluno,
+    PerfilAluno,
+    PlanejamentoSalvo,
+    RequisitoNivelamento,
 )
 
+
+# INÍCIO
 @admin.register(CalendarioMatricula)
 class CalendarioMatriculaAdmin(admin.ModelAdmin):
     list_display = (
@@ -18,6 +25,8 @@ class CalendarioMatriculaAdmin(admin.ModelAdmin):
     )
     search_fields = ('periodo',)
 
+
+# PLANEJAMENTO
 @admin.register(PlanejamentoSalvo)
 class PlanejamentoSalvoAdmin(admin.ModelAdmin):
     list_display = (
@@ -31,15 +40,17 @@ class PlanejamentoSalvoAdmin(admin.ModelAdmin):
     )
     list_filter = ('periodo',)
 
-@admin.register(NivelamentoSalvo)
-class NivelamentoSalvoAdmin(admin.ModelAdmin):
-    list_display = (
-        'nome',
-        'area',
-        'resultado'
-    )
-    search_fields = ('nome', 'area')
-    list_filter = ('area',)
+
+# CURSOS E DISCIPLINAS
+@admin.register(Curso)
+class CursoAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'total_disciplinas')
+    search_fields = ('nome',)
+
+    @admin.display(description='Disciplinas')
+    def total_disciplinas(self, curso):
+        return curso.disciplinas.count()
+
 
 class GrupoPreRequisitoInline(admin.TabularInline):
     model = GrupoPreRequisito
@@ -47,15 +58,58 @@ class GrupoPreRequisitoInline(admin.TabularInline):
     extra = 0
     filter_horizontal = ('disciplinas',)
 
+
+class RequisitoNivelamentoInline(admin.TabularInline):
+    model = RequisitoNivelamento
+    extra = 0
+
+
 @admin.register(Disciplina)
 class DisciplinaAdmin(admin.ModelAdmin):
     list_display = (
         'codigo',
         'nome',
-        'creditos'
+        'creditos',
+        'lista_cursos',
     )
     search_fields = ('codigo', 'nome')
+    list_filter = ('cursos',)
     filter_horizontal = (
+        'cursos',
         'co_requisitos',
     )
-    inlines = [GrupoPreRequisitoInline]
+    inlines = [GrupoPreRequisitoInline, RequisitoNivelamentoInline]
+
+    @admin.display(description='Cursos')
+    def lista_cursos(self, disciplina):
+        return ', '.join(c.nome for c in disciplina.cursos.all())
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('cursos')
+
+
+# NIVELAMENTO
+@admin.register(AreaNivelamento)
+class AreaNivelamentoAdmin(admin.ModelAdmin):
+    list_display = ('nome',)
+    search_fields = ('nome',)
+
+
+# ALUNOS
+class HistoricoDisciplinaInline(admin.TabularInline):
+    model = HistoricoDisciplina
+    extra = 0
+    autocomplete_fields = ('disciplina',)
+
+
+class NivelamentoAlunoInline(admin.TabularInline):
+    model = NivelamentoAluno
+    extra = 0
+
+
+@admin.register(PerfilAluno)
+class PerfilAlunoAdmin(admin.ModelAdmin):
+    list_display = ('user', 'curso')
+    list_filter = ('curso',)
+    search_fields = ('user__username', 'user__first_name', 'user__last_name')
+    inlines = [NivelamentoAlunoInline, HistoricoDisciplinaInline]

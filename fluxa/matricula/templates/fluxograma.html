@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fluxograma de Engenharia de Computação</title>
-  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=4">
+  <title>Fluxa — Fluxograma</title>
+  <link rel="stylesheet" href="{% static 'fluxograma.css' %}?v=5">
   <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
 <body>
@@ -14,7 +14,10 @@
 <main>
   {% include 'mensagens.html' %}
   <h1>Fluxograma de matérias</h1>
-  <p>Engenharia de Computação — PUC-Rio</p>
+  {% if not curso %}
+  <p class="busca-aviso" role="status">Você ainda não escolheu um curso. Escolha o seu em <a href="{% url 'perfil' %}">Meu perfil</a> para ver o fluxograma.</p>
+  {% else %}
+  <p>{{ curso.nome }} — PUC-Rio. As matérias que você já concluiu não aparecem no desenho; elas ficam na lista "Concluídas" e vêm do seu <a href="{% url 'historico' %}">Histórico</a>.</p>
   <p>Clique numa matéria para ver tudo o que ela exige: a cadeia de pré-requisitos fica em azul, os co-requisitos em roxo, e as setas mostram o caminho.</p>
 
   <form class="busca" method="get" action="{% url 'fluxograma' %}" role="search">
@@ -63,6 +66,7 @@
     <li><span class="leg leg-alvo"></span> Selecionada</li>
     <li><span class="leg leg-cadeia"></span> Pré-requisito (direto ou indireto)</li>
     <li><span class="leg leg-co"></span> Co-requisito</li>
+    <li><span class="leg leg-nivel"></span> Nível de nivelamento insuficiente</li>
   </ul>
 
   <div class="area">
@@ -90,13 +94,14 @@
         {% endfor %}
 
         {% for d in cartas %}
-        <a class="carta {{ d.classe }}" id="c-{{ d.codigo }}" style="left: {{ d.x }}px; top: {{ d.y }}px;"
-           href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}">
+        <a class="carta {{ d.classe }}{% if d.bloqueada %} bloqueada{% endif %}" id="c-{{ d.codigo }}" style="left: {{ d.x }}px; top: {{ d.y }}px;"
+           href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}{% if d.bloqueada %} (nível de nivelamento insuficiente){% endif %}">
           <strong>{{ d.codigo }}</strong>
           <span>{{ d.nome }}</span>
+          {% if d.bloqueada %}<em class="tag-nivel">nível</em>{% endif %}
         </a>
         {% empty %}
-        <p class="vazio">Nenhuma disciplina para mostrar.</p>
+        <p class="vazio">{% if total_disciplinas %}Nenhuma matéria com pré-requisito pendente.{% else %}Este curso ainda não tem disciplinas cadastradas.{% endif %}</p>
         {% endfor %}
       </div>
     </div>
@@ -105,6 +110,15 @@
     <aside class="painel" aria-label="Detalhes da matéria selecionada">
       <h2>{{ painel.codigo }} — {{ painel.nome }}</h2>
       <p>{{ painel.creditos }} créditos</p>
+      {% if painel.em_curso %}<p>Você está cursando esta matéria.</p>{% endif %}
+
+      {% if painel.avisos_nivel %}
+      <h3>Nivelamento</h3>
+      {% for a in painel.avisos_nivel %}
+      <p class="aviso-nivel{% if a.bloqueia %} bloqueia{% endif %}">{{ a.texto }}</p>
+      {% endfor %}
+      <p><a href="{% url 'historico' %}#nivelamento">Informar meu nível</a></p>
+      {% endif %}
 
       {% if painel.sem_relacoes %}
       <p>Esta matéria não exige nem é exigida por nenhuma outra.</p>
@@ -154,14 +168,16 @@
     <p>Não exigem nem são exigidas por nenhuma outra matéria.</p>
     <div class="isoladas-lista">
       {% for d in isoladas %}
-      <a class="carta {{ d.classe }}" id="c-{{ d.codigo }}"
-         href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}">
+      <a class="carta {{ d.classe }}{% if d.bloqueada %} bloqueada{% endif %}" id="c-{{ d.codigo }}"
+         href="{% url 'fluxograma' %}?foco={{ d.codigo }}#c-{{ d.codigo }}" title="{{ d.codigo }} — {{ d.nome }}{% if d.bloqueada %} (nível de nivelamento insuficiente){% endif %}">
         <strong>{{ d.codigo }}</strong>
         <span>{{ d.nome }}</span>
+        {% if d.bloqueada %}<em class="tag-nivel">nível</em>{% endif %}
       </a>
       {% endfor %}
     </div>
   </section>
+  {% endif %}
   {% endif %}
 </main>
 </div>

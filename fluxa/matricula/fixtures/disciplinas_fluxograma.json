@@ -6,13 +6,21 @@
     }
   },
   {
+    "model": "matricula.curso",
+    "fields": {
+      "nome": "Engenharia de Produção"
+    }
+  },
+  {
     "model": "matricula.disciplina",
     "fields": {
       "codigo": "ENG4010",
       "nome": "Projeto Integrado - Sustentabilidade",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [
         [
@@ -31,8 +39,10 @@
       "codigo": "EMP1310",
       "nome": "Comunicação e Trabalho em Equipe",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -44,8 +54,10 @@
       "codigo": "ENG4025",
       "nome": "Ciências Ambientais",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -57,8 +69,10 @@
       "codigo": "CTC4001",
       "nome": "Instrumentação e Medição",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -70,8 +84,10 @@
       "codigo": "CTC4002",
       "nome": "Modelagem e Programação",
       "creditos": 6,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -83,8 +99,10 @@
       "codigo": "CTC4003",
       "nome": "Desenho Técnico e Geometria Analítica",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -96,8 +114,10 @@
       "codigo": "CRE1200",
       "nome": "O Humano e o Fenômeno Religioso",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -109,8 +129,10 @@
       "codigo": "ENG4021",
       "nome": "Projeto Integrado - Software",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [
         [
@@ -129,8 +151,10 @@
       "codigo": "EMP1320",
       "nome": "Criação de Oportunidade",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -142,8 +166,10 @@
       "codigo": "INF1037",
       "nome": "Programação em C",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -155,8 +181,10 @@
       "codigo": "MAT4161",
       "nome": "Cálculo a uma Variável",
       "creditos": 6,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -168,8 +196,10 @@
       "codigo": "FIS4001",
       "nome": "Física I",
       "creditos": 5,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -181,8 +211,10 @@
       "codigo": "MAT4200",
       "nome": "Álgebra Linear I",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -194,8 +226,10 @@
       "codigo": "INF1012",
       "nome": "Modelagem de Dados",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -207,8 +241,10 @@
       "codigo": "INF1009",
       "nome": "Lógica para Computação",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -220,8 +256,10 @@
       "codigo": "ENG0425",
       "nome": "Optativas de Fundamentos à Eletrônica",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -233,8 +271,10 @@
       "codigo": "ENG4033",
       "nome": "Projeto Programação de Microcontroladores",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -246,8 +286,10 @@
       "codigo": "ENG4420",
       "nome": "Circuitos Elétricos e Eletrônicos I",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -259,8 +301,10 @@
       "codigo": "MAT4162",
       "nome": "Cálculo a Várias Variáveis I",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -272,8 +316,10 @@
       "codigo": "FIS4002",
       "nome": "Física II",
       "creditos": 5,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -285,8 +331,10 @@
       "codigo": "MAT4202",
       "nome": "Álgebra Linear II",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -298,8 +346,10 @@
       "codigo": "INF1383",
       "nome": "Banco de Dados",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -311,8 +361,10 @@
       "codigo": "ENG4007",
       "nome": "Introdução à Mecânica dos Sólidos",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -324,8 +376,10 @@
       "codigo": "ENG4040",
       "nome": "Projeto Integrado - Ciência de Dados",
       "creditos": 3,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [
         [
@@ -344,8 +398,10 @@
       "codigo": "ENG4502",
       "nome": "Introdução à Ciência de Dados",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -357,8 +413,10 @@
       "codigo": "ENG4501",
       "nome": "Probabilidade e Estatística Computacional",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -370,8 +428,10 @@
       "codigo": "ENG4402",
       "nome": "Engenharia de Dados",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -383,8 +443,10 @@
       "codigo": "MAT4174",
       "nome": "Equações Diferenciais, Sinais e Sistemas",
       "creditos": 6,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -396,8 +458,10 @@
       "codigo": "INF1010",
       "nome": "Estruturas de Dados Avançadas",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -409,8 +473,10 @@
       "codigo": "INF1018",
       "nome": "Software Básico",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -422,8 +488,10 @@
       "codigo": "ENG4011",
       "nome": "Fenômenos de Transporte I",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -435,8 +503,10 @@
       "codigo": "ENG0434",
       "nome": "Optativas de Eletrônica Digital",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -448,8 +518,10 @@
       "codigo": "INF0382",
       "nome": "Optativas de Programação Modular",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -461,8 +533,10 @@
       "codigo": "ENG4051",
       "nome": "Projeto Internet das Coisas",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -474,8 +548,10 @@
       "codigo": "ENG4421",
       "nome": "Circuitos Elétricos e Eletrônicos II",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -487,8 +563,10 @@
       "codigo": "MAT1320",
       "nome": "Introdução Matemática Discreta",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -500,8 +578,10 @@
       "codigo": "FIS4003",
       "nome": "Física III",
       "creditos": 6,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -513,8 +593,10 @@
       "codigo": "ENG4061",
       "nome": "Projeto Robótica",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -526,8 +608,10 @@
       "codigo": "ENG4448",
       "nome": "Computação Digital",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -539,8 +623,10 @@
       "codigo": "INF1022",
       "nome": "Analisadores Léxicos e Sintáticos",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -552,8 +638,10 @@
       "codigo": "INF1631",
       "nome": "Estruturas Discretas",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -565,8 +653,10 @@
       "codigo": "INF1636",
       "nome": "Programação Orientada a Objetos",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -578,8 +668,10 @@
       "codigo": "INF1316",
       "nome": "Sistemas Operacionais",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -591,8 +683,10 @@
       "codigo": "CRE0712",
       "nome": "Optativas de Cristianismo",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -604,8 +698,10 @@
       "codigo": "ENG4405",
       "nome": "Materiais para Eletrônica e Computação",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -617,8 +713,10 @@
       "codigo": "INF1721",
       "nome": "Análise de Algoritmos",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -630,8 +728,10 @@
       "codigo": "ENG4451",
       "nome": "Arquitetura de Computadores",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -643,8 +743,10 @@
       "codigo": "INF1643",
       "nome": "Redes de Comunicação de Dados",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -656,8 +758,10 @@
       "codigo": "INF1027",
       "nome": "Teste e Medição de Software",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -669,8 +773,10 @@
       "codigo": "INF0383",
       "nome": "Optativas de Engenharia de Software",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -682,8 +788,10 @@
       "codigo": "CRE1241",
       "nome": "Ética Cristã",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -695,8 +803,10 @@
       "codigo": "ENG4030",
       "nome": "Projeto Integrado - Empreendedorismo",
       "creditos": 3,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [
         [
@@ -712,8 +822,10 @@
       "codigo": "EMP1330",
       "nome": "Mentalidade Empreendedora",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -725,8 +837,10 @@
       "codigo": "ENG0558",
       "nome": "Opt. de Administração e Economia para Eng.",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -738,8 +852,10 @@
       "codigo": "INF0312",
       "nome": "Optativas de Programação Avançada para Engenharia",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -751,8 +867,10 @@
       "codigo": "INF0303",
       "nome": "Optativas de Inteligência Artificial",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -764,8 +882,10 @@
       "codigo": "INF0305",
       "nome": "Optativas de Computação Científica",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -777,8 +897,10 @@
       "codigo": "JUR0205",
       "nome": "Optativas de Direito para CTC",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -790,8 +912,10 @@
       "codigo": "ENG4134",
       "nome": "Projeto de Graduação em Eng. da Computação I",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 160
@@ -803,8 +927,10 @@
       "codigo": "ELL0900",
       "nome": "Eletivas Livres - Dentro/Fora Departamento",
       "creditos": 6,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -816,8 +942,10 @@
       "codigo": "ELO0900",
       "nome": "Eletivas de Orientação",
       "creditos": 8,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -829,8 +957,10 @@
       "codigo": "FIL0300",
       "nome": "Optativas de Filosofia - CB/CTC",
       "creditos": 4,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -842,8 +972,10 @@
       "codigo": "INF1014",
       "nome": "Seminários",
       "creditos": 1,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -855,8 +987,10 @@
       "codigo": "CRE1275",
       "nome": "Ética Socioambiental e Direitos Humanos",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 100
@@ -868,8 +1002,10 @@
       "codigo": "ENG4135",
       "nome": "Projeto de Graduação em Eng. da Computação II",
       "creditos": 2,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
@@ -881,8 +1017,10 @@
       "codigo": "ENG4153",
       "nome": "Estágio Supervisionado em Eng. da Computação",
       "creditos": 1,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 160
@@ -894,8 +1032,10 @@
       "codigo": "ACP0900",
       "nome": "Atividades Complementares",
       "creditos": 10,
-      "curso": [
-        "Engenharia de Computação"
+      "cursos": [
+        [
+          "Engenharia de Computação"
+        ]
       ],
       "co_requisitos": [],
       "creditos_minimos": 0
