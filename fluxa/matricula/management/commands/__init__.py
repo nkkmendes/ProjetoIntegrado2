@@ -1,2 +1,0 @@
-
-# Comandos do FLUXA
