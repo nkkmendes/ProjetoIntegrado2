@@ -1,6 +1,8 @@
 import unicodedata
 from urllib.parse import urlencode
 
+from .catalogos_fluxa import relacoes_do_curso
+
 from django.shortcuts import render, redirect, resolve_url
 from django.http import JsonResponse
 from django.contrib import messages
@@ -411,11 +413,13 @@ def _desenhar_setas(foco, cadeia, co_foco, info):
 
 
 @login_required
+
+@login_required
 def fluxograma(request):
     perfil = obter_perfil(request.user)
     curso = perfil.curso
 
-    # O fluxograma é do curso guardado no perfil do aluno.
+    # Buscar as disciplinas do curso escolhido
     if curso is None:
         disciplinas = Disciplina.objects.none()
     else:
@@ -424,145 +428,336 @@ def fluxograma(request):
             'co_requisitos',
             'associadas',
         )
+
+    # Computação mantém a organização original
     lista = ordenar_por_camada(disciplinas)
+
+    # Produção e os novos cursos usam suas próprias grades
+    relacoes = relacoes_do_curso(curso.nome) if curso else None
+    por_periodo = bool(relacoes)
+
+    if por_periodo:
+        for d in lista:
+            periodo = relacoes.get(d.codigo, {}).get('periodo')
+
+            if isinstance(periodo, int) and 1 <= periodo <= 10:
+                d.camada = periodo - 1
+            else:
+                d.camada = 10
+
+        lista.sort(key=lambda d: (d.camada, d.codigo))
+
     codigos_curso = {d.codigo for d in lista}
 
-    # Situação do aluno no histórico: o que já passou e o que está cursando.
+    # Consultar o histórico do aluno
     situacoes = dict(
-        perfil.historico.values_list('disciplina__codigo', 'status')
+        perfil.historico.values_list(
+            'disciplina__codigo',
+            'status'
+        )
     )
-    concluidas = {c for c, st in situacoes.items() if st == HistoricoDisciplina.CONCLUIDA}
-    em_curso = {c for c, st in situacoes.items() if st == HistoricoDisciplina.EM_CURSO}
+
+    concluidas = {
+        codigo
+        for codigo, status in situacoes.items()
+        if status == HistoricoDisciplina.CONCLUIDA
+    }
+
+    em_curso = {
+        codigo
+        for codigo, status in situacoes.items()
+        if status == HistoricoDisciplina.EM_CURSO
+    }
 
     avisos = avisos_de_nivel(perfil, lista)
 
+    # Organizar pré-requisitos e co-requisitos
     info = {}
     usadas = set()
+
     for d in lista:
-        # Pré-requisitos valem para todos os cursos, mas só desenhamos os que
-        # fazem parte do curso mostrado.
-        grupos = []
-        for grupo in d.grupos_pre_requisito.all():
-            membros = sorted(
-                i.codigo for i in grupo.disciplinas.all() if i.codigo in codigos_curso
+
+        if por_periodo:
+            dados = relacoes.get(d.codigo, {})
+
+            d.nome = dados.get('nome', d.nome)
+            d.creditos = dados.get('creditos', d.creditos)
+
+            grupos = [
+                sorted(
+                    codigo
+                    for codigo in grupo
+                    if codigo in codigos_curso
+                )
+                for grupo in dados.get('grupos', [])
+            ]
+
+            grupos = [grupo for grupo in grupos if grupo]
+
+            co = sorted(
+                set(dados.get('co', [])) & codigos_curso
             )
-            if membros:
-                grupos.append(membros)
+
+        else:
+            # Pré-requisitos originais de Computação
+            grupos = []
+
+            for grupo in d.grupos_pre_requisito.all():
+                membros = sorted(
+                    item.codigo
+                    for item in grupo.disciplinas.all()
+                    if item.codigo in codigos_curso
+                )
+
+                if membros:
+                    grupos.append(membros)
+
+            co = sorted(
+                (
+                    {item.codigo for item in d.co_requisitos.all()}
+                    |
+                    {item.codigo for item in d.associadas.all()}
+                ) & codigos_curso
+            )
+
         for membros in grupos:
             usadas.update(membros)
-        co = sorted(
-            ({i.codigo for i in d.co_requisitos.all()} |
-             {i.codigo for i in d.associadas.all()}) & codigos_curso
-        )
-        info[d.codigo] = {'obj': d, 'grupos': grupos, 'co': co}
 
-    dependentes = {c: set() for c in info}
+        info[d.codigo] = {
+            'obj': d,
+            'grupos': grupos,
+            'co': co,
+        }
+
+    # Descobrir quais matérias dependem de outras
+    dependentes = {codigo: set() for codigo in info}
+
     for codigo, dados in info.items():
         for membros in dados['grupos']:
-            for m in membros:
-                dependentes.setdefault(m, set()).add(codigo)
+            for materia in membros:
+                dependentes.setdefault(
+                    materia, set()
+                ).add(codigo)
 
+    # Identificar matérias concluídas e bloqueadas
     for codigo, dados in info.items():
         d = dados['obj']
-        d.isolada = not dados['grupos'] and not dados['co'] and codigo not in usadas
+
+        # Nos cursos organizados por período,
+        # todas as matérias aparecem na grade
+        d.isolada = (
+            not por_periodo
+            and not dados['grupos']
+            and not dados['co']
+            and codigo not in usadas
+        )
+
         d.concluida = codigo in concluidas
         d.classe = ''
         d.avisos_nivel = avisos.get(codigo, [])
-        d.bloqueada = any(a['bloqueia'] for a in d.avisos_nivel)
+
+        d.bloqueada = any(
+            aviso['bloqueia']
+            for aviso in d.avisos_nivel
+        )
+
         dados['concluida'] = d.concluida
 
-    foco = request.GET.get('foco', '').strip().upper()
+    # Selecionar uma matéria no fluxograma
+    foco = request.GET.get(
+        'foco', ''
+    ).strip().upper()
+
     if foco not in info or info[foco]['concluida']:
         foco = ''
 
+    # Buscar disciplina pelo código ou nome
     busca = request.GET.get('q', '').strip()
     aviso = ''
     resultados = []
+
     if busca:
         termo = _normalizar(busca)
+
         achadas = [
             d for d in lista
-            if termo in _normalizar(d.codigo) or termo in _normalizar(d.nome)
+            if termo in _normalizar(d.codigo)
+            or termo in _normalizar(d.nome)
         ]
+
         if not achadas:
-            aviso = f'Nenhuma matéria encontrada para "{busca}".'
+            aviso = (
+                f'Nenhuma matéria encontrada para "{busca}".'
+            )
+
         elif len(achadas) == 1:
             d = achadas[0]
+
             if d.concluida:
-                aviso = (f'{d.codigo} — {d.nome} já está concluída. '
-                         'Veja a lista "Concluídas" para desfazer.')
+                aviso = (
+                    f'{d.codigo} — {d.nome} já está concluída. '
+                    'Veja a lista "Concluídas" para desfazer.'
+                )
             else:
-                return redirect(_url_fluxograma(d.codigo, d.codigo))
+                return redirect(
+                    _url_fluxograma(d.codigo, d.codigo)
+                )
+
         else:
-            aviso = f'{len(achadas)} matérias encontradas. Escolha uma:'
+            aviso = (
+                f'{len(achadas)} matérias encontradas. '
+                'Escolha uma:'
+            )
             resultados = achadas
 
+    # Organizar as matérias em colunas
     colunas = {}
+
     for d in lista:
         if not d.isolada and not d.concluida:
-            colunas.setdefault(d.camada, []).append(d)
+            colunas.setdefault(
+                d.camada, []
+            ).append(d)
+
     camadas = sorted(colunas)
 
+    # Criar os cabeçalhos e posições das caixas
     cabecalhos = []
+
     for i, camada in enumerate(camadas):
         x = MARGEM_X + i * (CARTA_L + ESPACO_H)
+
+        if por_periodo:
+            if camada < 10:
+                titulo = f'{camada + 1}º período'
+            else:
+                titulo = 'Período não definido'
+        else:
+            if camada == 0:
+                titulo = 'Sem pré-requisito'
+            else:
+                titulo = f'Nível {camada}'
+
         cabecalhos.append({
             'x': x,
-            'titulo': 'Sem pré-requisito' if camada == 0 else f'Nível {camada}',
+            'titulo': titulo,
         })
+
         for j, d in enumerate(colunas[camada]):
             d.x = x
             d.y = TOPO + j * (CARTA_A + ESPACO_V)
 
-    largura = altura = 0
-    if camadas:
-        largura = 2 * MARGEM_X + len(camadas) * CARTA_L + (len(camadas) - 1) * ESPACO_H
-        altura = TOPO + max(len(v) for v in colunas.values()) * (CARTA_A + ESPACO_V)
+    # Calcular o tamanho da área do fluxograma
+    largura = 0
+    altura = 0
 
+    if camadas:
+        largura = (
+            2 * MARGEM_X
+            + len(camadas) * CARTA_L
+            + (len(camadas) - 1) * ESPACO_H
+        )
+
+        altura = (
+            TOPO
+            + max(len(v) for v in colunas.values())
+            * (CARTA_A + ESPACO_V)
+        )
+
+    # Preparar as setas e o painel lateral
     painel = None
-    setas, marcadores = [], []
-    grupos_por_codigo = {c: dados['grupos'] for c, dados in info.items()}
+    setas = []
+    marcadores = []
+
+    grupos_por_codigo = {
+        codigo: dados['grupos']
+        for codigo, dados in info.items()
+    }
+
     if foco:
-        cadeia = _cadeia(foco, grupos_por_codigo, concluidas)
-        co_foco = {c for c in info[foco]['co'] if c not in concluidas and c not in cadeia}
+        cadeia = _cadeia(
+            foco,
+            grupos_por_codigo,
+            concluidas
+        )
+
+        co_foco = {
+            codigo
+            for codigo in info[foco]['co']
+            if codigo not in concluidas
+            and codigo not in cadeia
+        }
 
         info[foco]['obj'].classe = 'alvo'
-        for c in cadeia:
-            info[c]['obj'].classe = 'cadeia'
-        for c in co_foco:
-            info[c]['obj'].classe = 'co'
+
+        for codigo in cadeia:
+            info[codigo]['obj'].classe = 'cadeia'
+
+        for codigo in co_foco:
+            info[codigo]['obj'].classe = 'co'
 
         if not info[foco]['obj'].isolada:
-            setas, marcadores = _desenhar_setas(foco, cadeia, co_foco, info)
+            setas, marcadores = _desenhar_setas(
+                foco,
+                cadeia,
+                co_foco,
+                info
+            )
 
         def itens(codigos):
-            return [{'codigo': c, 'concluida': info[c]['concluida']} for c in sorted(codigos)]
+            return [
+                {
+                    'codigo': codigo,
+                    'concluida': info[codigo]['concluida']
+                }
+                for codigo in sorted(codigos)
+            ]
 
         total_grupos = len(info[foco]['grupos'])
         d = info[foco]['obj']
+
         painel = {
             'codigo': d.codigo,
             'nome': d.nome,
             'creditos': d.creditos,
             'creditos_minimos': d.creditos_minimos,
             'grupos': [
-                {'cor': _cor_do_grupo(i, total_grupos), 'itens': itens(membros)}
-                for i, membros in enumerate(info[foco]['grupos'])
+                {
+                    'cor': _cor_do_grupo(i, total_grupos),
+                    'itens': itens(membros)
+                }
+                for i, membros in enumerate(
+                    info[foco]['grupos']
+                )
             ],
             'co': itens(info[foco]['co']),
-            'dependentes': itens(dependentes.get(foco, [])),
+            'dependentes': itens(
+                dependentes.get(foco, [])
+            ),
             'sem_relacoes': d.isolada,
             'avisos_nivel': d.avisos_nivel,
             'em_curso': foco in em_curso,
         }
 
-    feitas = [info[c]['obj'] for c in sorted(concluidas) if c in info]
+    # Matérias concluídas ficam separadas
+    feitas = [
+        info[codigo]['obj']
+        for codigo in sorted(concluidas)
+        if codigo in info
+    ]
 
+    # Enviar as informações para o HTML original
     return render(request, 'fluxograma.html', {
         'curso': curso,
         'cabecalhos': cabecalhos,
-        'cartas': [d for d in lista if not d.isolada and not d.concluida],
-        'isoladas': [d for d in lista if d.isolada and not d.concluida],
+        'cartas': [
+            d for d in lista
+            if not d.isolada and not d.concluida
+        ],
+        'isoladas': [
+            d for d in lista
+            if d.isolada and not d.concluida
+        ],
         'largura': largura,
         'altura': altura,
         'setas': setas,
@@ -575,6 +770,7 @@ def fluxograma(request):
         'concluidas': feitas,
         'total_disciplinas': len(lista),
     })
+
 
 def _buscar_disciplina(codigo):
     try:
