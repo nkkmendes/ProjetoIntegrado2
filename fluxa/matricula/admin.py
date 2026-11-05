@@ -1,5 +1,8 @@
 from django.contrib import admin
 
+from django.contrib import messages
+from .importacao_engenharias import importar_engenharias
+
 from .models import (
     AreaNivelamento,
     CalendarioMatricula,
@@ -41,15 +44,74 @@ class PlanejamentoSalvoAdmin(admin.ModelAdmin):
     list_filter = ('periodo',)
 
 
-# CURSOS E DISCIPLINAS
+
+
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'total_disciplinas')
+
+    list_display = (
+        'nome',
+        'total_disciplinas'
+    )
+
     search_fields = ('nome',)
+
+    actions = [
+        'importar_excel_engenharias'
+    ]
 
     @admin.display(description='Disciplinas')
     def total_disciplinas(self, curso):
         return curso.disciplinas.count()
+
+    @admin.action(
+        description='Importar Excel das 5 engenharias e optativas'
+    )
+    def importar_excel_engenharias(self, request, queryset):
+
+        if not request.user.is_superuser:
+            self.message_user(
+                request,
+                'Somente o administrador principal pode importar.',
+                level=messages.ERROR
+            )
+            return
+
+        try:
+            resultado = importar_engenharias()
+
+        except (OSError, ValueError, ImportError) as erro:
+            self.message_user(
+                request,
+                f'Erro ao importar Excel: {erro}',
+                level=messages.ERROR
+            )
+            return
+
+        self.message_user(
+            request,
+            (
+                f"Importação concluída! "
+                f"{resultado['linhas']} registros lidos, "
+                f"{resultado['novas']} disciplinas novas e "
+                f"{resultado['associacoes']} associações com cursos."
+            ),
+            level=messages.SUCCESS
+        )
+
+        divergentes = resultado[
+            'codigos_com_creditos_diferentes'
+        ]
+
+        if divergentes:
+            self.message_user(
+                request,
+                'Créditos diferentes para alguns códigos: '
+                + ', '.join(divergentes)
+                + '. Foram preservados os valores do banco.',
+                level=messages.WARNING
+            )
+
 
 
 class GrupoPreRequisitoInline(admin.TabularInline):
