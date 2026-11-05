@@ -1,5 +1,7 @@
+
 from django.conf import settings
 from django.db import models
+
 
 class PlanejamentoSalvo(models.Model):
     usuario = models.ForeignKey(
@@ -12,9 +14,11 @@ class PlanejamentoSalvo(models.Model):
     periodo = models.IntegerField()
     disciplinas = models.TextField()
 
+
 class SimulacaoSalva(models.Model):
     nome = models.CharField(max_length=100)
     disciplinas = models.TextField()
+
 
 class CalendarioMatricula(models.Model):
     periodo = models.CharField(max_length=10)
@@ -99,7 +103,9 @@ class GrupoPreRequisito(models.Model):
     )
 
     def __str__(self):
-        codigos = ' + '.join(d.codigo for d in self.disciplinas.order_by('codigo'))
+        codigos = ' + '.join(
+            d.codigo for d in self.disciplinas.order_by('codigo')
+        )
         return f'{self.disciplina.codigo} ← {codigos}'
 
 
@@ -125,11 +131,13 @@ class HistoricoDisciplina(models.Model):
     """Uma disciplina que o aluno já cursou (ou está cursando), com as notas.
 
     Substitui DisciplinaCursada, CreditosAluno e GrauAluno: o mesmo registro
-    diz se foi concluída, em que período, e com quais graus."""
+    diz se foi concluída, em que período, e com quais graus.
+    """
 
     CONCLUIDA = 'concluida'
     EM_CURSO = 'em_curso'
     REPROVADA = 'reprovada'
+
     STATUS = [
         (CONCLUIDA, 'Concluída'),
         (EM_CURSO, 'Em curso'),
@@ -146,13 +154,25 @@ class HistoricoDisciplina(models.Model):
         on_delete=models.CASCADE,
         related_name='historico'
     )
-    status = models.CharField(max_length=10, choices=STATUS, default=CONCLUIDA)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS,
+        default=CONCLUIDA
+    )
     periodo_letivo = models.CharField(max_length=10, blank=True, default='')
     turma = models.CharField(max_length=10, blank=True, default='')
-    g1 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    g2 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    g3 = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
-    media = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    g1 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    g2 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    g3 = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+    media = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
 
     class Meta:
         ordering = ['-periodo_letivo', 'disciplina__codigo']
@@ -165,10 +185,16 @@ class HistoricoDisciplina(models.Model):
 
     @property
     def tem_notas(self):
-        return any(n is not None for n in (self.g1, self.g2, self.g3, self.media))
+        return any(
+            n is not None
+            for n in (self.g1, self.g2, self.g3, self.media)
+        )
 
     def __str__(self):
-        return f'{self.perfil} — {self.disciplina.codigo} ({self.get_status_display()})'
+        return (
+            f'{self.perfil} — {self.disciplina.codigo} '
+            f'({self.get_status_display()})'
+        )
 
 
 class AreaNivelamentoManager(models.Manager):
@@ -194,7 +220,7 @@ class AreaNivelamento(models.Model):
 
 
 class NivelamentoAluno(models.Model):
-    """O nível numérico do aluno numa área. Sem registro = "não informado"."""
+    """O nível numérico do aluno numa área. Sem registro = não informado."""
 
     perfil = models.ForeignKey(
         PerfilAluno,
@@ -223,7 +249,9 @@ class NivelamentoAluno(models.Model):
 
 class RequisitoNivelamento(models.Model):
     """Nível mínimo numa área para poder cursar uma disciplina.
-    Vale para todos os cursos, como os pré-requisitos."""
+
+    Vale para todos os cursos, como os pré-requisitos.
+    """
 
     disciplina = models.ForeignKey(
         Disciplina,
@@ -247,4 +275,63 @@ class RequisitoNivelamento(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.disciplina.codigo} exige {self.area} ≥ {self.nivel_minimo}'
+        return (
+            f'{self.disciplina.codigo} exige '
+            f'{self.area} ≥ {self.nivel_minimo}'
+        )
+
+
+# NOVOS MODELOS - SPRINT 9
+
+class Turma(models.Model):
+    disciplina = models.ForeignKey(
+        Disciplina,
+        on_delete=models.CASCADE,
+        related_name='turmas'
+    )
+    codigo = models.CharField(max_length=20)
+    periodo_letivo = models.CharField(max_length=10)
+    professor = models.CharField(max_length=150, blank=True)
+    vagas = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['disciplina', 'codigo', 'periodo_letivo'],
+                name='turma_unica_por_disciplina_periodo'
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.disciplina.codigo} - '
+            f'Turma {self.codigo} ({self.periodo_letivo})'
+        )
+
+
+class HorarioTurma(models.Model):
+    DIAS = [
+        (0, 'Segunda-feira'),
+        (1, 'Terça-feira'),
+        (2, 'Quarta-feira'),
+        (3, 'Quinta-feira'),
+        (4, 'Sexta-feira'),
+        (5, 'Sábado'),
+    ]
+
+    turma = models.ForeignKey(
+        Turma,
+        on_delete=models.CASCADE,
+        related_name='horarios'
+    )
+    dia_semana = models.IntegerField(choices=DIAS)
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
+    sala = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return (
+            f'{self.turma} - '
+            f'{self.get_dia_semana_display()} '
+            f'{self.hora_inicio} às {self.hora_fim}'
+        )
