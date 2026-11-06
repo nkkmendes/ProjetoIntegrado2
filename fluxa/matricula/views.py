@@ -3,7 +3,8 @@ from urllib.parse import urlencode
 
 from .catalogos_fluxa import relacoes_do_curso
 
-from django.shortcuts import render, redirect, resolve_url
+from django.shortcuts import render, redirect, resolve_url, get_object_or_404
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout, update_session_auth_hash
@@ -15,7 +16,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import (
     CalendarioMatricula, Disciplina, HistoricoDisciplina,
-    PlanejamentoSalvo, SimulacaoSalva,
+    PlanejamentoSalvo, SimulacaoSalva, Turma,
 )
 from .forms import (
     LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm,
@@ -109,26 +110,93 @@ def logout_view(request):
 
 @login_required
 def planejamento(request):
-    form = PlanejamentoForm(request.POST or None)
+    perfil = obter_perfil(request.user)
+    curso = perfil.curso
+    periodo_oferta = '2026.2'
+
+    disciplinas = []
+    if curso:
+        turmas_periodo = Turma.objects.filter(
+            periodo_letivo=periodo_oferta
+        ).order_by('codigo')
+        disciplinas = list(
+            curso.disciplinas.prefetch_related(
+                Prefetch('turmas', queryset=turmas_periodo, to_attr='turmas_ofertadas')
+            ).order_by('codigo')
+        )
+
+    codigos_validos = {disciplina.codigo for disciplina in disciplinas}
+    registros = PlanejamentoSalvo.objects.filter(usuario=request.user).order_by('-id')
+
+    # A edição utiliza a mesma página, sem precisar criar uma nova URL.
+    id_edicao = request.POST.get('planejamento_id') if request.method == 'POST' else request.GET.get('editar')
+    planejamento_editado = None
+    if id_edicao:
+        planejamento_editado = get_object_or_404(
+            PlanejamentoSalvo, pk=id_edicao, usuario=request.user
+        )
+
+    if request.method == 'POST' and request.POST.get('acao') == 'excluir':
+        if planejamento_editado is None:
+            messages.error(request, 'Planejamento não encontrado.')
+        else:
+            planejamento_editado.delete()
+            messages.success(request, 'Planejamento excluído com sucesso.')
+        return redirect('planejamento')
 
     if request.method == 'POST':
+        selecionadas = list(dict.fromkeys(request.POST.getlist('disciplina')))
         dados = request.POST.copy()
-        dados['disciplinas'] = ', '.join(
-            request.POST.getlist('disciplina')
-        )
-        form = PlanejamentoForm(dados)
+        dados['disciplinas'] = ', '.join(selecionadas)
+        form = PlanejamentoForm(dados, instance=planejamento_editado)
+
+        if not curso:
+            form.add_error(None, 'Selecione seu curso no Perfil antes de salvar.')
+        elif not selecionadas:
+            form.add_error(None, 'Selecione pelo menos uma disciplina.')
+        elif any(codigo not in codigos_validos for codigo in selecionadas):
+            form.add_error(None, 'Uma ou mais disciplinas não pertencem ao seu curso.')
 
         if form.is_valid():
-            planejamento_salvo = form.save(commit=False)
-            planejamento_salvo.usuario = request.user
-            planejamento_salvo.save()
+            registro = form.save(commit=False)
+            registro.usuario = request.user
+            registro.save()
+            messages.success(
+                request,
+                'Planejamento atualizado com sucesso.' if planejamento_editado else 'Nova opção de grade salva com sucesso.'
+            )
             return redirect('planejamento')
+    else:
+        if planejamento_editado:
+            form = PlanejamentoForm(instance=planejamento_editado)
+            selecionadas = [
+                codigo.strip() for codigo in planejamento_editado.disciplinas.split(',')
+                if codigo.strip()
+            ]
+        else:
+            form = PlanejamentoForm()
+            selecionadas = []
 
-    registros = PlanejamentoSalvo.objects.filter(usuario=request.user).order_by('-id')
+    codigos_selecionados = set(selecionadas)
+    com_oferta = []
+    sem_oferta = []
+    for disciplina in disciplinas:
+        disciplina.selecionada = disciplina.codigo in codigos_selecionados
+        disciplina.quantidade_turmas = len(disciplina.turmas_ofertadas)
+        if disciplina.quantidade_turmas:
+            com_oferta.append(disciplina)
+        else:
+            sem_oferta.append(disciplina)
 
     return render(request, 'planejamento (1).html', {
         'form': form,
-        'dados': registros
+        'dados': registros,
+        'curso': curso,
+        'periodo_oferta': periodo_oferta,
+        'disciplinas_com_oferta': com_oferta,
+        'disciplinas_sem_oferta': sem_oferta,
+        'total_disciplinas': len(disciplinas),
+        'planejamento_editado': planejamento_editado,
     })
 
 
