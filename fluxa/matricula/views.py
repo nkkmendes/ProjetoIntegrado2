@@ -202,17 +202,100 @@ def planejamento(request):
 
 @login_required
 def simulacao(request):
-    form = SimulacaoForm(request.POST or None)
+    """Simula uma grade usando as turmas e os horários importados da PUC."""
+    perfil = obter_perfil(request.user)
+    curso = perfil.curso
+    periodo_oferta = '2026.2'
 
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('simulacao')
+    # Mostra somente turmas vinculadas às disciplinas do curso escolhido.
+    turmas = list(
+        Turma.objects.filter(
+            disciplina__cursos=curso,
+            periodo_letivo=periodo_oferta,
+        ).select_related('disciplina').prefetch_related('horarios')
+        .order_by('disciplina__codigo', 'codigo')
+    ) if curso else []
 
-    registros = SimulacaoSalva.objects.all()
+    ids_permitidos = {str(t.id) for t in turmas}
+    selecionados = request.POST.getlist('turmas') if request.method == 'POST' else []
+    selecionados = list(dict.fromkeys(selecionados))
+    nome = request.POST.get('nome', '').strip() if request.method == 'POST' else ''
+    erro = ''
 
+    if request.method == 'POST':
+        if not curso:
+            erro = 'Escolha seu curso no Perfil antes de montar a grade.'
+        elif not selecionados:
+            erro = 'Selecione ao menos uma turma.'
+        elif any(tid not in ids_permitidos for tid in selecionados):
+            erro = 'Uma das turmas selecionadas não pertence ao seu curso.'
+
+    selecionadas = [t for t in turmas if str(t.id) in selecionados] if not erro else []
+    codigos = [t.disciplina.codigo for t in selecionadas]
+    if not erro and len(codigos) != len(set(codigos)):
+        erro = 'Escolha apenas uma turma para cada disciplina.'
+
+    # Eventos ordenados por dia e hora, diretamente do modelo HorarioTurma.
+    eventos = []
+    for turma in selecionadas:
+        for horario in turma.horarios.all():
+            eventos.append({
+                'dia_numero': horario.dia_semana,
+                'dia': horario.get_dia_semana_display(),
+                'inicio': horario.hora_inicio,
+                'fim': horario.hora_fim,
+                'sala': horario.sala,
+                'codigo': turma.disciplina.codigo,
+                'disciplina': turma.disciplina.nome,
+                'turma': turma.codigo,
+            })
+    eventos.sort(key=lambda evento: (evento['dia_numero'], evento['inicio'], evento['codigo']))
+
+    conflitos = []
+    for i, atual in enumerate(eventos):
+        for outro in eventos[i + 1:]:
+            if outro['dia_numero'] != atual['dia_numero']:
+                if outro['dia_numero'] > atual['dia_numero']:
+                    break
+                continue
+            if atual['codigo'] != outro['codigo'] and (
+                atual['inicio'] < outro['fim'] and outro['inicio'] < atual['fim']
+            ):
+                conflitos.append(
+                    f"{atual['dia']}: {atual['codigo']} ({atual['turma']}) "
+                    f"e {outro['codigo']} ({outro['turma']})"
+                )
+
+    if request.method == 'POST' and request.POST.get('acao') == 'salvar' and not erro:
+        if not nome:
+            erro = 'Informe um nome para salvar a simulação.'
+        else:
+            descricao = ', '.join(
+                f'{turma.disciplina.codigo} - Turma {turma.codigo} ({periodo_oferta})'
+                for turma in selecionadas
+            )
+            SimulacaoSalva.objects.create(nome=nome, disciplinas=descricao)
+            messages.success(request, 'Simulação salva com sucesso.')
+            return redirect('simulacao')
+
+    for turma in turmas:
+        turma.selecionada = str(turma.id) in selecionados
+        turma.horarios_lista = sorted(
+            turma.horarios.all(), key=lambda h: (h.dia_semana, h.hora_inicio)
+        )
+
+    total_creditos = sum(t.disciplina.creditos for t in selecionadas)
     return render(request, 'Simulador (1).html', {
-        'form': form,
-        'dados': registros
+        'curso': curso,
+        'periodo_oferta': periodo_oferta,
+        'turmas': turmas,
+        'selecionadas': selecionadas,
+        'eventos': eventos,
+        'conflitos': conflitos,
+        'total_creditos': total_creditos,
+        'erro': erro,
+        'nome': nome,
+        'dados': SimulacaoSalva.objects.order_by('-id')[:30],
     })
 
 
