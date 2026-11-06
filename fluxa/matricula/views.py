@@ -1,10 +1,12 @@
 import unicodedata
+import fitz
 import os
 import tempfile
 from pathlib import Path
 from urllib.parse import urlencode
 
 from .catalogos_fluxa import relacoes_do_curso
+from .ocr_sau import analisar_pdf
 
 from django.shortcuts import render, redirect, resolve_url, get_object_or_404
 from django.db.models import Prefetch
@@ -352,6 +354,7 @@ def historico(request):
                                 destino.write(bloco)
                         arquivo_final = pasta / f'usuario_{request.user.pk}.pdf'
                         os.replace(temporario, arquivo_final)
+                        request.session.pop('sau_registros_ocr', None)
                         messages.success(request, 'PDF do SAU enviado com sucesso!')
                     except OSError:
                         messages.error(request, 'Não foi possível salvar o PDF. Tente novamente.')
@@ -359,6 +362,72 @@ def historico(request):
                         if temporario is not None:
                             temporario.unlink(missing_ok=True)
             return redirect(reverse('historico') + '#pdf-sau')
+
+        if acao == 'analisar_pdf_sau':
+            caminho = Path.home() / '.fluxa' / 'sau' / f'usuario_{request.user.pk}.pdf'
+            if not caminho.is_file():
+                messages.error(request, 'Envie o PDF do SAU antes de analisar.')
+            else:
+                try:
+                    analise = analisar_pdf(caminho)
+                    request.session['sau_registros_ocr'] = analise['registros']
+                    request.session['sau_ocr_usuario'] = request.user.pk
+                    request.session['sau_ocr_usado'] = analise['usou_ocr']
+                    if analise['registros']:
+                        messages.success(
+                            request,
+                            f"{len(analise['registros'])} disciplina(s) identificada(s) no PDF. "
+                            'Confira os dados antes de importar.'
+                        )
+                        if analise['nao_cadastradas']:
+                            messages.warning(
+                                request,
+                                f"{analise['nao_cadastradas']} disciplina(s) não cadastrada(s) "
+                                'no Fluxa aparecem para conferência, mas não podem ser importadas.'
+                            )
+                    else:
+                        messages.warning(
+                            request,
+                            'Nenhuma disciplina com código, período e situação reconhecíveis '
+                            'foi encontrada no catálogo do Fluxa. Confira o PDF.'
+                        )
+                except (ValueError, OSError, fitz.FileDataError) as exc:
+                    request.session.pop('sau_registros_ocr', None)
+                    messages.error(request, f'Não foi possível analisar o PDF: {exc}')
+            return redirect(reverse('historico') + '#pdf-sau')
+
+        if acao == 'confirmar_ocr_sau':
+            opcoes = request.session.get('sau_registros_ocr', [])
+            if request.session.get('sau_ocr_usuario') != request.user.pk or not opcoes:
+                messages.error(request, 'Analise novamente o PDF antes de confirmar.')
+            else:
+                indices = set(request.POST.getlist('selecionados'))
+                selecionados = [
+                    item for i, item in enumerate(opcoes)
+                    if str(i) in indices and item.get('cadastrada', True)
+                ]
+                disciplinas = Disciplina.objects.in_bulk(
+                    [item['codigo'] for item in selecionados], field_name='codigo'
+                )
+                alterados = 0
+                for item in selecionados:
+                    disciplina = disciplinas.get(item['codigo'])
+                    if not disciplina:
+                        continue
+                    dados = {
+                        'status': item['status'],
+                        'periodo_letivo': item['periodo'],
+                    }
+                    if item['media'] is not None:
+                        dados['media'] = item['media']
+                    HistoricoDisciplina.objects.update_or_create(
+                        perfil=perfil, disciplina=disciplina, defaults=dados
+                    )
+                    alterados += 1
+                request.session.pop('sau_registros_ocr', None)
+                request.session.pop('sau_ocr_usuario', None)
+                messages.success(request, f'{alterados} disciplina(s) confirmada(s) no histórico.')
+            return redirect(reverse('historico') + '#cursadas')
 
         if acao == 'historico':
             form = HistoricoForm(request.POST)
@@ -388,6 +457,10 @@ def historico(request):
         'registros': registros,
         'resumo': resumo_creditos(perfil),
         'quadro_nivel': quadro_de_nivelamento(perfil),
+        'sau_pdf_existe': (Path.home() / '.fluxa' / 'sau' / f'usuario_{request.user.pk}.pdf').is_file(),
+        'sau_ocr_registros': request.session.get('sau_registros_ocr', [])
+            if request.session.get('sau_ocr_usuario') == request.user.pk else [],
+        'sau_ocr_usado': request.session.get('sau_ocr_usado', False),
     })
 
 
