@@ -1,6 +1,6 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: #F0F4FA; color: #0F2C4C; font: 300 14px Arial, Helvetica, sans-serif; }
+body { margin: 0; background: #F0F4FA; color: #0F2C4C; font: 300 14px 'Inter', Arial, Helvetica, sans-serif; }
 main { padding: 20px; }
 h1 { font-size: 28px; margin-top: 0; }
 h2 { font-size: 18px; }
