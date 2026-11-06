@@ -1,4 +1,7 @@
 import unicodedata
+import os
+import tempfile
+from pathlib import Path
 from urllib.parse import urlencode
 
 from .catalogos_fluxa import relacoes_do_curso
@@ -318,6 +321,44 @@ def historico(request):
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
+
+        if acao == 'enviar_pdf_sau':
+            pdf = request.FILES.get('pdf_sau')
+            limite_bytes = 10 * 1024 * 1024
+
+            if pdf is None:
+                messages.error(request, 'Selecione um arquivo PDF para enviar.')
+            elif not pdf.name.lower().endswith('.pdf'):
+                messages.error(request, 'O arquivo precisa ter a extensão .pdf.')
+            elif pdf.size == 0 or pdf.size > limite_bytes:
+                messages.error(request, 'O PDF precisa ter entre 1 byte e 10 MB.')
+            else:
+                cabecalho = pdf.read(5)
+                pdf.seek(0)
+                if cabecalho != b'%PDF-':
+                    messages.error(request, 'O arquivo selecionado não parece ser um PDF válido.')
+                else:
+                    # Salva fora do repositório e fora da pasta static/media pública.
+                    pasta = Path.home() / '.fluxa' / 'sau'
+                    temporario = None
+                    try:
+                        pasta.mkdir(parents=True, exist_ok=True)
+                        with tempfile.NamedTemporaryFile(
+                            mode='wb', prefix='sau_', suffix='.tmp',
+                            dir=pasta, delete=False
+                        ) as destino:
+                            temporario = Path(destino.name)
+                            for bloco in pdf.chunks():
+                                destino.write(bloco)
+                        arquivo_final = pasta / f'usuario_{request.user.pk}.pdf'
+                        os.replace(temporario, arquivo_final)
+                        messages.success(request, 'PDF do SAU enviado com sucesso!')
+                    except OSError:
+                        messages.error(request, 'Não foi possível salvar o PDF. Tente novamente.')
+                    finally:
+                        if temporario is not None:
+                            temporario.unlink(missing_ok=True)
+            return redirect(reverse('historico') + '#pdf-sau')
 
         if acao == 'historico':
             form = HistoricoForm(request.POST)

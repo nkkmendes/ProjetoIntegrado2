@@ -18,10 +18,26 @@
 
   <nav class="atalhos" aria-label="Seções da página">
     <a href="#resumo">Resumo</a>
+    <a href="#pdf-sau">Enviar PDF do SAU</a>
     <a href="#registrar">Registrar disciplina</a>
     <a href="#cursadas">Disciplinas cursadas</a>
     <a href="#nivelamento">Nivelamento</a>
   </nav>
+
+  <section id="pdf-sau" class="bloco">
+    <h2>Enviar histórico acadêmico do SAU</h2>
+    <p class="sub">Escolha um PDF do seu histórico acadêmico exportado do SAU da PUC-Rio. O arquivo será usado para a futura leitura automática das disciplinas, na integração com OCR.</p>
+    <form method="post" action="{% url 'historico' %}#pdf-sau" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="enviar_pdf_sau">
+      <p>
+        <label for="pdf_sau">Arquivo PDF do SAU</label>
+        <input id="pdf_sau" type="file" name="pdf_sau" accept=".pdf,application/pdf" required>
+      </p>
+      <button type="submit" class="acao">Enviar PDF</button>
+    </form>
+    <p class="sub">Nesta etapa, o PDF ainda não preenche o histórico automaticamente. Essa leitura será implementada na Tarefa 6.</p>
+  </section>
 
   <section id="resumo" class="bloco">
     <h2>Contagem de créditos</h2>
