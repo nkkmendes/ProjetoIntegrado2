@@ -6,7 +6,7 @@ body {
     margin: 0;
     display: flex;
     min-height: 100vh;
-    font: 300 14px 'Courier New', Courier, monospace;
+    font: 300 14px Arial, Helvetica, sans-serif;
     color: #0F2C4C;
     background-color: #F0F4FA;
 }
@@ -107,7 +107,7 @@ button, .botao {
     border-radius: 5px;
     background-color: white;
     color: #475569;
-    font: bold 14px 'Courier New', Courier, monospace;
+    font: bold 14px Arial, Helvetica, sans-serif;
     text-decoration: none;
     line-height: 1.4;
 }
@@ -137,7 +137,7 @@ input, select, textarea {
     border-radius: 5px;
     background-color: white;
     color: #475569;
-    font: 300 14px 'Courier New', Courier, monospace;
+    font: 300 14px Arial, Helvetica, sans-serif;
 }
 
 #curso {

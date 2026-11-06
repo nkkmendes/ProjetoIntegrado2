@@ -4,7 +4,7 @@
 body {
     margin: 0;
     display: flex;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
     font-weight: 300;
     color: #0F2C4C;
     background: #F0F4FA;
