@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from django.views.generic import RedirectView
-from matricula import views
+from matricula import views, fluxograma_2023
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,7 +24,8 @@ urlpatterns = [
     path('nivelamento/', RedirectView.as_view(pattern_name='historico'), name='nivelamento'),
     path('creditos/', RedirectView.as_view(pattern_name='historico'), name='creditos'),
     path('notas-periodo/', RedirectView.as_view(pattern_name='historico'), name='notas_periodo'),
-    path('fluxograma/', views.fluxograma, name='fluxograma'),
+    path('fluxograma/', fluxograma_2023.fluxograma, name='fluxograma'),
+    path('fluxograma/grafo/', fluxograma_2023.grafo_fluxograma, name='grafo_fluxograma'),
     path('fluxograma/disciplina/<str:codigo>/', views.detalhes_disciplina, name='detalhes_disciplina'),
     path('fluxograma/concluir/<str:codigo>/', views.marcar_concluida, name='marcar_concluida'),
     path('perfil/', views.perfil, name='perfil'),
