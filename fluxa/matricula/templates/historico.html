@@ -28,8 +28,8 @@
   </nav>
 
   <section id="pdf-sau" class="bloco">
-    <h2>Enviar histórico acadêmico do SAU</h2>
-    <p class="sub">Escolha um PDF do seu histórico acadêmico exportado do SAU da PUC-Rio. Depois de enviar, analise o arquivo para conferir os dados reconhecidos antes de gravá-los no histórico.</p>
+    <h2>Importar histórico do SAU</h2>
+    <p class="sub">No SAU, abra o <strong>Espelho do Histórico</strong>, salve a página como PDF e envie aqui. Você confere tudo antes de gravar. O PDF é apagado logo depois da leitura: o Fluxa guarda apenas o que você confirmar.</p>
     <form method="post" action="{% url 'historico' %}#pdf-sau" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="acao" value="enviar_pdf_sau">
@@ -40,39 +40,63 @@
       <button type="submit" class="acao">Enviar PDF</button>
     </form>
     {% if sau_pdf_existe %}
-    <p class="sub">Existe um PDF enviado para sua conta.</p>
+    <p class="sub">Há um PDF aguardando leitura.</p>
     <form method="post" action="{% url 'historico' %}#pdf-sau">
       {% csrf_token %}
       <input type="hidden" name="acao" value="analisar_pdf_sau">
-      <button type="submit" class="acao">Analisar PDF com OCR</button>
+      <button type="submit" class="acao">Ler PDF</button>
+    </form>
+    <form method="post" action="{% url 'historico' %}#pdf-sau">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="descartar_sau">
+      <button type="submit" class="acao">Descartar PDF</button>
     </form>
     {% endif %}
     {% if sau_ocr_registros %}
     <h3>Conferir disciplinas reconhecidas</h3>
-    <p class="sub">Disciplinas ainda não cadastradas no Fluxa também aparecem, mas não podem ser importadas até serem incluídas no catálogo.</p>
-    <p class="sub">Modo de leitura: {% if sau_ocr_usado %}Tesseract OCR{% else %}texto do PDF{% endif %}. Marque somente os registros corretos. Confirmar pode atualizar notas e situação já cadastradas.</p>
+    <p class="sub">Modo de leitura: {% if sau_ocr_usado %}OCR{% else %}texto do PDF{% endif %}. Desmarque o que estiver errado. Confirmar atualiza situação, período, turma e média das disciplinas já cadastradas. Disciplinas fora do catálogo do Fluxa aparecem só para conferência.</p>
     <form method="post" action="{% url 'historico' %}#cursadas">
       {% csrf_token %}
       <input type="hidden" name="acao" value="confirmar_ocr_sau">
       <div class="tabela">
         <table>
-          <thead><tr><th>Importar</th><th>Código</th><th>Disciplina</th><th>Período</th><th>Situação</th><th>Média</th><th>Cadastro</th></tr></thead>
+          <thead><tr><th>Importar</th><th>Código</th><th>Disciplina</th><th>Período</th><th>Situação</th><th>Média</th><th>Observações</th></tr></thead>
           <tbody>
             {% for item in sau_ocr_registros %}
             <tr>
               <td><input type="checkbox" name="selecionados" value="{{ forloop.counter0 }}" {% if item.cadastrada %}checked{% else %}disabled{% endif %} aria-label="Selecionar {{ item.codigo }}"></td>
               <td>{{ item.codigo }}</td>
               <td>{{ item.nome }}</td>
-              <td>{{ item.periodo }}</td>
-              <td>{{ item.status }}</td>
+              <td>{{ item.periodo|default:'—' }}</td>
+              <td>
+                {% if item.escolher %}
+                <label for="status_{{ forloop.counter0 }}" class="sub">{{ item.situacao_sau }} — escolha:</label>
+                <select id="status_{{ forloop.counter0 }}" name="status_{{ forloop.counter0 }}">
+                  <option value="">Escolher…</option>
+                  <option value="concluida">Concluída</option>
+                  <option value="em_curso">Em curso</option>
+                </select>
+                {% else %}
+                {{ item.situacao_sau }}
+                {% endif %}
+              </td>
               <td>{{ item.media|default:'—' }}</td>
-              <td>{% if item.cadastrada %}Cadastrada{% else %}Não cadastrada — apenas conferência{% endif %}</td>
+              <td>
+                {% if not item.cadastrada %}Não cadastrada — apenas conferência.{% endif %}
+                {% if item.aviso %}{{ item.aviso }}{% endif %}
+                {% if item.tentativas > 1 %}Cursada {{ item.tentativas }} vezes; vale a melhor situação.{% endif %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
       <button type="submit" class="acao">Confirmar disciplinas selecionadas</button>
+    </form>
+    <form method="post" action="{% url 'historico' %}#pdf-sau">
+      {% csrf_token %}
+      <input type="hidden" name="acao" value="descartar_sau">
+      <button type="submit" class="acao">Cancelar importação</button>
     </form>
     {% endif %}
   </section>

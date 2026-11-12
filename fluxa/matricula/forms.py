@@ -1,8 +1,6 @@
 
 from django import forms
 from .models import (
-    PlanejamentoSalvo,
-    SimulacaoSalva,
     Curso,
     Disciplina,
     PerfilAluno,
@@ -112,22 +110,6 @@ class TrocarSenhaForm(PasswordChangeForm):
         self.fields['new_password1'].label = 'Nova senha'
         self.fields['new_password1'].help_text = ''
         self.fields['new_password2'].label = 'Confirmar nova senha'
-
-class PlanejamentoForm(forms.ModelForm):
-    class Meta:
-        model = PlanejamentoSalvo
-        fields = ['nome', 'periodo', 'disciplinas']
-        
-        widgets = {
-        'periodo': forms.NumberInput(attrs={'min': 1, 'max': 10})
-    }
-
-
-class SimulacaoForm(forms.ModelForm):
-    class Meta:
-        model = SimulacaoSalva
-        fields = ['nome', 'disciplinas']
-
 
 class PerfilCursoForm(forms.ModelForm):
     """Deixa o aluno escolher (ou trocar) o curso do perfil.

@@ -4,20 +4,36 @@ from django.db import models
 
 
 class PlanejamentoSalvo(models.Model):
+    """Uma grade de horários guardada pelo aluno: um conjunto de turmas reais
+    do micro-horário, com um nome. É criada no Simulador ("Salvar em
+    planejamento") e pode ser reaberta lá para edição."""
+
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        null=True,
-        blank=True
+        related_name='planejamentos'
     )
     nome = models.CharField(max_length=100)
-    periodo = models.IntegerField()
-    disciplinas = models.TextField()
+    periodo_letivo = models.CharField(max_length=10, blank=True, default='')
+    turmas = models.ManyToManyField(
+        'Turma',
+        blank=True,
+        related_name='planejamentos'
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-atualizado_em']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['usuario', 'nome'],
+                name='planejamento_nome_unico_por_aluno'
+            )
+        ]
 
-class SimulacaoSalva(models.Model):
-    nome = models.CharField(max_length=100)
-    disciplinas = models.TextField()
+    def __str__(self):
+        return f'{self.nome} ({self.usuario})'
 
 
 class CalendarioMatricula(models.Model):

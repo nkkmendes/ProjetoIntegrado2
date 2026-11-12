@@ -1,7 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 
-from django.contrib import messages
-from .importacao_engenharias import importar_engenharias
+from .importacao_engenharias import importar_grades
 
 from .models import (
     AreaNivelamento,
@@ -14,6 +13,7 @@ from .models import (
     PerfilAluno,
     PlanejamentoSalvo,
     RequisitoNivelamento,
+    Turma,
 )
 
 
@@ -29,89 +29,60 @@ class CalendarioMatriculaAdmin(admin.ModelAdmin):
     search_fields = ('periodo',)
 
 
-# PLANEJAMENTO
+# PLANEJAMENTO (grades salvas pelos alunos)
 @admin.register(PlanejamentoSalvo)
 class PlanejamentoSalvoAdmin(admin.ModelAdmin):
-    list_display = (
-        'nome',
-        'usuario',
-        'periodo'
-    )
-    search_fields = (
-        'nome',
-        'usuario__username'
-    )
-    list_filter = ('periodo',)
+    list_display = ('nome', 'usuario', 'periodo_letivo', 'atualizado_em')
+    search_fields = ('nome', 'usuario__username')
+    list_filter = ('periodo_letivo',)
+    filter_horizontal = ('turmas',)
 
 
+@admin.register(Turma)
+class TurmaAdmin(admin.ModelAdmin):
+    list_display = ('disciplina', 'codigo', 'periodo_letivo', 'professor', 'vagas')
+    search_fields = ('disciplina__codigo', 'disciplina__nome', 'professor')
+    list_filter = ('periodo_letivo',)
 
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'nome',
-        'total_disciplinas'
-    )
-
+    list_display = ('nome', 'total_disciplinas')
     search_fields = ('nome',)
-
-    actions = [
-        'importar_excel_engenharias'
-    ]
+    actions = ['importar_grades_das_engenharias']
 
     @admin.display(description='Disciplinas')
     def total_disciplinas(self, curso):
         return curso.disciplinas.count()
 
-    @admin.action(
-        description='Importar Excel das 5 engenharias e optativas'
-    )
-    def importar_excel_engenharias(self, request, queryset):
-
+    @admin.action(description='Importar as grades da planilha (sem apagar nada)')
+    def importar_grades_das_engenharias(self, request, queryset):
         if not request.user.is_superuser:
             self.message_user(
                 request,
                 'Somente o administrador principal pode importar.',
-                level=messages.ERROR
+                level=messages.ERROR,
             )
             return
-
         try:
-            resultado = importar_engenharias()
-
+            r = importar_grades()
         except (OSError, ValueError, ImportError) as erro:
-            self.message_user(
-                request,
-                f'Erro ao importar Excel: {erro}',
-                level=messages.ERROR
-            )
+            self.message_user(request, f'Erro ao importar: {erro}', level=messages.ERROR)
             return
-
         self.message_user(
             request,
-            (
-                f"Importação concluída! "
-                f"{resultado['linhas']} registros lidos, "
-                f"{resultado['novas']} disciplinas novas e "
-                f"{resultado['associacoes']} associações com cursos."
-            ),
-            level=messages.SUCCESS
+            f"Importação concluída: {r['disciplinas_novas']} disciplinas novas, "
+            f"{r['vinculos_novos']} vínculos com cursos, "
+            f"{r['pre_requisitos_novos']} pré-requisitos novos.",
+            level=messages.SUCCESS,
         )
-
-        divergentes = resultado[
-            'codigos_com_creditos_diferentes'
-        ]
-
-        if divergentes:
+        if r['pre_requisitos_diferentes'] or r['dados_diferentes']:
             self.message_user(
                 request,
-                'Créditos diferentes para alguns códigos: '
-                + ', '.join(divergentes)
-                + '. Foram preservados os valores do banco.',
-                level=messages.WARNING
+                'Há diferenças entre o banco e a planilha; os valores do banco foram '
+                'mantidos. Rode "python manage.py importar_dados" para ver a lista.',
+                level=messages.WARNING,
             )
-
 
 
 class GrupoPreRequisitoInline(admin.TabularInline):

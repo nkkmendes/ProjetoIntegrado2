@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxa — Planejamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'grades.css' %}">
+  <link rel="stylesheet" href="{% static 'navegacao.css' %}">
+</head>
+<body>
+<div class="fx-layout">
+{% include 'menu.html' %}
+<main>
+  {% include 'mensagens.html' %}
+  <h1>Planejamento</h1>
+  <p class="intro">Aqui ficam as grades que você salvou no Simulador. Dê um nome a cada uma e abra de novo no simulador quando quiser editar.</p>
+
+  <ol class="passos">
+    <li><strong>1. Monte no Simulador.</strong> Escolha turmas sem conflito de horário.</li>
+    <li><strong>2. Salve em planejamento.</strong> A grade ganha um nome e fica guardada aqui.</li>
+    <li><strong>3. Reabra para editar.</strong> “Abrir no simulador” carrega a grade de volta.</li>
+  </ol>
+
+  <div class="cabeca-lista">
+    <h2>{% if grades %}{{ grades|length }} grade{{ grades|length|pluralize }} salva{{ grades|length|pluralize }}{% else %}Nenhuma grade salva{% endif %}</h2>
+    <a class="botao" href="{% url 'simulacao' %}">Montar nova grade no Simulador</a>
+  </div>
+
+  {% if not grades %}
+  <p class="bloco vazio">Nenhuma grade salva. Monte uma no Simulador e use “Salvar em planejamento”.</p>
+  {% endif %}
+
+  <div class="cartoes">
+    {% for g in grades %}
+    <article class="cartao">
+      <form method="post" action="{% url 'planejamento' %}" class="renomear">
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="renomear">
+        <input type="hidden" name="planejamento_id" value="{{ g.plano.pk }}">
+        <div class="campo">
+          <label for="nome-{{ g.plano.pk }}">Nome da grade</label>
+          <input id="nome-{{ g.plano.pk }}" type="text" name="nome" maxlength="100" value="{{ g.plano.nome }}" required>
+        </div>
+        <button type="submit">Renomear</button>
+      </form>
+      <p class="meta">{{ g.plano.periodo_letivo|default:"—" }} · {{ g.creditos }} crédito{{ g.creditos|pluralize }} · {{ g.n_disciplinas }} disciplina{{ g.n_disciplinas|pluralize }}</p>
+
+      <div class="mini-dias" aria-hidden="true"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
+      <div class="mini" role="img" aria-label="Miniatura da grade semanal">
+        {% for b in g.blocos %}<i class="cor-{{ b.cor }}" style="left: calc({{ b.esquerda|stringformat:'f' }}% + 2px); width: calc(16.6667% - 4px); top: calc({{ b.topo|stringformat:'f' }}% + 1px); height: calc({{ b.altura|stringformat:'f' }}% - 2px);"></i>{% endfor %}
+      </div>
+
+      <div class="chips">
+        {% for c in g.chips %}<span class="chip cor-{{ c.cor }}">{{ c.texto }}</span>{% endfor %}
+      </div>
+
+      <div class="acoes">
+        <a class="botao" href="{% url 'simulacao' %}?planejamento={{ g.plano.pk }}">Abrir no simulador</a>
+        <form method="post" action="{% url 'planejamento' %}">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="excluir">
+          <input type="hidden" name="planejamento_id" value="{{ g.plano.pk }}">
+          <button type="submit" class="botao-perigo" onclick="return confirm('Excluir a grade “{{ g.plano.nome|escapejs }}”?');">Excluir</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <p class="sub">Simulação acadêmica: não efetua matrícula e não garante vagas na PUC.</p>
+</main>
+</div>
+</body>
+</html>

@@ -1,13 +1,11 @@
 """Importa turmas e horários do Micro-Horário da PUC-Rio para o Fluxa.
 
-Execução (na pasta que contém manage.py):
-    python manage.py shell -c "from matricula.importar_microhorario import importar; importar()"
-
-Antes, coloque a planilha em matricula/dados/Horario_das_Disciplinas_05112026.xlsx.
+Normalmente é chamado pelo comando `python manage.py importar_dados`.
+A planilha fica em matricula/dados/Horario_das_Disciplinas_05112026.xlsx e o
+período (ex.: 2026.2) é lido do próprio cabeçalho dela.
 """
 
 import re
-from collections import defaultdict
 from datetime import time
 from pathlib import Path
 
@@ -16,9 +14,9 @@ from django.db import transaction
 from matricula.models import Disciplina, HorarioTurma, Turma
 
 
-PERIODO = '2026.2'
 ARQUIVO = Path(settings.BASE_DIR) / 'matricula' / 'dados' / 'Horario_das_Disciplinas_05112026.xlsx'
 
+PERIODO_NO_CABECALHO = re.compile(r'Período:\s*(\d{4}\.\d)')
 DIAS = {'SEG': 0, 'TER': 1, 'QUA': 2, 'QUI': 3, 'SEX': 4, 'SAB': 5, 'SÁB': 5}
 PADRAO = re.compile(
     r'\b(SEG|TER|QUA|QUI|SEX|SAB|SÁB)\s+'
@@ -57,9 +55,10 @@ def importar():
     planilha = load_workbook(ARQUIVO, read_only=True, data_only=True)
     try:
         aba = planilha['MicroHorario'] if 'MicroHorario' in planilha.sheetnames else planilha.active
-        cabecalho = str(aba['A1'].value or '')
-        if f'Período: {PERIODO}' not in cabecalho:
-            raise ValueError(f'A planilha não indica o período esperado: {PERIODO}')
+        achado_periodo = PERIODO_NO_CABECALHO.search(str(aba['A1'].value or ''))
+        if not achado_periodo:
+            raise ValueError('A planilha não indica o período (esperado "Período: 2026.2" na célula A1).')
+        periodo = achado_periodo.group(1)
 
         # A planilha tem uma linha por combinação de turma e destino/bloqueio.
         # Consolidamos esses destinos sem duplicar a mesma turma no banco.
@@ -115,7 +114,7 @@ def importar():
             turma, criada = Turma.objects.update_or_create(
                 disciplina=disciplina,
                 codigo=codigo_turma,
-                periodo_letivo=PERIODO,
+                periodo_letivo=periodo,
                 defaults={
                     'professor': registro['professor'][:150],
                     'vagas': sum(registro['destinos'].values())
@@ -142,11 +141,12 @@ def importar():
             ])
             horarios_salvos += len(registro['horarios'])
 
-    print(f'Período: {PERIODO}')
-    print(f'Linhas lidas: {linhas_lidas}')
-    print(f'Disciplinas já cadastradas no Fluxa: {len(disciplinas)}')
-    print(f'Turmas criadas: {criadas}')
-    print(f'Turmas atualizadas: {atualizadas}')
-    print(f'Horários importados: {horarios_salvos}')
-    print(f'Turmas ignoradas por disciplina não cadastrada: {ignoradas}')
-    print('Importação concluída.')
+    return {
+        'periodo': periodo,
+        'linhas': linhas_lidas,
+        'disciplinas_no_banco': len(disciplinas),
+        'turmas_criadas': criadas,
+        'turmas_atualizadas': atualizadas,
+        'horarios': horarios_salvos,
+        'turmas_ignoradas': ignoradas,
+    }
