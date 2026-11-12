@@ -1,21 +1,18 @@
+"""Leitura da planilha da grade curricular.
 
-"""Grades curriculares das nove engenharias do Fluxa."""
-
+Este módulo só é usado pela importação (importacao_engenharias.py): as telas
+do site nunca leem Excel nem JSON, só o banco de dados.
+"""
 from collections import OrderedDict
 from pathlib import Path
 
 from django.conf import settings
 
-
 BASE = Path(settings.BASE_DIR) / 'matricula'
-
-
-OPTATIVAS = BASE / 'dados' / 'FLUXA_consulta_optativas_5_engenharias.xlsx'
-
 GRADE = BASE / 'dados' / 'FLUXA_grade_curricular_9_engenharias.xlsx'
 
+# Nome do curso no Fluxa -> aba da planilha.
 ABAS = {
-    'Engenharia de Computação': 'Computação',
     'Engenharia de Produção': 'Produção (FAR)',
     'Engenharia de Controle e Automação': 'Controle e Automação',
     'Engenharia Elétrica': 'Elétrica (ESC)',
@@ -26,265 +23,72 @@ ABAS = {
     'Engenharia Ambiental': 'Ambiental',
 }
 
-NOVOS_CURSOS = tuple(ABAS)
+# Engenharia de Computação não está aqui de propósito: o seu currículo e os
+# seus pré-requisitos vêm da fixture disciplinas_fluxograma.json.
+CURSOS_DA_PLANILHA = tuple(ABAS)
+
+TIPOS_DE_GRUPO = ('Optativa (grupo)', 'Eletiva (grupo)')
+
 
 def _texto(valor):
-    if valor is None:
-        return ''
-
-    return str(valor).strip()
+    return '' if valor is None else str(valor).strip()
 
 
 def _linhas(planilha, aba):
-    """Lê as linhas do Excel."""
-
+    """Lê uma aba em linhas com cabeçalhos e fecha o arquivo corretamente."""
     from openpyxl import load_workbook
 
-    livro = load_workbook(
-        planilha,
-        read_only=True,
-        data_only=True
-    )
-
+    livro = load_workbook(planilha, read_only=True, data_only=True)
     try:
         if aba not in livro.sheetnames:
-            raise ValueError(
-                f'Aba não encontrada no Excel: {aba}'
-            )
-
-        linhas = livro[aba].iter_rows(
-            values_only=True
-        )
-
+            raise ValueError(f'Aba não encontrada no Excel: {aba}')
+        linhas = livro[aba].iter_rows(values_only=True)
         cabecalho = next(linhas, None)
-
         if cabecalho is None:
             return []
-
-        chaves = [
-            _texto(coluna).lower()
-            for coluna in cabecalho
-        ]
-
-        return [
-            dict(zip(chaves, linha))
-            for linha in linhas
-        ]
-
+        chaves = [_texto(c).lower() for c in cabecalho]
+        return [dict(zip(chaves, linha)) for linha in linhas]
     finally:
         livro.close()
 
 
 def _requisitos(texto):
-    """A+B = duas exigências; A|B = alternativas."""
-
-    grupos = []
-
-    for alternativa in _texto(texto).upper().split('|'):
-
-        codigos = [
-            codigo.strip()
-            for codigo in alternativa.split('+')
-            if codigo.strip()
-        ]
-
-        if codigos:
-            grupos.append(codigos)
-
-    return grupos
-
-
-def linhas_do_curso(nome):
-    """Retorna todas as disciplinas e seus períodos."""
-
-    if nome not in ABAS:
-        return []
-
+    """A+B = as duas exigências (grupo); A|B = alternativas (grupos diferentes).
+    Não inventa pré-requisitos: célula vazia devolve lista vazia."""
     resultado = []
-
-    for registro in _linhas(GRADE, ABAS[nome]):
-
-        codigo = _texto(
-            registro.get('codigo')
-        ).upper()
-
-        if not codigo:
-            continue
-
-        if _texto(registro.get('curso')) != nome:
-            raise ValueError(
-                f'Curso inesperado na grade: {codigo}'
-            )
-
-        periodo = registro.get('periodo')
-
-        if isinstance(periodo, (int, float)):
-            if int(periodo) == periodo:
-                periodo = int(periodo)
-            else:
-                periodo = 0
-
-        elif _texto(periodo).isdigit():
-            periodo = int(_texto(periodo))
-
-        else:
-            periodo = 0
-
-        if not 0 <= periodo <= 10:
-            raise ValueError(
-                f'Período inválido: {codigo}'
-            )
-
-        creditos = int(
-            registro['creditos']
-        )
-
-        if creditos < 0:
-            raise ValueError(
-                f'Créditos negativos: {codigo}'
-            )
-
-        resultado.append({
-            'codigo': codigo,
-            'nome': _texto(
-                registro.get('nome')
-            ),
-            'creditos': creditos,
-            'periodo': periodo,
-            'grupos': _requisitos(
-                registro.get('pre_requisitos')
-            ),
-            'co': [
-                c
-                for grupo in _requisitos(
-                    registro.get('co_requisitos')
-                )
-                for c in grupo
-            ],
-            'tipo': _texto(
-                registro.get('tipo')
-            ),
-            'verificacao': _texto(
-                registro.get('verificacao')
-            )
-        })
-
+    for alternativa in _texto(texto).upper().split('|'):
+        membros = [c.strip() for c in alternativa.split('+') if c.strip()]
+        if membros:
+            resultado.append(membros)
     return resultado
 
 
-def relacoes_do_curso(nome):
-    """Organiza as relações de disciplinas por curso."""
+def ler_grade(nome_curso):
+    """Devolve {código: {nome, creditos, grupos, co, grupo_optativa}} do curso.
+
+    Um grupo de optativas pode aparecer em mais de um período: os créditos
+    somam, pois o aluno cumpre o total do grupo.
+    """
+    if nome_curso not in ABAS:
+        raise ValueError(f'Curso sem aba na planilha: {nome_curso}')
 
     mapa = OrderedDict()
-
-    for item in linhas_do_curso(nome):
-
-        codigo = item['codigo']
-
+    for r in _linhas(GRADE, ABAS[nome_curso]):
+        codigo = _texto(r.get('codigo')).upper()
+        if not codigo:
+            continue
+        if _texto(r.get('curso')) != nome_curso:
+            raise ValueError(f'Curso inesperado na grade: {codigo}')
+        creditos = int(r['creditos'])
+        grupo = _texto(r.get('tipo')) in TIPOS_DE_GRUPO
         if codigo not in mapa:
-
             mapa[codigo] = {
-                'nome': item['nome'],
-                'creditos': item['creditos'],
-                'periodo': item['periodo'],
-                'grupos': item['grupos'],
-                'co': item['co'],
-                'grupo_optativa': (
-                    'grupo' in item['tipo'].lower()
-                    or codigo.startswith(
-                        ('ELL', 'ELU', 'ELO', 'ACP')
-                    )
-                )
+                'nome': _texto(r.get('nome')),
+                'creditos': creditos,
+                'grupos': _requisitos(r.get('pre_requisitos')),
+                'co': [c for g in _requisitos(r.get('co_requisitos')) for c in g],
+                'grupo_optativa': grupo,
             }
-
-        else:
-            anterior = mapa[codigo]
-
-            # Grupos podem aparecer em vários períodos
-            anterior['creditos'] += item['creditos']
-
-            if not anterior['grupos'] and item['grupos']:
-                anterior['grupos'] = item['grupos']
-
-            if not anterior['co'] and item['co']:
-                anterior['co'] = item['co']
-
+        elif mapa[codigo]['grupo_optativa']:
+            mapa[codigo]['creditos'] += creditos
     return mapa
-
-
-def grupos_de_optativas(nome):
-    """Identifica os grupos de optativas do curso."""
-
-    if nome not in ABAS:
-        return set()
-
-    return {
-        item['codigo']
-        for item in linhas_do_curso(nome)
-        if 'grupo' in item['tipo'].lower()
-    }
-
-
-def consultar_catalogo_optativas(nome):
-    """Consulta a planilha informativa de optativas."""
-
-    grupos = []
-
-    for registro in _linhas(
-        OPTATIVAS,
-        'GRUPOS POR CURSO'
-    ):
-
-        if _texto(registro.get('curso')) == nome:
-
-            grupos.append({
-                'codigo': _texto(
-                    registro.get('codigo_grupo')
-                ),
-                'nome': _texto(
-                    registro.get('nome_grupo')
-                ),
-                'periodo': registro.get('periodo'),
-                'creditos': registro.get(
-                    'creditos_no_periodo'
-                ),
-                'situacao': _texto(
-                    registro.get('situacao_das_opcoes')
-                ),
-                'fonte': _texto(
-                    registro.get('fonte_lista_opcoes')
-                )
-            })
-
-    codigos = {
-        grupo['codigo']
-        for grupo in grupos
-    }
-
-    opcoes = []
-
-    for registro in _linhas(
-        OPTATIVAS,
-        'DISCIPLINAS CONFIRMADAS'
-    ):
-
-        if _texto(
-            registro.get('codigo_grupo')
-        ) in codigos:
-
-            opcoes.append({
-                'grupo': _texto(
-                    registro.get('codigo_grupo')
-                ),
-                'codigo': _texto(
-                    registro.get('codigo_opcao')
-                ),
-                'nome': _texto(
-                    registro.get('nome_opcao')
-                ),
-                'fonte': _texto(
-                    registro.get('fonte_oficial')
-                )
-            })
-
-    return grupos, opcoes

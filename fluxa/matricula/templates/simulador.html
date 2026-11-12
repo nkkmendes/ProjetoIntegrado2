@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fluxa — Simulador de matrícula</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'grades.css' %}">
+  <link rel="stylesheet" href="{% static 'navegacao.css' %}">
+</head>
+<body>
+<div class="fx-layout">
+{% include 'menu.html' %}
+<main>
+  {% include 'mensagens.html' %}
+  <h1>Simulador de matrícula</h1>
+  <p class="intro">Monte sua grade{% if periodo %} de {{ periodo }}{% endif %} com turmas reais do micro-horário. Só aparecem as disciplinas que o seu histórico permite cursar, e uma turma que bate de horário com a grade fica bloqueada.</p>
+
+  {% if not curso %}
+  <p class="aviso">Você ainda não escolheu um curso. <a href="{% url 'perfil' %}">Escolher meu curso no perfil</a>.</p>
+  {% elif not periodo %}
+  <p class="aviso">Ainda não há turmas importadas. Rode <code>python manage.py importar_dados</code> para carregar o micro-horário.</p>
+  {% else %}
+
+  {% if plano %}
+  <div class="edicao">
+    <span>Editando a grade <strong>“{{ plano.nome }}”</strong> do Planejamento. Ao salvar, ela é atualizada.</span>
+    <a class="botao-sec" href="{% url 'simulacao' %}">Começar uma grade nova</a>
+  </div>
+  {% endif %}
+
+  <noscript><p class="aviso">O simulador precisa de JavaScript ligado no navegador.</p></noscript>
+
+  <form method="post" action="{% url 'simulacao' %}" id="sim-form">
+    {% csrf_token %}
+    <input type="hidden" name="acao" value="salvar">
+    {% if plano %}<input type="hidden" name="planejamento_id" value="{{ plano.pk }}">{% endif %}
+    <div id="sim-campos"></div>
+
+    <section class="bloco" aria-label="Resumo e salvamento">
+      <div class="resumo">
+        <div class="numeros">
+          <div class="numero"><span class="rotulo">Disciplinas</span><span class="valor" id="sim-n-disc">0</span></div>
+          <div class="numero"><span class="rotulo">Créditos</span><span class="valor" id="sim-n-cred">0</span></div>
+          <div class="numero"><span class="rotulo">Conflitos</span><span class="valor ok">0</span></div>
+        </div>
+        <div class="salvar">
+          <div class="campo">
+            <label for="nome-grade">Nome da grade</label>
+            <input id="nome-grade" type="text" name="nome" maxlength="100" value="{{ nome }}" placeholder="Ex.: Grade A">
+          </div>
+          <button type="submit" class="botao" id="sim-salvar">Salvar em planejamento</button>
+          <button type="button" class="botao-sec" id="sim-limpar">Limpar grade</button>
+          <p class="nota">{% if plano %}Ao salvar, a grade “{{ plano.nome }}” é atualizada.{% else %}Será criada uma nova grade no Planejamento.{% endif %}</p>
+        </div>
+      </div>
+      {% if erro %}<p class="erro" role="alert">{{ erro }}</p>{% endif %}
+    </section>
+  </form>
+
+  <div class="simulador">
+    <section class="bloco painel-lateral" aria-labelledby="titulo-lista">
+      <h2 id="titulo-lista">Disciplinas que posso cursar</h2>
+      <p class="sub">Calculadas pelo seu histórico: pré-requisitos cumpridos, sem as já cursadas e sem bloqueio de nivelamento.</p>
+      <label for="sim-busca">Buscar por código ou nome</label>
+      <input id="sim-busca" type="search" placeholder="Ex.: INF1037 ou Cálculo" autocomplete="off">
+      <p class="contador" id="sim-contador"></p>
+      <div class="lista-disciplinas" id="sim-lista" tabindex="0" role="region" aria-label="Lista de disciplinas e turmas"></div>
+      {% if nota_ocultas %}<p class="rodape-lista">{{ nota_ocultas }}</p>{% endif %}
+    </section>
+
+    <div class="painel-grade">
+      <section class="bloco" aria-labelledby="titulo-grade">
+        <h2 id="titulo-grade">Minha grade — {{ periodo }}</h2>
+        <div class="rolagem-x">
+          <div class="grade" role="group" aria-label="Grade semanal de segunda a sábado">
+            <div class="grade-dias" id="sim-dias"></div>
+            <div class="grade-corpo" id="sim-corpo"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco" aria-labelledby="titulo-escolhidas">
+        <h2 id="titulo-escolhidas">Turmas escolhidas</h2>
+        <p class="vazio" id="sim-sem-escolha">Nenhuma turma na grade ainda. Abra uma disciplina na lista ao lado e escolha a turma.</p>
+        <ul class="escolhidas" id="sim-escolhidas"></ul>
+      </section>
+
+      <p class="sub">Simulação acadêmica: não efetua matrícula e não garante vagas na PUC.</p>
+    </div>
+  </div>
+
+  {{ dados_simulador|json_script:"dados-simulador" }}
+  {{ selecao_inicial|json_script:"selecao-inicial" }}
+  <script src="{% static 'simulador.js' %}"></script>
+  {% endif %}
+</main>
+</div>
+</body>
+</html>

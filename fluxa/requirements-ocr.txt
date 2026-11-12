@@ -1,0 +1,5 @@
+# Opcional: só necessário para PDFs do SAU que sejam imagem (sem texto).
+# Exige também o programa Tesseract instalado (com o idioma português).
+-r requirements.txt
+pytesseract==0.3.13
+Pillow>=11.0,<14.0

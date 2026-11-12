@@ -1,15 +1,13 @@
 import unicodedata
-import fitz
 import os
 import tempfile
 from pathlib import Path
 from urllib.parse import urlencode
 
-from .catalogos_fluxa import relacoes_do_curso
 from .ocr_sau import analisar_pdf
 
+from django.db import transaction
 from django.shortcuts import render, redirect, resolve_url, get_object_or_404
-from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout, update_session_auth_hash
@@ -20,15 +18,16 @@ from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import (
-    CalendarioMatricula, Disciplina, HistoricoDisciplina,
-    PlanejamentoSalvo, SimulacaoSalva, Turma,
+    CalendarioMatricula, Disciplina, HistoricoDisciplina, PlanejamentoSalvo,
 )
 from .forms import (
     LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm,
-    PerfilCursoForm, PlanejamentoForm, SimulacaoForm, HistoricoForm, NivelamentoAlunoForm,
+    PerfilCursoForm, HistoricoForm, NivelamentoAlunoForm,
 )
 from .servicos import (
     obter_perfil, resumo_creditos, avisos_de_nivel, quadro_de_nivelamento,
+    periodo_de_oferta, disciplinas_disponiveis, dados_do_simulador,
+    validar_selecao, resumo_da_grade,
 )
 
 def inicio(request):
@@ -113,195 +112,157 @@ def logout_view(request):
     return redirect('login')
 
 
+def _pk(valor):
+    """Converte um id vindo do navegador em inteiro (0 se não for válido)."""
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _nota_das_ocultas(ocultas, periodo):
+    """Texto do rodapé da lista lateral do Simulador."""
+    partes = []
+    if ocultas['pre_requisito']:
+        partes.append(f"{ocultas['pre_requisito']} com pré-requisito pendente")
+    if ocultas['nivelamento']:
+        n = ocultas['nivelamento']
+        partes.append(f"{n} bloqueada{'s' if n != 1 else ''} pelo nível de nivelamento")
+    if ocultas['co_requisito']:
+        partes.append(f"{ocultas['co_requisito']} com co-requisito que não pode ser cursado agora")
+    if ocultas['sem_turma']:
+        partes.append(f"{ocultas['sem_turma']} sem turma em {periodo}")
+    total = sum(ocultas.values())
+    if not total:
+        return ''
+    inicio = (
+        f'{total} disciplinas do seu curso não aparecem aqui'
+        if total != 1 else '1 disciplina do seu curso não aparece aqui'
+    )
+    return inicio + ': ' + ', '.join(partes) + '.'
+
+
 @login_required
 def planejamento(request):
+    """Grades salvas do aluno. Só guarda, nomeia e reabre: quem monta a grade
+    é o Simulador. Cada aluno só enxerga e altera as próprias grades."""
     perfil = obter_perfil(request.user)
-    curso = perfil.curso
-    periodo_oferta = '2026.2'
-
-    disciplinas = []
-    if curso:
-        turmas_periodo = Turma.objects.filter(
-            periodo_letivo=periodo_oferta
-        ).order_by('codigo')
-        disciplinas = list(
-            curso.disciplinas.prefetch_related(
-                Prefetch('turmas', queryset=turmas_periodo, to_attr='turmas_ofertadas')
-            ).order_by('codigo')
-        )
-
-    codigos_validos = {disciplina.codigo for disciplina in disciplinas}
-    registros = PlanejamentoSalvo.objects.filter(usuario=request.user).order_by('-id')
-
-    # A edição utiliza a mesma página, sem precisar criar uma nova URL.
-    id_edicao = request.POST.get('planejamento_id') if request.method == 'POST' else request.GET.get('editar')
-    planejamento_editado = None
-    if id_edicao:
-        planejamento_editado = get_object_or_404(
-            PlanejamentoSalvo, pk=id_edicao, usuario=request.user
-        )
-
-    if request.method == 'POST' and request.POST.get('acao') == 'excluir':
-        if planejamento_editado is None:
-            messages.error(request, 'Planejamento não encontrado.')
-        else:
-            planejamento_editado.delete()
-            messages.success(request, 'Planejamento excluído com sucesso.')
-        return redirect('planejamento')
 
     if request.method == 'POST':
-        selecionadas = list(dict.fromkeys(request.POST.getlist('disciplina')))
-        dados = request.POST.copy()
-        dados['disciplinas'] = ', '.join(selecionadas)
-        form = PlanejamentoForm(dados, instance=planejamento_editado)
+        plano = get_object_or_404(
+            PlanejamentoSalvo,
+            pk=_pk(request.POST.get('planejamento_id')),
+            usuario=request.user,
+        )
+        acao = request.POST.get('acao')
+        if acao == 'excluir':
+            nome = plano.nome
+            plano.delete()
+            messages.success(request, f'Grade “{nome}” excluída.')
+        elif acao == 'renomear':
+            novo_nome = request.POST.get('nome', '').strip()[:100]
+            if not novo_nome:
+                messages.error(request, 'O nome da grade não pode ficar vazio.')
+            elif request.user.planejamentos.filter(nome=novo_nome).exclude(pk=plano.pk).exists():
+                messages.error(request, 'Você já tem uma grade com esse nome.')
+            else:
+                plano.nome = novo_nome
+                plano.save()
+                messages.success(request, 'Nome da grade atualizado.')
+        return redirect('planejamento')
 
-        if not curso:
-            form.add_error(None, 'Selecione seu curso no Perfil antes de salvar.')
-        elif not selecionadas:
-            form.add_error(None, 'Selecione pelo menos uma disciplina.')
-        elif any(codigo not in codigos_validos for codigo in selecionadas):
-            form.add_error(None, 'Uma ou mais disciplinas não pertencem ao seu curso.')
-
-        if form.is_valid():
-            registro = form.save(commit=False)
-            registro.usuario = request.user
-            registro.save()
-            messages.success(
-                request,
-                'Planejamento atualizado com sucesso.' if planejamento_editado else 'Nova opção de grade salva com sucesso.'
-            )
-            return redirect('planejamento')
-    else:
-        if planejamento_editado:
-            form = PlanejamentoForm(instance=planejamento_editado)
-            selecionadas = [
-                codigo.strip() for codigo in planejamento_editado.disciplinas.split(',')
-                if codigo.strip()
-            ]
-        else:
-            form = PlanejamentoForm()
-            selecionadas = []
-
-    codigos_selecionados = set(selecionadas)
-    com_oferta = []
-    sem_oferta = []
-    for disciplina in disciplinas:
-        disciplina.selecionada = disciplina.codigo in codigos_selecionados
-        disciplina.quantidade_turmas = len(disciplina.turmas_ofertadas)
-        if disciplina.quantidade_turmas:
-            com_oferta.append(disciplina)
-        else:
-            sem_oferta.append(disciplina)
-
-    return render(request, 'planejamento (1).html', {
-        'form': form,
-        'dados': registros,
-        'curso': curso,
-        'periodo_oferta': periodo_oferta,
-        'disciplinas_com_oferta': com_oferta,
-        'disciplinas_sem_oferta': sem_oferta,
-        'total_disciplinas': len(disciplinas),
-        'planejamento_editado': planejamento_editado,
+    planos = (
+        request.user.planejamentos
+        .prefetch_related('turmas__disciplina', 'turmas__horarios')
+    )
+    grades = [
+        {'plano': plano, **resumo_da_grade(plano.turmas.all())}
+        for plano in planos
+    ]
+    return render(request, 'planejamento.html', {
+        'grades': grades,
+        'curso': perfil.curso,
     })
 
 
 @login_required
 def simulacao(request):
-    """Simula uma grade usando as turmas e os horários importados da PUC."""
+    """Simulador de matrícula: o aluno escolhe turmas reais do micro-horário
+    entre as disciplinas que o histórico dele permite cursar. O servidor
+    confere tudo de novo ao salvar (disponibilidade, uma turma por disciplina
+    e conflito de horário)."""
     perfil = obter_perfil(request.user)
-    curso = perfil.curso
-    periodo_oferta = '2026.2'
+    periodo = periodo_de_oferta()
 
-    # Mostra somente turmas vinculadas às disciplinas do curso escolhido.
-    turmas = list(
-        Turma.objects.filter(
-            disciplina__cursos=curso,
-            periodo_letivo=periodo_oferta,
-        ).select_related('disciplina').prefetch_related('horarios')
-        .order_by('disciplina__codigo', 'codigo')
-    ) if curso else []
+    postando = request.method == 'POST'
+    id_plano = _pk(request.POST.get('planejamento_id') if postando else request.GET.get('planejamento'))
+    plano = None
+    if id_plano:
+        plano = get_object_or_404(PlanejamentoSalvo, pk=id_plano, usuario=request.user)
 
-    ids_permitidos = {str(t.id) for t in turmas}
-    selecionados = request.POST.getlist('turmas') if request.method == 'POST' else []
-    selecionados = list(dict.fromkeys(selecionados))
-    nome = request.POST.get('nome', '').strip() if request.method == 'POST' else ''
     erro = ''
+    nome = plano.nome if plano else ''
+    selecionadas = []
 
-    if request.method == 'POST':
-        if not curso:
-            erro = 'Escolha seu curso no Perfil antes de montar a grade.'
-        elif not selecionados:
-            erro = 'Selecione ao menos uma turma.'
-        elif any(tid not in ids_permitidos for tid in selecionados):
-            erro = 'Uma das turmas selecionadas não pertence ao seu curso.'
+    if postando and request.POST.get('acao') == 'salvar':
+        nome = request.POST.get('nome', '').strip()[:100]
+        ids = request.POST.getlist('turmas')
+        turmas, erro = validar_selecao(perfil, periodo, ids)
+        if not erro and not nome:
+            erro = 'Dê um nome à grade para salvá-la em Planejamento.'
+        if not erro:
+            repetido = request.user.planejamentos.filter(nome=nome)
+            if plano:
+                repetido = repetido.exclude(pk=plano.pk)
+            if repetido.exists():
+                erro = 'Você já tem uma grade com esse nome.'
+        if not erro:
+            with transaction.atomic():
+                if plano is None:
+                    plano = PlanejamentoSalvo(usuario=request.user)
+                plano.nome = nome
+                plano.periodo_letivo = periodo
+                plano.save()
+                plano.turmas.set(turmas)
+            messages.success(request, f'Grade “{nome}” salva em Planejamento.')
+            return redirect(f"{reverse('simulacao')}?planejamento={plano.pk}")
+        selecionadas = [_pk(i) for i in ids]
+    elif plano:
+        selecionadas = list(plano.turmas.values_list('pk', flat=True))
 
-    selecionadas = [t for t in turmas if str(t.id) in selecionados] if not erro else []
-    codigos = [t.disciplina.codigo for t in selecionadas]
-    if not erro and len(codigos) != len(set(codigos)):
-        erro = 'Escolha apenas uma turma para cada disciplina.'
-
-    # Eventos ordenados por dia e hora, diretamente do modelo HorarioTurma.
-    eventos = []
-    for turma in selecionadas:
-        for horario in turma.horarios.all():
-            eventos.append({
-                'dia_numero': horario.dia_semana,
-                'dia': horario.get_dia_semana_display(),
-                'inicio': horario.hora_inicio,
-                'fim': horario.hora_fim,
-                'sala': horario.sala,
-                'codigo': turma.disciplina.codigo,
-                'disciplina': turma.disciplina.nome,
-                'turma': turma.codigo,
-            })
-    eventos.sort(key=lambda evento: (evento['dia_numero'], evento['inicio'], evento['codigo']))
-
-    conflitos = []
-    for i, atual in enumerate(eventos):
-        for outro in eventos[i + 1:]:
-            if outro['dia_numero'] != atual['dia_numero']:
-                if outro['dia_numero'] > atual['dia_numero']:
-                    break
-                continue
-            if atual['codigo'] != outro['codigo'] and (
-                atual['inicio'] < outro['fim'] and outro['inicio'] < atual['fim']
-            ):
-                conflitos.append(
-                    f"{atual['dia']}: {atual['codigo']} ({atual['turma']}) "
-                    f"e {outro['codigo']} ({outro['turma']})"
-                )
-
-    if request.method == 'POST' and request.POST.get('acao') == 'salvar' and not erro:
-        if not nome:
-            erro = 'Informe um nome para salvar a simulação.'
-        else:
-            descricao = ', '.join(
-                f'{turma.disciplina.codigo} - Turma {turma.codigo} ({periodo_oferta})'
-                for turma in selecionadas
-            )
-            SimulacaoSalva.objects.create(nome=nome, disciplinas=descricao)
-            messages.success(request, 'Simulação salva com sucesso.')
-            return redirect('simulacao')
-
-    for turma in turmas:
-        turma.selecionada = str(turma.id) in selecionados
-        turma.horarios_lista = sorted(
-            turma.horarios.all(), key=lambda h: (h.dia_semana, h.hora_inicio)
+    disponiveis = disciplinas_disponiveis(perfil, periodo)
+    ids_disponiveis = {t.pk for d in disponiveis['disciplinas'] for t in d.turmas_periodo}
+    mantidas = [i for i in selecionadas if i in ids_disponiveis]
+    if plano and not postando and len(mantidas) != len(selecionadas):
+        messages.warning(
+            request,
+            f'{len(selecionadas) - len(mantidas)} turma(s) desta grade não estão mais '
+            'disponíveis para você (por exemplo, a disciplina já foi concluída) e foram retiradas.'
         )
 
-    total_creditos = sum(t.disciplina.creditos for t in selecionadas)
-    return render(request, 'Simulador (1).html', {
-        'curso': curso,
-        'periodo_oferta': periodo_oferta,
-        'turmas': turmas,
-        'selecionadas': selecionadas,
-        'eventos': eventos,
-        'conflitos': conflitos,
-        'total_creditos': total_creditos,
-        'erro': erro,
+    return render(request, 'simulador.html', {
+        'curso': perfil.curso,
+        'periodo': periodo,
+        'plano': plano,
         'nome': nome,
-        'dados': SimulacaoSalva.objects.order_by('-id')[:30],
+        'erro': erro,
+        'dados_simulador': dados_do_simulador(disponiveis['disciplinas']),
+        'selecao_inicial': mantidas,
+        'nota_ocultas': _nota_das_ocultas(disponiveis['ocultas'], periodo),
     })
+
+
+def _caminho_pdf_sau(user):
+    return Path.home() / '.fluxa' / 'sau' / f'usuario_{user.pk}.pdf'
+
+
+def _apagar_pdf_sau(user):
+    """Remove o PDF do SAU do aluno (se existir). Os dados pessoais do PDF
+    não ficam guardados depois da análise."""
+    try:
+        _caminho_pdf_sau(user).unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 @login_required
@@ -352,7 +313,7 @@ def historico(request):
                             temporario = Path(destino.name)
                             for bloco in pdf.chunks():
                                 destino.write(bloco)
-                        arquivo_final = pasta / f'usuario_{request.user.pk}.pdf'
+                        arquivo_final = _caminho_pdf_sau(request.user)
                         os.replace(temporario, arquivo_final)
                         request.session.pop('sau_registros_ocr', None)
                         messages.success(request, 'PDF do SAU enviado com sucesso!')
@@ -364,12 +325,16 @@ def historico(request):
             return redirect(reverse('historico') + '#pdf-sau')
 
         if acao == 'analisar_pdf_sau':
-            caminho = Path.home() / '.fluxa' / 'sau' / f'usuario_{request.user.pk}.pdf'
+            caminho = _caminho_pdf_sau(request.user)
             if not caminho.is_file():
                 messages.error(request, 'Envie o PDF do SAU antes de analisar.')
             else:
                 try:
                     analise = analisar_pdf(caminho)
+                except (ValueError, OSError) as exc:
+                    request.session.pop('sau_registros_ocr', None)
+                    messages.error(request, f'Não foi possível analisar o PDF: {exc}')
+                else:
                     request.session['sau_registros_ocr'] = analise['registros']
                     request.session['sau_ocr_usuario'] = request.user.pk
                     request.session['sau_ocr_usado'] = analise['usou_ocr']
@@ -379,21 +344,40 @@ def historico(request):
                             f"{len(analise['registros'])} disciplina(s) identificada(s) no PDF. "
                             'Confira os dados antes de importar.'
                         )
-                        if analise['nao_cadastradas']:
-                            messages.warning(
-                                request,
-                                f"{analise['nao_cadastradas']} disciplina(s) não cadastrada(s) "
-                                'no Fluxa aparecem para conferência, mas não podem ser importadas.'
-                            )
                     else:
                         messages.warning(
                             request,
-                            'Nenhuma disciplina com código, período e situação reconhecíveis '
-                            'foi encontrada no catálogo do Fluxa. Confira o PDF.'
+                            'Nenhuma disciplina foi reconhecida. Confira se o PDF é o '
+                            '"Espelho do Histórico" do SAU.'
                         )
-                except (ValueError, OSError, fitz.FileDataError) as exc:
-                    request.session.pop('sau_registros_ocr', None)
-                    messages.error(request, f'Não foi possível analisar o PDF: {exc}')
+                    if analise['nao_cadastradas']:
+                        messages.warning(
+                            request,
+                            f"{analise['nao_cadastradas']} disciplina(s) não cadastrada(s) "
+                            'no Fluxa aparecem para conferência, mas não podem ser importadas.'
+                        )
+                    if analise['ignoradas']:
+                        messages.info(
+                            request,
+                            f"{len(analise['ignoradas'])} linha(s) de cancelamento, trancamento "
+                            'ou incompleto foram ignoradas, pois a disciplina não foi cursada.'
+                        )
+                    if analise['nao_lidas']:
+                        messages.warning(
+                            request,
+                            'Não consegui ler estas disciplinas do PDF: '
+                            + ', '.join(analise['nao_lidas']) + '.'
+                        )
+                finally:
+                    # Privacidade: o PDF só existe até ser lido.
+                    _apagar_pdf_sau(request.user)
+            return redirect(reverse('historico') + '#pdf-sau')
+
+        if acao == 'descartar_sau':
+            _apagar_pdf_sau(request.user)
+            for chave in ('sau_registros_ocr', 'sau_ocr_usuario', 'sau_ocr_usado'):
+                request.session.pop(chave, None)
+            messages.success(request, 'PDF e dados lidos descartados.')
             return redirect(reverse('historico') + '#pdf-sau')
 
         if acao == 'confirmar_ocr_sau':
@@ -402,21 +386,30 @@ def historico(request):
                 messages.error(request, 'Analise novamente o PDF antes de confirmar.')
             else:
                 indices = set(request.POST.getlist('selecionados'))
-                selecionados = [
-                    item for i, item in enumerate(opcoes)
-                    if str(i) in indices and item.get('cadastrada', True)
-                ]
+                selecionados = []
+                sem_escolha = 0
+                for i, item in enumerate(opcoes):
+                    if str(i) not in indices or not item.get('cadastrada', True):
+                        continue
+                    status = item['status']
+                    if item.get('escolher'):
+                        status = request.POST.get(f'status_{i}', '')
+                        if status not in (HistoricoDisciplina.CONCLUIDA, HistoricoDisciplina.EM_CURSO):
+                            sem_escolha += 1
+                            continue
+                    selecionados.append((item, status))
                 disciplinas = Disciplina.objects.in_bulk(
-                    [item['codigo'] for item in selecionados], field_name='codigo'
+                    [item['codigo'] for item, _ in selecionados], field_name='codigo'
                 )
                 alterados = 0
-                for item in selecionados:
+                for item, status in selecionados:
                     disciplina = disciplinas.get(item['codigo'])
                     if not disciplina:
                         continue
                     dados = {
-                        'status': item['status'],
+                        'status': status,
                         'periodo_letivo': item['periodo'],
+                        'turma': item.get('turma', ''),
                     }
                     if item['media'] is not None:
                         dados['media'] = item['media']
@@ -424,9 +417,15 @@ def historico(request):
                         perfil=perfil, disciplina=disciplina, defaults=dados
                     )
                     alterados += 1
-                request.session.pop('sau_registros_ocr', None)
-                request.session.pop('sau_ocr_usuario', None)
+                for chave in ('sau_registros_ocr', 'sau_ocr_usuario', 'sau_ocr_usado'):
+                    request.session.pop(chave, None)
                 messages.success(request, f'{alterados} disciplina(s) confirmada(s) no histórico.')
+                if sem_escolha:
+                    messages.warning(
+                        request,
+                        f'{sem_escolha} disciplina(s) com grau não informado ficaram de fora '
+                        'porque você não escolheu entre concluída e em curso.'
+                    )
             return redirect(reverse('historico') + '#cursadas')
 
         if acao == 'historico':
@@ -457,7 +456,7 @@ def historico(request):
         'registros': registros,
         'resumo': resumo_creditos(perfil),
         'quadro_nivel': quadro_de_nivelamento(perfil),
-        'sau_pdf_existe': (Path.home() / '.fluxa' / 'sau' / f'usuario_{request.user.pk}.pdf').is_file(),
+        'sau_pdf_existe': _caminho_pdf_sau(request.user).is_file(),
         'sau_ocr_registros': request.session.get('sau_registros_ocr', [])
             if request.session.get('sau_ocr_usuario') == request.user.pk else [],
         'sau_ocr_usado': request.session.get('sau_ocr_usado', False),
@@ -602,26 +601,18 @@ def _cor_do_grupo(indice, total):
 
 
 def _cadeia(codigo, grupos, concluidas):
-    """Busca os pre-requisitos diretos e indiretos."""
-    encontrados = set()
-    visitados = {codigo}
-    pendentes = [codigo]
-
-    while pendentes:
-        atual = pendentes.pop()
-
-        for grupo in grupos.get(atual, []):
-            for requisito in grupo:
-                if requisito == codigo:
-                    continue
-
-                encontrados.add(requisito)
-
-                if requisito not in visitados:
-                    visitados.add(requisito)
-                    pendentes.append(requisito)
-
-    return encontrados
+    """Todos os pré-requisitos (de todos os grupos), até o começo ou até
+    uma matéria concluída."""
+    achados = set()
+    fila = [codigo]
+    while fila:
+        atual = fila.pop()
+        for membros in grupos.get(atual, []):
+            for c in membros:
+                if c not in concluidas and c not in achados:
+                    achados.add(c)
+                    fila.append(c)
+    return achados
 
 
 def _desenhar_setas(foco, cadeia, co_foco, info):
@@ -685,41 +676,28 @@ def _desenhar_setas(foco, cadeia, co_foco, info):
     return setas, marcadores
 
 
-
 @login_required
 def fluxograma(request):
     perfil = obter_perfil(request.user)
     curso = perfil.curso
 
-    # Buscar disciplinas do curso
-    if curso:
+    # Buscar as disciplinas do curso escolhido
+    if curso is None:
+        disciplinas = Disciplina.objects.none()
+    else:
         disciplinas = curso.disciplinas.prefetch_related(
             'grupos_pre_requisito__disciplinas',
             'co_requisitos',
             'associadas',
         )
-    else:
-        disciplinas = Disciplina.objects.none()
 
+    # Uma só lógica para todos os cursos: as colunas vêm dos pré-requisitos
+    # (globais) que estão no banco, sem períodos.
     lista = ordenar_por_camada(disciplinas)
-    relacoes = relacoes_do_curso(curso.nome) if curso else None
-    por_periodo = bool(relacoes)
-
-    # Separar as disciplinas por periodo
-    if por_periodo:
-        for d in lista:
-            periodo = relacoes.get(d.codigo, {}).get('periodo')
-
-            if isinstance(periodo, int) and 1 <= periodo <= 10:
-                d.camada = periodo - 1
-            else:
-                d.camada = 10
-
-        lista.sort(key=lambda d: (d.camada, d.codigo))
 
     codigos_curso = {d.codigo for d in lista}
 
-    # Consultar historico do aluno
+    # Consultar o histórico do aluno
     situacoes = dict(
         perfil.historico.values_list(
             'disciplina__codigo',
@@ -728,87 +706,70 @@ def fluxograma(request):
     )
 
     concluidas = {
-        codigo for codigo, status in situacoes.items()
+        codigo
+        for codigo, status in situacoes.items()
         if status == HistoricoDisciplina.CONCLUIDA
     }
 
     em_curso = {
-        codigo for codigo, status in situacoes.items()
+        codigo
+        for codigo, status in situacoes.items()
         if status == HistoricoDisciplina.EM_CURSO
     }
 
     avisos = avisos_de_nivel(perfil, lista)
 
-    # Organizar requisitos das disciplinas
+    # Organizar pré-requisitos e co-requisitos
     info = {}
     usadas = set()
 
     for d in lista:
-        if por_periodo:
-            dados = relacoes.get(d.codigo, {})
 
-            d.nome = dados.get('nome', d.nome)
-            d.creditos = dados.get('creditos', d.creditos)
+        grupos = []
 
-            grupos = [
-                sorted(
-                    codigo for codigo in grupo
-                    if codigo in codigos_curso
-                )
-                for grupo in dados.get('grupos', [])
-            ]
-
-            grupos = [grupo for grupo in grupos if grupo]
-
-            co = sorted(
-                set(dados.get('co', [])) & codigos_curso
+        for grupo in d.grupos_pre_requisito.all():
+            membros = sorted(
+                item.codigo
+                for item in grupo.disciplinas.all()
+                if item.codigo in codigos_curso
             )
 
-        else:
-            grupos = []
+            if membros:
+                grupos.append(membros)
 
-            for grupo in d.grupos_pre_requisito.all():
-                membros = sorted(
-                    item.codigo
-                    for item in grupo.disciplinas.all()
-                    if item.codigo in codigos_curso
-                )
-
-                if membros:
-                    grupos.append(membros)
-
-            co = sorted((
+        co = sorted(
+            (
                 {item.codigo for item in d.co_requisitos.all()}
                 |
                 {item.codigo for item in d.associadas.all()}
-            ) & codigos_curso)
+            ) & codigos_curso
+        )
 
-        for grupo in grupos:
-            usadas.update(grupo)
+        for membros in grupos:
+            usadas.update(membros)
 
         info[d.codigo] = {
             'obj': d,
             'grupos': grupos,
-            'co': co
+            'co': co,
         }
 
-    # Descobrir disciplinas dependentes
+    # Descobrir quais matérias dependem de outras
     dependentes = {codigo: set() for codigo in info}
 
     for codigo, dados in info.items():
-        for grupo in dados['grupos']:
-            for requisito in grupo:
+        for membros in dados['grupos']:
+            for materia in membros:
                 dependentes.setdefault(
-                    requisito, set()
+                    materia, set()
                 ).add(codigo)
 
-    # Situacao de cada disciplina
+    # Identificar matérias concluídas e bloqueadas
     for codigo, dados in info.items():
         d = dados['obj']
 
         d.isolada = (
-            not por_periodo
-            and not dados['grupos']
+            not dados['grupos']
             and not dados['co']
             and codigo not in usadas
         )
@@ -824,13 +785,15 @@ def fluxograma(request):
 
         dados['concluida'] = d.concluida
 
-    # Identificar a disciplina selecionada
-    foco = request.GET.get('foco', '').strip().upper()
+    # Selecionar uma matéria no fluxograma
+    foco = request.GET.get(
+        'foco', ''
+    ).strip().upper()
 
-    if foco not in info:
+    if foco not in info or info[foco]['concluida']:
         foco = ''
 
-    # Pesquisar disciplinas
+    # Buscar disciplina pelo código ou nome
     busca = request.GET.get('q', '').strip()
     aviso = ''
     resultados = []
@@ -845,60 +808,62 @@ def fluxograma(request):
         ]
 
         if not achadas:
-            aviso = f'Nenhuma materia encontrada para "{busca}".'
+            aviso = (
+                f'Nenhuma matéria encontrada para "{busca}".'
+            )
 
         elif len(achadas) == 1:
-            return redirect(
-                _url_fluxograma(
-                    achadas[0].codigo,
-                    achadas[0].codigo
+            d = achadas[0]
+
+            if d.concluida:
+                aviso = (
+                    f'{d.codigo} — {d.nome} já está concluída. '
+                    'Veja a lista "Concluídas" para desfazer.'
                 )
-            )
+            else:
+                return redirect(
+                    _url_fluxograma(d.codigo, d.codigo)
+                )
 
         else:
             aviso = (
-                f'{len(achadas)} materias encontradas. '
+                f'{len(achadas)} matérias encontradas. '
                 'Escolha uma:'
             )
             resultados = achadas
 
-    # Organizar materias por coluna
-    # Inclui materias concluidas para mostrar a cadeia completa
+    # Organizar as matérias em colunas
     colunas = {}
 
     for d in lista:
-        if not d.isolada:
+        if not d.isolada and not d.concluida:
             colunas.setdefault(
                 d.camada, []
             ).append(d)
 
     camadas = sorted(colunas)
+
+    # Criar os cabeçalhos e posições das caixas
     cabecalhos = []
 
     for i, camada in enumerate(camadas):
         x = MARGEM_X + i * (CARTA_L + ESPACO_H)
 
-        if por_periodo:
-            if camada < 10:
-                titulo = f'{camada + 1}º período'
-            else:
-                titulo = 'Período não definido'
+        if camada == 0:
+            titulo = 'Sem pré-requisito'
         else:
-            if camada == 0:
-                titulo = 'Sem pré-requisito'
-            else:
-                titulo = f'Nível {camada}'
+            titulo = f'Nível {camada}'
 
         cabecalhos.append({
             'x': x,
-            'titulo': titulo
+            'titulo': titulo,
         })
 
         for j, d in enumerate(colunas[camada]):
             d.x = x
             d.y = TOPO + j * (CARTA_A + ESPACO_V)
 
-    # Calcular tamanho da area do fluxograma
+    # Calcular o tamanho da área do fluxograma
     largura = 0
     altura = 0
 
@@ -915,36 +880,45 @@ def fluxograma(request):
             * (CARTA_A + ESPACO_V)
         )
 
-    # Preparar painel lateral
+    # Preparar as setas e o painel lateral
     painel = None
+    setas = []
+    marcadores = []
+
+    grupos_por_codigo = {
+        codigo: dados['grupos']
+        for codigo, dados in info.items()
+    }
 
     if foco:
-        grupos_por_codigo = {
-            codigo: dados['grupos']
-            for codigo, dados in info.items()
-        }
-
         cadeia = _cadeia(
             foco,
             grupos_por_codigo,
             concluidas
         )
 
-        co_foco = (
-            set(info[foco]['co'])
-            - cadeia
-            - {foco}
-        )
+        co_foco = {
+            codigo
+            for codigo in info[foco]['co']
+            if codigo not in concluidas
+            and codigo not in cadeia
+        }
 
         info[foco]['obj'].classe = 'alvo'
 
         for codigo in cadeia:
-            if codigo in info:
-                info[codigo]['obj'].classe = 'cadeia'
+            info[codigo]['obj'].classe = 'cadeia'
 
         for codigo in co_foco:
-            if codigo in info:
-                info[codigo]['obj'].classe = 'co'
+            info[codigo]['obj'].classe = 'co'
+
+        if not info[foco]['obj'].isolada:
+            setas, marcadores = _desenhar_setas(
+                foco,
+                cadeia,
+                co_foco,
+                info
+            )
 
         def itens(codigos):
             return [
@@ -953,11 +927,10 @@ def fluxograma(request):
                     'concluida': info[codigo]['concluida']
                 }
                 for codigo in sorted(codigos)
-                if codigo in info
             ]
 
-        d = info[foco]['obj']
         total_grupos = len(info[foco]['grupos'])
+        d = info[foco]['obj']
 
         painel = {
             'codigo': d.codigo,
@@ -967,9 +940,9 @@ def fluxograma(request):
             'grupos': [
                 {
                     'cor': _cor_do_grupo(i, total_grupos),
-                    'itens': itens(grupo)
+                    'itens': itens(membros)
                 }
-                for i, grupo in enumerate(
+                for i, membros in enumerate(
                     info[foco]['grupos']
                 )
             ],
@@ -979,41 +952,43 @@ def fluxograma(request):
             ),
             'sem_relacoes': d.isolada,
             'avisos_nivel': d.avisos_nivel,
-            'em_curso': foco in em_curso
+            'em_curso': foco in em_curso,
         }
 
-    # Materias concluidas
+    # Matérias concluídas ficam separadas
     feitas = [
         info[codigo]['obj']
         for codigo in sorted(concluidas)
         if codigo in info
     ]
 
-    # JavaScript desenhara as setas
+    cartas = [d for d in lista if not d.isolada and not d.concluida]
+    isoladas = [d for d in lista if d.isolada and not d.concluida]
+    # Quando a maior parte do curso não tem nenhum requisito no banco, o
+    # desenho fica quase vazio: avisamos que é falta de dados, não ausência
+    # de requisitos.
+    requisitos_incompletos = bool(lista) and (
+        sum(1 for d in lista if d.isolada) > len(lista) / 2
+    )
+
     return render(request, 'fluxograma.html', {
         'curso': curso,
         'cabecalhos': cabecalhos,
-        'cartas': [
-            d for d in lista
-            if not d.isolada
-        ],
-        'isoladas': [
-            d for d in lista
-            if d.isolada
-        ],
+        'cartas': cartas,
+        'isoladas': isoladas,
+        'requisitos_incompletos': requisitos_incompletos,
         'largura': largura,
         'altura': altura,
-        'setas': [],
-        'marcadores': [],
+        'setas': setas,
+        'marcadores': marcadores,
         'painel': painel,
         'foco': foco,
         'busca': busca,
         'aviso': aviso,
         'resultados': resultados,
         'concluidas': feitas,
-        'total_disciplinas': len(lista)
+        'total_disciplinas': len(lista),
     })
-
 
 
 def _buscar_disciplina(codigo):
@@ -1021,83 +996,6 @@ def _buscar_disciplina(codigo):
         return Disciplina.objects.get(codigo__iexact=codigo)
     except Disciplina.DoesNotExist:
         return None
-
-@login_required
-def grafo_fluxograma(request):
-    perfil = obter_perfil(request.user)
-    curso = perfil.curso
-
-    if not curso:
-        return JsonResponse({
-            'grafo': {},
-            'co_requisitos': {},
-            'concluidas': []
-        })
-
-    disciplinas = list(
-        curso.disciplinas.prefetch_related(
-            'grupos_pre_requisito__disciplinas',
-            'co_requisitos',
-            'associadas'
-        )
-    )
-
-    codigos = {d.codigo for d in disciplinas}
-    relacoes = relacoes_do_curso(curso.nome)
-
-    grafo = {}
-    co_requisitos = {}
-
-    for d in disciplinas:
-        if relacoes is not None:
-            dados = relacoes.get(d.codigo, {})
-            grupos = dados.get('grupos', [])
-            co = dados.get('co', [])
-
-        else:
-            grupos = [
-                [
-                    item.codigo
-                    for item in grupo.disciplinas.all()
-                ]
-                for grupo in d.grupos_pre_requisito.all()
-            ]
-
-            co = (
-                [item.codigo for item in d.co_requisitos.all()]
-                +
-                [item.codigo for item in d.associadas.all()]
-            )
-
-        grafo[d.codigo] = [
-            [
-                codigo
-                for codigo in grupo
-                if codigo in codigos
-            ]
-            for grupo in grupos
-            if any(codigo in codigos for codigo in grupo)
-        ]
-
-        co_requisitos[d.codigo] = sorted(
-            set(co) & codigos
-        )
-
-    concluidas = list(
-        perfil.historico.filter(
-            status=HistoricoDisciplina.CONCLUIDA,
-            disciplina__codigo__in=codigos
-        ).values_list(
-            'disciplina__codigo',
-            flat=True
-        )
-    )
-
-    return JsonResponse({
-        'grafo': grafo,
-        'co_requisitos': co_requisitos,
-        'concluidas': concluidas
-    })
 
 @login_required
 def detalhes_disciplina(request, codigo):
