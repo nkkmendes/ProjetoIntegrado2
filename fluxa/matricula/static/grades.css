@@ -205,3 +205,53 @@ button[disabled] { cursor: not-allowed; }
     line-height: 1.5;
     overflow-wrap: anywhere;
 }
+
+/* Disponibilidade das disciplinas */
+
+.disponibilidade-grade {
+    margin-top: 18px;
+    padding: 15px;
+    background: #f5f7fa;
+    border-radius: 8px;
+}
+
+.disponibilidade-grade h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.item-disponibilidade {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+.status-disponivel {
+    color: #17803d;
+    font-weight: bold;
+}
+
+.status-sem-oferta {
+    color: #b45309;
+    font-weight: bold;
+}
+
+.status-bloqueada {
+    color: #b91c1c;
+    font-weight: bold;
+}
+
+.status-nao-verificada {
+    color: #666;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .item-disponibilidade {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

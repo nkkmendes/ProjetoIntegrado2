@@ -175,13 +175,74 @@ def planejamento(request):
         request.user.planejamentos
         .prefetch_related('turmas__disciplina', 'turmas__horarios')
     )
-    grades = [
-        {'plano': plano, **resumo_da_grade(plano.turmas.all())}
-        for plano in planos
-    ]
+    from datetime import date
+
+    hoje = date.today()
+    semestre_atual = 1 if hoje.month <= 6 else 2
+
+    if semestre_atual == 1:
+        periodo = f'{hoje.year}.2'
+    else:
+        periodo = f'{hoje.year + 1}.1'
+
+
+    ofertas_cadastradas = (
+        Disciplina.objects.filter(
+            turmas__periodo_letivo=periodo
+        ).exists() if periodo else False
+    )
+
+
+    codigos_disponiveis = set()
+
+    if ofertas_cadastradas:
+        resultado = disciplinas_disponiveis(perfil, periodo)
+        codigos_disponiveis = {
+            d.codigo for d in resultado['disciplinas']
+        }
+
+
+    grades = []
+
+    for plano in planos:
+        turmas = list(plano.turmas.all())
+        resumo = resumo_da_grade(turmas)
+
+        disponibilidade = []
+
+        for turma in turmas:
+            disciplina = turma.disciplina
+
+            tem_oferta = disciplina.turmas.filter(
+                periodo_letivo=periodo
+            ).exists()
+
+            if not periodo or not ofertas_cadastradas:
+                situacao = 'Aguardando atualização'
+            elif not tem_oferta:
+                situacao = 'Sem oferta cadastrada'
+            elif disciplina.codigo in codigos_disponiveis:
+                situacao = 'Disponível'
+            else:
+                situacao = 'Não habilitada'
+
+
+            disponibilidade.append({
+                'codigo': disciplina.codigo,
+                'nome': disciplina.nome,
+                'situacao': situacao,
+            })
+
+        grades.append({
+            'plano': plano,
+            **resumo,
+            'disponibilidade': disponibilidade,
+        })
+
     return render(request, 'planejamento.html', {
         'grades': grades,
         'curso': perfil.curso,
+        'periodo_oferta': periodo,
     })
 
 

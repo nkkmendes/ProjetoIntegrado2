@@ -103,6 +103,28 @@
         {% for c in g.chips %}<span class="chip cor-{{ c.cor }}">{{ c.texto }}</span>{% endfor %}
       </div>
 
+      <div class="disponibilidade-grade">
+  <h3>Disponibilidade para {{ periodo_oferta|default:"o próximo período" }}</h3>
+
+  {% for d in g.disponibilidade %}
+    <div class="item-disponibilidade">
+      <span>{{ d.codigo }} — {{ d.nome }}</span>
+
+      {% if d.situacao == "Disponível" %}
+        <span class="status-disponivel">Disponível</span>
+      {% elif d.situacao == "Sem oferta cadastrada" %}
+        <span class="status-sem-oferta">Sem oferta cadastrada</span>
+      {% elif d.situacao == "Não habilitada" %}
+        <span class="status-bloqueada">Não habilitada</span>
+      {% else %}
+        <span class="status-nao-verificada">Aguardando atualização</span>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>Nenhuma disciplina cadastrada nesta grade.</p>
+  {% endfor %}
+</div>
+
       <div class="acoes">
         <a class="botao" href="{% url 'simulacao' %}?planejamento={{ g.plano.pk }}">Abrir no simulador</a>
         <form method="post" action="{% url 'planejamento' %}">
