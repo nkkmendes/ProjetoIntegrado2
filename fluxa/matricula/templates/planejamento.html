@@ -47,7 +47,17 @@
         </div>
         <button type="submit">Renomear</button>
       </form>
-      <p class="meta">{{ g.plano.periodo_letivo|default:"—" }} · {{ g.creditos }} crédito{{ g.creditos|pluralize }} · {{ g.n_disciplinas }} disciplina{{ g.n_disciplinas|pluralize }}</p>
+      <div class="resumo-creditos">
+  <div class="creditos-destaque">
+    <strong>{{ g.creditos }}</strong>
+    <span>crédito{{ g.creditos|pluralize }}</span>
+  </div>
+
+  <div class="creditos-detalhes">
+    <span>Período: {{ g.plano.periodo_letivo|default:"—" }}</span>
+    <span>{{ g.n_disciplinas }} disciplina{{ g.n_disciplinas|pluralize }}</span>
+  </div>
+</div>
 
       <div class="mini-dias" aria-hidden="true"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
       <div class="mini" role="img" aria-label="Miniatura da grade semanal">

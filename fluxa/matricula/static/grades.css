@@ -121,3 +121,40 @@ button[disabled] { cursor: not-allowed; }
 
 /* Aviso de co-requisito pendente na lista de turmas escolhidas */
 .aviso-corequisito { color: #b3261e; font-weight: 600; }
+
+.resumo-creditos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 8px;
+    background: #f0f4f8;
+}
+
+.creditos-destaque {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: #174a74;
+}
+
+.creditos-destaque strong {
+    font-size: 28px;
+}
+
+.creditos-detalhes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: #555;
+}
+
+@media (max-width: 600px) {
+    .resumo-creditos {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
