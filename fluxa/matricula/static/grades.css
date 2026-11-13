@@ -158,3 +158,28 @@ button[disabled] { cursor: not-allowed; }
         align-items: flex-start;
     }
 }
+
+/* Ajuste final da comparação lado a lado */
+
+.resultado-comparacao {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.resultado-comparacao .grade-comparada {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.resultado-comparacao .mini {
+    width: 100%;
+}
+
+@media (max-width: 650px) {
+    .resultado-comparacao {
+        grid-template-columns: 1fr;
+    }
+}

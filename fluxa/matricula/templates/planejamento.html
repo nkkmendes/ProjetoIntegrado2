@@ -34,9 +34,44 @@
   <p class="bloco vazio">Nenhuma grade salva. Monte uma no Simulador e use “Salvar em planejamento”.</p>
   {% endif %}
 
+  <!-- Comparação de duas grades -->
+{% if grades|length >= 2 %}
+<section class="bloco comparador">
+  <h2>Comparar horários de duas grades</h2>
+  <p>Selecione duas grades salvas para visualizar seus horários lado a lado.</p>
+
+  <div class="seletores-comparacao">
+    <div>
+      <label for="grade-a">Grade A</label>
+      <select id="grade-a">
+        {% for g in grades %}
+        <option value="{{ g.plano.pk }}">{{ g.plano.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="grade-b">Grade B</label>
+      <select id="grade-b">
+        {% for g in grades %}
+        <option value="{{ g.plano.pk }}">{{ g.plano.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="button" id="botao-comparar">
+      Comparar grades
+    </button>
+  </div>
+
+  <div id="resultado-comparacao" class="resultado-comparacao"
+       style="display:none;"></div>
+</section>
+{% endif %}
+
   <div class="cartoes">
     {% for g in grades %}
-    <article class="cartao">
+    <article class="cartao" data-grade-id="{{ g.plano.pk }}">
       <form method="post" action="{% url 'planejamento' %}" class="renomear">
         {% csrf_token %}
         <input type="hidden" name="acao" value="renomear">
@@ -84,5 +119,62 @@
   <p class="sub">Simulação acadêmica: não efetua matrícula e não garante vagas na PUC.</p>
 </main>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const botao = document.getElementById("botao-comparar");
+    const resultado = document.getElementById("resultado-comparacao");
+
+    if (!botao || !resultado) return;
+
+    botao.addEventListener("click", function () {
+        const idA = document.getElementById("grade-a").value;
+        const idB = document.getElementById("grade-b").value;
+
+        if (idA === idB) {
+            alert("Selecione duas grades diferentes.");
+            return;
+        }
+
+        const gradeA = Array.from(document.querySelectorAll(".cartao"))
+            .find(g => g.dataset.gradeId === idA);
+
+        const gradeB = Array.from(document.querySelectorAll(".cartao"))
+            .find(g => g.dataset.gradeId === idB);
+
+        if (!gradeA || !gradeB) {
+            alert("Não foi possível encontrar as grades.");
+            return;
+        }
+
+        resultado.replaceChildren();
+
+        [gradeA, gradeB].forEach(function (grade, indice) {
+            const coluna = document.createElement("div");
+            coluna.className = "grade-comparada";
+
+            const titulo = document.createElement("h3");
+            const nome = grade.querySelector('input[name="nome"]');
+
+            titulo.textContent = (indice === 0 ? "Grade A: " : "Grade B: ")
+                + (nome ? nome.value : "Sem nome");
+
+            coluna.appendChild(titulo);
+
+            [".resumo-creditos", ".mini-dias", ".mini", ".chips"]
+                .forEach(function (seletor) {
+                    const elemento = grade.querySelector(seletor);
+
+                    if (elemento) {
+                        coluna.appendChild(elemento.cloneNode(true));
+                    }
+                });
+
+            resultado.appendChild(coluna);
+        });
+        resultado.style.display = "grid";
+        resultado.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+});
+</script>
 </body>
 </html>
