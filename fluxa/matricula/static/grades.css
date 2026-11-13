@@ -183,3 +183,25 @@ button[disabled] { cursor: not-allowed; }
         grid-template-columns: 1fr;
     }
 }
+
+/* Resumo da comparação */
+
+#resumo-diferencas {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f0f4f8;
+    border: 1px solid #d5dfeb;
+    border-radius: 10px;
+}
+
+#resumo-diferencas h3 {
+    color: #174a74;
+    margin-bottom: 12px;
+}
+
+#resumo-diferencas p {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}

@@ -171,6 +171,74 @@ document.addEventListener("DOMContentLoaded", function () {
 
             resultado.appendChild(coluna);
         });
+        // Resumo das diferenças entre as grades
+const lerDisciplinas = (grade) => {
+    return Array.from(grade.querySelectorAll(".chips .chip"))
+        .map(chip => chip.textContent.trim());
+};
+
+const disciplinasA = lerDisciplinas(gradeA);
+const disciplinasB = lerDisciplinas(gradeB);
+
+const codigo = texto => texto.split("·")[0].trim();
+
+const codigosA = disciplinasA.map(codigo);
+const codigosB = disciplinasB.map(codigo);
+
+const comuns = [...new Set(codigosA.filter(c => codigosB.includes(c)))];
+const somenteA = disciplinasA.filter(d => !codigosB.includes(codigo(d)));
+const somenteB = disciplinasB.filter(d => !codigosA.includes(codigo(d)));
+
+const turmasDiferentes = comuns.filter(c => {
+    const turmaA = disciplinasA.find(d => codigo(d) === c);
+    const turmaB = disciplinasB.find(d => codigo(d) === c);
+    return turmaA !== turmaB;
+});
+
+const creditosA = Number(
+    gradeA.querySelector(".creditos-destaque strong")?.textContent.trim() || 0
+);
+const creditosB = Number(
+    gradeB.querySelector(".creditos-destaque strong")?.textContent.trim() || 0
+);
+
+let resumo = document.getElementById("resumo-diferencas");
+
+if (!resumo) {
+    resumo = document.createElement("div");
+    resumo.id = "resumo-diferencas";
+    resultado.insertAdjacentElement("afterend", resumo);
+}
+
+const adicionarLinha = (titulo, itens) => {
+    const p = document.createElement("p");
+    const strong = document.createElement("strong");
+    strong.textContent = titulo + ": ";
+    p.appendChild(strong);
+    p.appendChild(document.createTextNode(
+        itens.length ? itens.join(", ") : "Nenhuma"
+    ));
+    resumo.appendChild(p);
+};
+
+resumo.replaceChildren();
+
+const tituloResumo = document.createElement("h3");
+tituloResumo.textContent = "Resumo da comparação";
+resumo.appendChild(tituloResumo);
+
+adicionarLinha("Disciplinas em ambas", comuns);
+adicionarLinha("Somente na Grade A", somenteA);
+adicionarLinha("Somente na Grade B", somenteB);
+adicionarLinha("Turmas diferentes", turmasDiferentes);
+
+const diferenca = document.createElement("p");
+diferenca.textContent = "Diferença de créditos: "
+    + Math.abs(creditosA - creditosB);
+resumo.appendChild(diferenca);
+
+resumo.style.display = "block";
+
         resultado.style.display = "grid";
         resultado.scrollIntoView({ behavior: "smooth", block: "start" });
     });
