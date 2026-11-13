@@ -27,7 +27,8 @@ from .forms import (
 from .servicos import (
     obter_perfil, resumo_creditos, avisos_de_nivel, quadro_de_nivelamento,
     periodo_de_oferta, disciplinas_disponiveis, dados_do_simulador,
-    validar_selecao, resumo_da_grade,
+    validar_selecao, resumo_da_grade, guardar_horarios, verificar_mudancas_horarios,
+    cor_da_disciplina,
 )
 
 def inicio(request):
@@ -142,6 +143,39 @@ def _nota_das_ocultas(ocultas, periodo):
     return inicio + ': ' + ', '.join(partes) + '.'
 
 
+def resumo_horarios_preservados(registros):
+    registros = sorted(registros, key=lambda item: (item['disciplina'], item['turma']))
+    inicio_h, fim_h = 7, 19
+    for item in registros:
+        for horario in item['horarios']:
+            inicio_h = min(inicio_h, horario['inicio'] // 60)
+            fim_h = max(fim_h, -(-horario['fim'] // 60))
+
+    total_min = max(1, (fim_h - inicio_h) * 60)
+    blocos = []
+    chips = []
+    for item in registros:
+        cor = cor_da_disciplina(item['disciplina'])
+        chips.append({
+            'texto': f"{item['disciplina']} · {item['turma']}",
+            'cor': cor,
+        })
+        for horario in item['horarios']:
+            blocos.append({
+                'cor': cor,
+                'esquerda': round(horario['dia'] * 100 / 6, 3),
+                'topo': round((horario['inicio'] - inicio_h * 60) * 100 / total_min, 3),
+                'altura': round((horario['fim'] - horario['inicio']) * 100 / total_min, 3),
+            })
+
+    return {
+        'creditos': sum(item['creditos'] for item in registros),
+        'n_disciplinas': len(registros),
+        'blocos': blocos,
+        'chips': chips,
+    }
+
+
 @login_required
 def planejamento(request):
     """Grades salvas do aluno. Só guarda, nomeia e reabre: quem monta a grade
@@ -206,7 +240,17 @@ def planejamento(request):
 
     for plano in planos:
         turmas = list(plano.turmas.all())
-        resumo = resumo_da_grade(turmas)
+        resumo = (
+            resumo_horarios_preservados(plano.horarios_salvos)
+            if plano.horarios_salvos else resumo_da_grade(turmas)
+        )
+        verificacao_horarios = verificar_mudancas_horarios(plano)
+        if verificacao_horarios['alterado']:
+            messages.warning(
+                request,
+                f'A grade “{plano.nome}” teve dados alterados no micro-horário. '
+                'Os horários originais continuam preservados na visualização.'
+            )
 
         disponibilidade = []
 
@@ -237,6 +281,7 @@ def planejamento(request):
             'plano': plano,
             **resumo,
             'disponibilidade': disponibilidade,
+            'verificacao_horarios': verificacao_horarios,
         })
 
     return render(request, 'planejamento.html', {
@@ -283,6 +328,7 @@ def simulacao(request):
                     plano = PlanejamentoSalvo(usuario=request.user)
                 plano.nome = nome
                 plano.periodo_letivo = periodo
+                plano.horarios_salvos = guardar_horarios(turmas)
                 plano.save()
                 plano.turmas.set(turmas)
             messages.success(request, f'Grade “{nome}” salva em Planejamento.')

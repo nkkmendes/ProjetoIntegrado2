@@ -72,6 +72,18 @@
   <div class="cartoes">
     {% for g in grades %}
     <article class="cartao" data-grade-id="{{ g.plano.pk }}">
+{% if g.verificacao_horarios.alterado %}
+<div style="padding: 12px; margin-bottom: 12px; background: #fff3cd; color: #664d03; border: 1px solid #ffecb5; border-radius: 8px;">
+    <strong>⚠ Atenção: horários atualizados!</strong>
+    <p>O micro-horário sofreu alterações nesta grade.</p>
+    <p>Os horários originais continuam preservados no planejamento.</p>
+</div>
+{% elif not g.verificacao_horarios.verificado %}
+<div style="padding: 12px; margin-bottom: 12px; background: #f1f3f5; border-radius: 8px;">
+    <strong>Horários não verificados</strong>
+    <p>Esta grade foi criada antes do registro dos horários originais.</p>
+</div>
+{% endif %}
       <form method="post" action="{% url 'planejamento' %}" class="renomear">
         {% csrf_token %}
         <input type="hidden" name="acao" value="renomear">

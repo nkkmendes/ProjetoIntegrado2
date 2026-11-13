@@ -20,7 +20,12 @@ class PlanejamentoSalvo(models.Model):
         blank=True,
         related_name='planejamentos'
     )
+    horarios_salvos = models.JSONField(
+        default=list,
+        blank=True
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
+
     atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
