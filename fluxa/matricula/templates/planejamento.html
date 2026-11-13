@@ -128,6 +128,8 @@
         <span class="status-sem-oferta">Sem oferta cadastrada</span>
       {% elif d.situacao == "Não habilitada" %}
         <span class="status-bloqueada">Não habilitada</span>
+      {% elif d.situacao == "Fora do seu curso" %}
+        <span class="status-bloqueada">Fora do seu curso</span>
       {% else %}
         <span class="status-nao-verificada">Aguardando atualização</span>
       {% endif %}

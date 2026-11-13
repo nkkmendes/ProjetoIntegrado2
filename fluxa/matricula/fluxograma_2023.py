@@ -82,6 +82,16 @@ def _cadeia(codigo, grafo):
     return encontrados
 
 
+def _liberada(grupos, concluidas):
+    """Pré-requisitos cumpridos: algum grupo todo concluído (A|B = grupos
+    alternativos; A+B = mesmo grupo). Sem pré-requisito = liberada."""
+
+    return not grupos or any(
+        set(grupo) <= concluidas
+        for grupo in grupos
+    )
+
+
 def _itens(codigos, historico, nomes):
     return [
         {
@@ -191,6 +201,7 @@ def fluxograma(request):
             'concluidas': [],
             'total_disciplinas': 0,
             'creditos_total': 0,
+            'progresso': None,
         })
 
     # Ler o Excel da engenharia escolhida
@@ -327,13 +338,24 @@ def fluxograma(request):
         else:
             classe = ''
 
+        concluida = codigo in concluidas
+        cursando = codigo in em_curso
+
         caixa = SimpleNamespace(
             codigo=codigo,
             chave=chave,
             periodo=periodo,
             nome=item['nome'],
             creditos=item['creditos'],
-            concluida=codigo in concluidas,
+            concluida=concluida,
+            em_curso=cursando,
+            # Liberada: ainda não feita e com os pré-requisitos já
+            # concluídos no Histórico.
+            liberada=(
+                not concluida
+                and not cursando
+                and _liberada(item['grupos'], concluidas)
+            ),
             classe=classe,
             bloqueada=any(
                 a.get('bloqueia')
@@ -472,6 +494,22 @@ def fluxograma(request):
         if codigo in relacoes
     ]
 
+    # Progresso do aluno no curso (cada código conta uma vez, mesmo que
+    # apareça em mais de um período)
+    por_codigo = {d.codigo: d for d in cartas}
+    total = len(por_codigo)
+
+    progresso = {
+        'concluidas': len(feitas),
+        'total': total,
+        'percentual': (
+            round(100 * len(feitas) / total)
+            if total else 0
+        ),
+        'em_curso': sum(1 for d in por_codigo.values() if d.em_curso),
+        'liberadas': sum(1 for d in por_codigo.values() if d.liberada),
+    }
+
     return render(request, 'fluxograma.html', {
         'curso': curso,
         'cabecalhos': cabecalhos,
@@ -490,4 +528,5 @@ def fluxograma(request):
             item['creditos']
             for item in linhas
         ),
+        'progresso': progresso,
     })

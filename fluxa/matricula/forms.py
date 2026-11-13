@@ -46,6 +46,12 @@ class CadastroForm(forms.Form):
         max_length=150,
         widget=forms.EmailInput(attrs={'placeholder': 'seu.email@exemplo.com'}),
     )
+    curso = forms.ModelChoiceField(
+        label='Curso',
+        queryset=Curso.objects.order_by('nome'),
+        empty_label='Escolha seu curso',
+        error_messages={'required': 'Escolha o seu curso.'},
+    )
     senha = forms.CharField(
         label='Senha',
         min_length=6,
@@ -79,7 +85,7 @@ class CadastroForm(forms.Form):
             first_name=primeiro_nome,
             last_name=sobrenome,
         )
-        PerfilAluno.objects.create(user=usuario, curso=Curso.objects.first())
+        PerfilAluno.objects.create(user=usuario, curso=self.cleaned_data['curso'])
         return usuario
 
 class RecuperarSenhaForm(PasswordResetForm):

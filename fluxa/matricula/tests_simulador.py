@@ -298,7 +298,7 @@ class SalvarGradeTest(BaseSimulador):
         HistoricoDisciplina.objects.create(perfil=self.perfil_ana, disciplina=self.A, status='concluida')
         tela = self.client.get(f"{reverse('simulacao')}?planejamento={plano.pk}")
         self.assertEqual(tela.context['selecao_inicial'], [self.C1.pk])
-        self.assertContains(tela, '1 turma(s) desta grade não estão mais disponíveis')
+        self.assertContains(tela, 'AAA1000 (A1): você já a concluiu no Histórico.')
 
 
 class PlanejamentoTest(BaseSimulador):

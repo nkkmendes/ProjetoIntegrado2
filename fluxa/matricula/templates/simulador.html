@@ -25,6 +25,10 @@
   <p class="aviso">Ainda não há turmas importadas. Rode <code>python manage.py importar_dados</code> para carregar o micro-horário.</p>
   {% else %}
 
+  {% if historico_vazio %}
+  <p class="aviso">Seu Histórico está vazio, então o simulador considera que você ainda não cursou nada. <a href="{% url 'historico' %}">Registre suas disciplinas no Histórico</a> para ver o que você realmente pode cursar.</p>
+  {% endif %}
+
   {% if plano %}
   <div class="edicao">
     <span>Editando a grade <strong>“{{ plano.nome }}”</strong> do Planejamento. Ao salvar, ela é atualizada.</span>
@@ -69,7 +73,16 @@
       <input id="sim-busca" type="search" placeholder="Ex.: INF1037 ou Cálculo" autocomplete="off">
       <p class="contador" id="sim-contador"></p>
       <div class="lista-disciplinas" id="sim-lista" tabindex="0" role="region" aria-label="Lista de disciplinas e turmas"></div>
-      {% if nota_ocultas %}<p class="rodape-lista">{{ nota_ocultas }}</p>{% endif %}
+      {% if motivos_ocultas %}
+      <details class="ocultas">
+        <summary>{{ nota_ocultas }} <strong>Ver quais e por quê</strong></summary>
+        <ul>
+          {% for m in motivos_ocultas %}
+          <li><strong>{{ m.codigo }}</strong> — {{ m.nome }}<span>{{ m.motivo }}</span></li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
     </section>
 
     <div class="painel-grade">

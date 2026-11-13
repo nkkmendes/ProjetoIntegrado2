@@ -190,6 +190,24 @@ body {
   padding: 20px;
 }
 
+.card.aluno {
+  margin-bottom: 20px;
+}
+
+.card .aviso {
+  padding: 12px 14px;
+  border-left: 3px solid #B91C1C;
+  border-radius: 5px;
+  background: #F0F4FA;
+  color: #B91C1C;
+  font-size: 0.85rem;
+}
+
+.card .aviso a {
+  color: #1D4E78;
+  font-weight: bold;
+}
+
 .card h2 {
   font-size: 1.05rem;
   margin-bottom: 16px;

@@ -53,6 +53,13 @@ button[disabled] { cursor: not-allowed; }
 .lista-disciplinas { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
 .contador { margin: 8px 0 0; font-size: 12px; color: #475569; }
 .rodape-lista { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #CBD5E1; font-size: 12px; color: #475569; }
+.ocultas { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #CBD5E1; font-size: 12px; color: #475569; }
+.ocultas summary { cursor: pointer; }
+.ocultas summary::marker { color: #1D4E78; }
+.ocultas ul { max-height: 260px; overflow: auto; margin: 8px 0 0; padding: 0; list-style: none; }
+.ocultas li { padding: 6px 0; border-top: 1px solid #F0F4FA; color: #0F2C4C; }
+.ocultas li span { display: block; color: #B91C1C; }
+.aviso a { color: #1D4E78; font-weight: bold; }
 
 .disc { display: flex; gap: 10px; align-items: center; width: 100%; padding: 10px 12px; text-align: left; color: #0F2C4C; background: #F0F4FA; border: 1px solid #CBD5E1; border-radius: 5px; }
 .disc.na-grade { background: var(--bg); border-color: var(--sw); }

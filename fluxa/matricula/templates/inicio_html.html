@@ -19,6 +19,30 @@
       <h1 class="page-title">MatriculaFácil</h1>
       <p class="page-sub">Organize seus semestres e garanta uma trajetória acadêmica tranquila na PUC-Rio.</p>
 
+      <div class="card aluno">
+        <h2>Olá, {{ user.first_name|default:user.username }}</h2>
+        {% if perfil.curso %}
+          <div class="kv">
+            <span>Curso</span>
+            <span class="pill">{{ perfil.curso.nome }}</span>
+          </div>
+          <div class="kv">
+            <span>Créditos cumpridos</span>
+            <span class="pill">{{ resumo.cumpridos_no_curso }} de {{ resumo.total_curso }} ({{ resumo.percentual }}%)</span>
+          </div>
+          <div class="kv">
+            <span>Créditos em curso</span>
+            <span class="pill">{{ resumo.em_curso }}</span>
+          </div>
+          <div class="kv">
+            <span>CR acumulado</span>
+            <span class="pill">{% if resumo.cr %}{{ resumo.cr|floatformat:2 }}{% else %}—{% endif %}</span>
+          </div>
+        {% else %}
+          <p class="aviso">Você ainda não escolheu o seu curso. <a href="{% url 'perfil' %}">Escolha em Meu perfil</a> para ver o fluxograma, as disciplinas disponíveis e a contagem de créditos.</p>
+        {% endif %}
+      </div>
+
       <div class="grid2">
         <div class="card">
           {% if calendario %}

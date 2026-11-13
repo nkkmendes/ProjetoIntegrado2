@@ -169,3 +169,31 @@ main a {
 main .atalho {
     margin-top: 20px;
 }
+
+main .confirmar {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-left: 3px solid #B91C1C;
+    border-radius: 5px;
+    background-color: #F0F4FA;
+}
+
+main .confirmar p {
+    margin-bottom: 8px;
+    color: #0F2C4C;
+}
+
+main .confirmar ul {
+    margin: 0 0 4px;
+    padding-left: 20px;
+    font-size: 14px;
+}
+
+main .confirmar a {
+    margin-left: 14px;
+}
+
+main .aviso-curso {
+    margin-top: 10px;
+    color: #B91C1C;
+}

@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="{% static 'fluxograma.css' %}?v=5"
+        href="{% static 'fluxograma.css' %}?v=6"
     >
 
     <link
@@ -130,6 +130,30 @@
                 As setas aparecem somente após selecionar
                 uma disciplina.
             </p>
+
+            <!-- PROGRESSO (vem do Histórico) -->
+
+            <div class="progresso" role="status">
+
+                <p>
+                    <strong>{{ progresso.concluidas }} de {{ progresso.total }}</strong>
+                    disciplinas concluídas ({{ progresso.percentual }}%)
+                </p>
+
+                <div class="barra" aria-hidden="true">
+                    <span style="width: {{ progresso.percentual }}%;"></span>
+                </div>
+
+                <p>
+                    <strong>{{ progresso.liberadas }}</strong>
+                    liberada{{ progresso.liberadas|pluralize }} para cursar
+                    · <strong>{{ progresso.em_curso }}</strong> em curso.
+                    Atualize o que você já fez no
+                    <a href="{% url 'historico' %}">Histórico</a>
+                    ou pelo botão “Marcar como concluída”.
+                </p>
+
+            </div>
 
             <!-- BUSCA DE DISCIPLINAS -->
 
@@ -283,6 +307,16 @@
                     Nivelamento insuficiente
                 </li>
 
+                <li>
+                    <span class="leg leg-liberada"></span>
+                    Liberada (pré-requisitos cumpridos)
+                </li>
+
+                <li>
+                    <span class="leg leg-cursando"></span>
+                    Cursando
+                </li>
+
             </ul>
 
             <!-- AREA PRINCIPAL -->
@@ -330,7 +364,7 @@
                         {% for d in cartas %}
 
                             <a
-                                class="carta {{ d.classe }}{% if d.concluida %} concluida{% endif %}{% if d.bloqueada %} bloqueada{% endif %}"
+                                class="carta {{ d.classe }}{% if d.concluida %} concluida{% endif %}{% if d.bloqueada %} bloqueada{% endif %}{% if d.liberada %} liberada{% endif %}{% if d.em_curso %} em-curso{% endif %}"
                                 id="c-{{ d.chave }}"
                                 data-codigo="{{ d.codigo }}"
                                 data-periodo="{{ d.periodo }}"
@@ -351,6 +385,14 @@
 
                                     <em class="tag-nivel">
                                         nível
+                                    </em>
+
+                                {% endif %}
+
+                                {% if d.em_curso %}
+
+                                    <em class="tag-cursando">
+                                        cursando
                                     </em>
 
                                 {% endif %}

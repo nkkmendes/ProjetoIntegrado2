@@ -20,7 +20,7 @@ body {
 
 div {
     width: 350px;
-    height: 650px;
+    height: auto;
     display: flex;
     flex-direction: column;
     border-radius: 25px;
@@ -74,6 +74,21 @@ input {
     color: #475569;
 }
 
+select {
+    margin-top: 5px;
+    margin-left: 5px;
+    box-sizing: border-box;
+    width: 342px;
+    padding: 15px;
+    border: 1px solid #475569;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    font-family: inherit;
+    font-weight: 300;
+    font-size: 13px;
+    color: #475569;
+}
+
 button {
     margin-top: 20px;
     margin-left: 5px;
@@ -117,7 +132,7 @@ button {
         padding: 25px;
     }
 
-    input, button {
+    input, select, button {
         box-sizing: border-box;
         width: calc(100% - 5px);
     }

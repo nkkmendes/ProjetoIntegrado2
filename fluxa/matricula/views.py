@@ -18,7 +18,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import (
-    CalendarioMatricula, Disciplina, HistoricoDisciplina, PlanejamentoSalvo,
+    CalendarioMatricula, Disciplina, HistoricoDisciplina, PlanejamentoSalvo, Turma,
 )
 from .forms import (
     LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm,
@@ -28,7 +28,7 @@ from .servicos import (
     obter_perfil, resumo_creditos, avisos_de_nivel, quadro_de_nivelamento,
     periodo_de_oferta, disciplinas_disponiveis, dados_do_simulador,
     validar_selecao, resumo_da_grade, guardar_horarios, verificar_mudancas_horarios,
-    cor_da_disciplina,
+    cor_da_disciplina, grades_fora_do_curso,
 )
 
 def inicio(request):
@@ -37,9 +37,12 @@ def inicio(request):
 @login_required
 def telaInicio(request):
     calendario = CalendarioMatricula.objects.first()
+    perfil = obter_perfil(request.user)
 
     return render(request, 'inicio_html.html', {
-        'calendario': calendario
+        'calendario': calendario,
+        'perfil': perfil,
+        'resumo': resumo_creditos(perfil),
     })
 
 def destino_seguro(request):
@@ -237,6 +240,10 @@ def planejamento(request):
 
 
     grades = []
+    codigos_do_curso = (
+        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
+        if perfil.curso else None
+    )
 
     for plano in planos:
         turmas = list(plano.turmas.all())
@@ -261,7 +268,9 @@ def planejamento(request):
                 periodo_letivo=periodo
             ).exists()
 
-            if not periodo or not ofertas_cadastradas:
+            if codigos_do_curso is not None and disciplina.codigo not in codigos_do_curso:
+                situacao = 'Fora do seu curso'
+            elif not periodo or not ofertas_cadastradas:
                 situacao = 'Aguardando atualização'
             elif not tem_oferta:
                 situacao = 'Sem oferta cadastrada'
@@ -341,10 +350,14 @@ def simulacao(request):
     ids_disponiveis = {t.pk for d in disponiveis['disciplinas'] for t in d.turmas_periodo}
     mantidas = [i for i in selecionadas if i in ids_disponiveis]
     if plano and not postando and len(mantidas) != len(selecionadas):
+        retiradas = (
+            Turma.objects.filter(pk__in=set(selecionadas) - set(mantidas))
+            .select_related('disciplina').order_by('disciplina__codigo')
+        )
+        motivos = _motivos_das_retiradas(perfil, periodo, retiradas, disponiveis['motivos'])
         messages.warning(
             request,
-            f'{len(selecionadas) - len(mantidas)} turma(s) desta grade não estão mais '
-            'disponíveis para você (por exemplo, a disciplina já foi concluída) e foram retiradas.'
+            'Algumas turmas desta grade foram retiradas: ' + ' '.join(motivos)
         )
 
     return render(request, 'simulador.html', {
@@ -356,7 +369,36 @@ def simulacao(request):
         'dados_simulador': dados_do_simulador(disponiveis['disciplinas']),
         'selecao_inicial': mantidas,
         'nota_ocultas': _nota_das_ocultas(disponiveis['ocultas'], periodo),
+        'motivos_ocultas': disponiveis['motivos'],
+        'historico_vazio': not perfil.historico.exists(),
     })
+
+
+def _motivos_das_retiradas(perfil, periodo, turmas, motivos):
+    """Uma frase por turma retirada de uma grade salva, dizendo o porquê.
+    Usa o Histórico do aluno e os motivos de `disciplinas_disponiveis`."""
+    situacao = dict(perfil.historico.values_list('disciplina__codigo', 'status'))
+    por_codigo = {m['codigo']: m['motivo'] for m in motivos}
+    do_curso = (
+        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
+        if perfil.curso else set()
+    )
+    frases = []
+    for t in turmas:
+        codigo = t.disciplina.codigo
+        if situacao.get(codigo) == HistoricoDisciplina.CONCLUIDA:
+            porque = 'você já a concluiu no Histórico.'
+        elif situacao.get(codigo) == HistoricoDisciplina.EM_CURSO:
+            porque = 'ela está como "em curso" no seu Histórico.'
+        elif codigo not in do_curso:
+            porque = 'ela não faz parte do seu curso atual.'
+        elif codigo in por_codigo:
+            motivo = por_codigo[codigo]
+            porque = motivo[0].lower() + motivo[1:]
+        else:
+            porque = f'a turma {t.codigo} não é oferecida em {periodo}.'
+        frases.append(f'{codigo} ({t.codigo}): {porque}')
+    return frases
 
 
 def _caminho_pdf_sau(user):
@@ -612,6 +654,7 @@ def perfil(request):
     form_nome = PerfilNomeForm(initial={'nome': request.user.get_full_name()})
     form_senha = TrocarSenhaForm(request.user)
     form_curso = PerfilCursoForm(instance=perfil_aluno)
+    confirmar_curso = None
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
@@ -624,11 +667,31 @@ def perfil(request):
                 return redirect('perfil')
 
         elif acao == 'curso':
+            curso_atual = perfil_aluno.curso
             form_curso = PerfilCursoForm(request.POST, instance=perfil_aluno)
             if form_curso.is_valid():
-                form_curso.save()
-                messages.success(request, 'Curso atualizado. O fluxograma já usa o novo curso.')
-                return redirect('perfil')
+                novo = form_curso.cleaned_data['curso']
+                afetadas = grades_fora_do_curso(request.user, novo) if novo != curso_atual else []
+                if afetadas and request.POST.get('confirmar') != '1':
+                    # O is_valid() já trocou o curso no objeto; desfaz até o aluno confirmar.
+                    perfil_aluno.curso = curso_atual
+                    confirmar_curso = {'curso': novo, 'grades': afetadas}
+                else:
+                    form_curso.save()
+                    if novo != curso_atual:
+                        messages.success(
+                            request,
+                            f'Curso alterado para {novo.nome}. O fluxograma, o simulador, '
+                            'o planejamento e a contagem de créditos já usam o novo curso.'
+                        )
+                        if afetadas:
+                            nomes = ', '.join(f'“{g["plano"].nome}”' for g in afetadas)
+                            messages.warning(
+                                request,
+                                f'Estas grades têm disciplinas fora do novo curso: {nomes}. '
+                                'Elas continuam salvas no Planejamento.'
+                            )
+                    return redirect('perfil')
 
         elif acao == 'senha':
             form_senha = TrocarSenhaForm(request.user, request.POST)
@@ -642,6 +705,7 @@ def perfil(request):
         'form_nome': form_nome,
         'form_senha': form_senha,
         'form_curso': form_curso,
+        'confirmar_curso': confirmar_curso,
         'perfil_aluno': perfil_aluno,
         'resumo': resumo_creditos(perfil_aluno),
     })

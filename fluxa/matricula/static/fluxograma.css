@@ -34,6 +34,14 @@ button { font: inherit; cursor: pointer; }
 .leg-cadeia { border-color: #1D4E78; }
 .leg-co { border-color: #166534; }
 .leg-nivel { border-color: #B91C1C; border-style: dashed; background: #FFFFFF; }
+.leg-liberada { border-color: #166534; background: #FFFFFF; }
+.leg-cursando { border-color: #1D4E78; background: #FFFFFF; }
+
+.progresso { margin: 0 0 12px; padding: 12px 18px; background: #FFFFFF; border: 1px solid #475569; border-radius: 25px; font-size: 14px; }
+.progresso p { margin: 0; }
+.progresso .barra { height: 10px; margin: 8px 0; background: #F0F4FA; border: 1px solid #CBD5E1; border-radius: 5px; overflow: hidden; }
+.progresso .barra span { display: block; height: 100%; background: #166534; }
+.progresso a { color: #1D4E78; font-weight: bold; }
 
 .area { display: flex; align-items: flex-start; gap: 16px; }
 .quadro { flex: 1; min-width: 0; max-height: 74vh; min-height: 300px; overflow: auto; border: 1px solid #475569; border-radius: 25px; background: #FFFFFF; scroll-behavior: smooth; scrollbar-color: #475569 #F0F4FA; }
@@ -47,7 +55,10 @@ button { font: inherit; cursor: pointer; }
 .carta strong { display: block; font-size: 14px; }
 .carta span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.35; }
 .carta:hover { background: #FFFFFF; border-color: #1D4E78; }
+.carta.liberada { background: #FFFFFF; border: 2px solid #166534; }
+.carta.em-curso { background: #FFFFFF; border: 2px solid #1D4E78; }
 .carta.bloqueada { background: #FFFFFF; border: 2px dashed #B91C1C; }
+.carta .tag-cursando { position: absolute; top: -9px; left: 8px; padding: 1px 7px; background: #1D4E78; color: #FFFFFF; border-radius: 5px; font-size: 12px; font-style: normal; font-weight: bold; }
 .carta .tag-nivel { position: absolute; top: -9px; right: 8px; padding: 1px 7px; background: #B91C1C; color: #FFFFFF; border-radius: 5px; font-size: 12px; font-style: normal; font-weight: bold; }
 
 .grade.com-foco .carta { opacity: .3; }

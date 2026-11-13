@@ -37,8 +37,30 @@
             <h2>Dados acadêmicos</h2>
             <h4>Curso</h4>
             <p>{{ perfil_aluno.curso.nome|default:"Não informado" }}</p>
-            <details{% if form_curso.errors %} open{% endif %}>
-                <summary>Alterar curso</summary>
+            {% if confirmar_curso %}
+            <section class="confirmar">
+                <p><strong>Confirmar a troca para {{ confirmar_curso.curso.nome }}?</strong></p>
+                <p>Estas grades salvas têm disciplinas que não fazem parte do novo curso. Elas continuam no Planejamento, mas essas disciplinas aparecerão como “Fora do seu curso”:</p>
+                <ul>
+                    {% for g in confirmar_curso.grades %}
+                    <li>{{ g.plano.nome }}: {{ g.codigos|join:", " }}</li>
+                    {% endfor %}
+                </ul>
+                <form method="post" action="{% url 'perfil' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="acao" value="curso">
+                    <input type="hidden" name="curso" value="{{ confirmar_curso.curso.pk }}">
+                    <input type="hidden" name="confirmar" value="1">
+                    <button type="submit">Confirmar troca</button>
+                    <a href="{% url 'perfil' %}">Cancelar</a>
+                </form>
+            </section>
+            {% endif %}
+            {% if not perfil_aluno.curso %}
+            <p class="aviso-curso">Escolha o seu curso para o fluxograma, o simulador e a contagem de créditos funcionarem.</p>
+            {% endif %}
+            <details{% if form_curso.errors or not perfil_aluno.curso %} open{% endif %}>
+                <summary>{% if perfil_aluno.curso %}Alterar curso{% else %}Escolher curso{% endif %}</summary>
                 <form method="post" action="{% url 'perfil' %}">
                     {% csrf_token %}
                     <input type="hidden" name="acao" value="curso">

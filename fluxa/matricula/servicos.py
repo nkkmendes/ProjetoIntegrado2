@@ -11,7 +11,6 @@ from django.db.models import Prefetch
 
 from .models import (
     AreaNivelamento,
-    Curso,
     HistoricoDisciplina,
     HorarioTurma,
     PerfilAluno,
@@ -22,12 +21,30 @@ from .models import (
 
 def obter_perfil(user):
     """Devolve o perfil do aluno, criando-o se ainda não existir
-    (acontece, por exemplo, com usuários criados pelo createsuperuser)."""
-    perfil, _ = PerfilAluno.objects.select_related('curso').get_or_create(
-        user=user,
-        defaults={'curso': Curso.objects.first()},
-    )
+    (acontece, por exemplo, com usuários criados pelo createsuperuser).
+    O curso não é escolhido por conta própria: quem não tem curso é avisado
+    no Início e no Perfil para escolher o seu."""
+    perfil, _ = PerfilAluno.objects.select_related('curso').get_or_create(user=user)
     return perfil
+
+
+def grades_fora_do_curso(user, curso):
+    """Grades salvas do aluno que têm disciplinas fora do currículo de `curso`.
+
+    Usada antes de trocar o curso no Perfil (para pedir confirmação) e no
+    Planejamento. Devolve uma lista de {'plano', 'codigos'}, só com as grades
+    afetadas; os códigos vêm das turmas e dos horários preservados."""
+    if curso is None:
+        return []
+    do_curso = set(curso.disciplinas.values_list('codigo', flat=True))
+    afetadas = []
+    for plano in user.planejamentos.prefetch_related('turmas__disciplina').order_by('nome'):
+        codigos = {t.disciplina.codigo for t in plano.turmas.all()}
+        codigos |= {item['disciplina'] for item in plano.horarios_salvos or []}
+        fora = sorted(codigos - do_curso)
+        if fora:
+            afetadas.append({'plano': plano, 'codigos': fora})
+    return afetadas
 
 
 def calcular_cr(registros):
@@ -217,10 +234,12 @@ def disciplinas_disponiveis(perfil, periodo):
         um co-requisito que não pode ser cursado fica de fora.
 
     Cada disciplina devolvida ganha `coreqs_juntos`: os co-requisitos que o aluno
-    ainda precisa escolher na mesma grade. Devolve {'disciplinas', 'ocultas'}.
+    ainda precisa escolher na mesma grade. Devolve {'disciplinas', 'ocultas',
+    'motivos'}: `ocultas` conta as que ficaram de fora por tipo e `motivos`
+    lista cada uma delas com o porquê ({'codigo', 'nome', 'motivo'}).
     """
     chaves = ('pre_requisito', 'nivelamento', 'co_requisito', 'sem_turma')
-    vazio = {'disciplinas': [], 'ocultas': dict.fromkeys(chaves, 0)}
+    vazio = {'disciplinas': [], 'ocultas': dict.fromkeys(chaves, 0), 'motivos': []}
     if not perfil.curso or not periodo:
         return vazio
 
@@ -252,14 +271,21 @@ def disciplinas_disponiveis(perfil, periodo):
     avisos = avisos_de_nivel(perfil, candidatas)
 
     ocultas = dict.fromkeys(chaves, 0)
+    motivos = []
+
+    def fora(d, chave, motivo):
+        ocultas[chave] += 1
+        motivos.append({'codigo': d.codigo, 'nome': d.nome, 'motivo': motivo})
+
     base = []
     for d in candidatas:
+        bloqueios = [a['texto'] for a in avisos.get(d.codigo, []) if a['bloqueia']]
         if not pre_requisitos_cumpridos(d, concluidas):
-            ocultas['pre_requisito'] += 1
-        elif any(a['bloqueia'] for a in avisos.get(d.codigo, [])):
-            ocultas['nivelamento'] += 1
+            fora(d, 'pre_requisito', _falta_de_pre_requisito(d, concluidas, em_curso))
+        elif bloqueios:
+            fora(d, 'nivelamento', 'Nivelamento insuficiente. ' + ' '.join(bloqueios))
         elif not d.turmas_periodo:
-            ocultas['sem_turma'] += 1
+            fora(d, 'sem_turma', f'Sem turma em {periodo}.')
         else:
             base.append(d)
 
@@ -277,13 +303,44 @@ def disciplinas_disponiveis(perfil, periodo):
             if faltam:
                 base.remove(d)
                 atuais.discard(d.codigo)
-                ocultas['co_requisito'] += 1
+                fora(d, 'co_requisito', (
+                    f'Exige cursar junto {_juntar(sorted(faltam))}, '
+                    'que você ainda não pode cursar.'
+                ))
                 mudou = True
     for d in base:
         d.coreqs_juntos = sorted(
             c.codigo for c in d.co_requisitos.all() if c.codigo not in ja_tem
         )
-    return {'disciplinas': base, 'ocultas': ocultas}
+    motivos.sort(key=lambda m: m['codigo'])
+    return {'disciplinas': base, 'ocultas': ocultas, 'motivos': motivos}
+
+
+def _juntar(codigos):
+    """['A'] -> 'A'; ['A', 'B', 'C'] -> 'A, B e C'."""
+    if len(codigos) == 1:
+        return codigos[0]
+    return ', '.join(codigos[:-1]) + ' e ' + codigos[-1]
+
+
+def _falta_de_pre_requisito(disciplina, concluidas, em_curso):
+    """Explica o pré-requisito que falta, pelo grupo mais perto de completar."""
+    grupos = [
+        sorted(d.codigo for d in g.disciplinas.all())
+        for g in disciplina.grupos_pre_requisito.all()
+    ]
+    grupos = [g for g in grupos if g]
+    faltam = min(
+        ([c for c in g if c not in concluidas] for g in grupos),
+        key=len,
+    )
+    texto = f'Falta concluir {_juntar(faltam)}'
+    cursando = [c for c in faltam if c in em_curso]
+    if cursando:
+        texto += f' ({_juntar(cursando)} em curso)'
+    if len(grupos) > 1:
+        texto += ', ou outra combinação de pré-requisitos'
+    return texto + '.'
 
 
 def dados_do_simulador(disciplinas):
