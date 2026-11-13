@@ -34,9 +34,56 @@
   <p class="bloco vazio">Nenhuma grade salva. Monte uma no Simulador e use “Salvar em planejamento”.</p>
   {% endif %}
 
+  <!-- Comparação de duas grades -->
+{% if grades|length >= 2 %}
+<section class="bloco comparador">
+  <h2>Comparar horários de duas grades</h2>
+  <p>Selecione duas grades salvas para visualizar seus horários lado a lado.</p>
+
+  <div class="seletores-comparacao">
+    <div>
+      <label for="grade-a">Grade A</label>
+      <select id="grade-a">
+        {% for g in grades %}
+        <option value="{{ g.plano.pk }}">{{ g.plano.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="grade-b">Grade B</label>
+      <select id="grade-b">
+        {% for g in grades %}
+        <option value="{{ g.plano.pk }}">{{ g.plano.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="button" id="botao-comparar">
+      Comparar grades
+    </button>
+  </div>
+
+  <div id="resultado-comparacao" class="resultado-comparacao"
+       style="display:none;"></div>
+</section>
+{% endif %}
+
   <div class="cartoes">
     {% for g in grades %}
-    <article class="cartao">
+    <article class="cartao" data-grade-id="{{ g.plano.pk }}">
+{% if g.verificacao_horarios.alterado %}
+<div style="padding: 12px; margin-bottom: 12px; background: #fff3cd; color: #664d03; border: 1px solid #ffecb5; border-radius: 8px;">
+    <strong>⚠ Atenção: horários atualizados!</strong>
+    <p>O micro-horário sofreu alterações nesta grade.</p>
+    <p>Os horários originais continuam preservados no planejamento.</p>
+</div>
+{% elif not g.verificacao_horarios.verificado %}
+<div style="padding: 12px; margin-bottom: 12px; background: #f1f3f5; border-radius: 8px;">
+    <strong>Horários não verificados</strong>
+    <p>Esta grade foi criada antes do registro dos horários originais.</p>
+</div>
+{% endif %}
       <form method="post" action="{% url 'planejamento' %}" class="renomear">
         {% csrf_token %}
         <input type="hidden" name="acao" value="renomear">
@@ -47,7 +94,17 @@
         </div>
         <button type="submit">Renomear</button>
       </form>
-      <p class="meta">{{ g.plano.periodo_letivo|default:"—" }} · {{ g.creditos }} crédito{{ g.creditos|pluralize }} · {{ g.n_disciplinas }} disciplina{{ g.n_disciplinas|pluralize }}</p>
+      <div class="resumo-creditos">
+  <div class="creditos-destaque">
+    <strong>{{ g.creditos }}</strong>
+    <span>crédito{{ g.creditos|pluralize }}</span>
+  </div>
+
+  <div class="creditos-detalhes">
+    <span>Período: {{ g.plano.periodo_letivo|default:"—" }}</span>
+    <span>{{ g.n_disciplinas }} disciplina{{ g.n_disciplinas|pluralize }}</span>
+  </div>
+</div>
 
       <div class="mini-dias" aria-hidden="true"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
       <div class="mini" role="img" aria-label="Miniatura da grade semanal">
@@ -57,6 +114,28 @@
       <div class="chips">
         {% for c in g.chips %}<span class="chip cor-{{ c.cor }}">{{ c.texto }}</span>{% endfor %}
       </div>
+
+      <div class="disponibilidade-grade">
+  <h3>Disponibilidade para {{ periodo_oferta|default:"o próximo período" }}</h3>
+
+  {% for d in g.disponibilidade %}
+    <div class="item-disponibilidade">
+      <span>{{ d.codigo }} — {{ d.nome }}</span>
+
+      {% if d.situacao == "Disponível" %}
+        <span class="status-disponivel">Disponível</span>
+      {% elif d.situacao == "Sem oferta cadastrada" %}
+        <span class="status-sem-oferta">Sem oferta cadastrada</span>
+      {% elif d.situacao == "Não habilitada" %}
+        <span class="status-bloqueada">Não habilitada</span>
+      {% else %}
+        <span class="status-nao-verificada">Aguardando atualização</span>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>Nenhuma disciplina cadastrada nesta grade.</p>
+  {% endfor %}
+</div>
 
       <div class="acoes">
         <a class="botao" href="{% url 'simulacao' %}?planejamento={{ g.plano.pk }}">Abrir no simulador</a>
@@ -74,5 +153,130 @@
   <p class="sub">Simulação acadêmica: não efetua matrícula e não garante vagas na PUC.</p>
 </main>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const botao = document.getElementById("botao-comparar");
+    const resultado = document.getElementById("resultado-comparacao");
+
+    if (!botao || !resultado) return;
+
+    botao.addEventListener("click", function () {
+        const idA = document.getElementById("grade-a").value;
+        const idB = document.getElementById("grade-b").value;
+
+        if (idA === idB) {
+            alert("Selecione duas grades diferentes.");
+            return;
+        }
+
+        const gradeA = Array.from(document.querySelectorAll(".cartao"))
+            .find(g => g.dataset.gradeId === idA);
+
+        const gradeB = Array.from(document.querySelectorAll(".cartao"))
+            .find(g => g.dataset.gradeId === idB);
+
+        if (!gradeA || !gradeB) {
+            alert("Não foi possível encontrar as grades.");
+            return;
+        }
+
+        resultado.replaceChildren();
+
+        [gradeA, gradeB].forEach(function (grade, indice) {
+            const coluna = document.createElement("div");
+            coluna.className = "grade-comparada";
+
+            const titulo = document.createElement("h3");
+            const nome = grade.querySelector('input[name="nome"]');
+
+            titulo.textContent = (indice === 0 ? "Grade A: " : "Grade B: ")
+                + (nome ? nome.value : "Sem nome");
+
+            coluna.appendChild(titulo);
+
+            [".resumo-creditos", ".mini-dias", ".mini", ".chips"]
+                .forEach(function (seletor) {
+                    const elemento = grade.querySelector(seletor);
+
+                    if (elemento) {
+                        coluna.appendChild(elemento.cloneNode(true));
+                    }
+                });
+
+            resultado.appendChild(coluna);
+        });
+        // Resumo das diferenças entre as grades
+const lerDisciplinas = (grade) => {
+    return Array.from(grade.querySelectorAll(".chips .chip"))
+        .map(chip => chip.textContent.trim());
+};
+
+const disciplinasA = lerDisciplinas(gradeA);
+const disciplinasB = lerDisciplinas(gradeB);
+
+const codigo = texto => texto.split("·")[0].trim();
+
+const codigosA = disciplinasA.map(codigo);
+const codigosB = disciplinasB.map(codigo);
+
+const comuns = [...new Set(codigosA.filter(c => codigosB.includes(c)))];
+const somenteA = disciplinasA.filter(d => !codigosB.includes(codigo(d)));
+const somenteB = disciplinasB.filter(d => !codigosA.includes(codigo(d)));
+
+const turmasDiferentes = comuns.filter(c => {
+    const turmaA = disciplinasA.find(d => codigo(d) === c);
+    const turmaB = disciplinasB.find(d => codigo(d) === c);
+    return turmaA !== turmaB;
+});
+
+const creditosA = Number(
+    gradeA.querySelector(".creditos-destaque strong")?.textContent.trim() || 0
+);
+const creditosB = Number(
+    gradeB.querySelector(".creditos-destaque strong")?.textContent.trim() || 0
+);
+
+let resumo = document.getElementById("resumo-diferencas");
+
+if (!resumo) {
+    resumo = document.createElement("div");
+    resumo.id = "resumo-diferencas";
+    resultado.insertAdjacentElement("afterend", resumo);
+}
+
+const adicionarLinha = (titulo, itens) => {
+    const p = document.createElement("p");
+    const strong = document.createElement("strong");
+    strong.textContent = titulo + ": ";
+    p.appendChild(strong);
+    p.appendChild(document.createTextNode(
+        itens.length ? itens.join(", ") : "Nenhuma"
+    ));
+    resumo.appendChild(p);
+};
+
+resumo.replaceChildren();
+
+const tituloResumo = document.createElement("h3");
+tituloResumo.textContent = "Resumo da comparação";
+resumo.appendChild(tituloResumo);
+
+adicionarLinha("Disciplinas em ambas", comuns);
+adicionarLinha("Somente na Grade A", somenteA);
+adicionarLinha("Somente na Grade B", somenteB);
+adicionarLinha("Turmas diferentes", turmasDiferentes);
+
+const diferenca = document.createElement("p");
+diferenca.textContent = "Diferença de créditos: "
+    + Math.abs(creditosA - creditosB);
+resumo.appendChild(diferenca);
+
+resumo.style.display = "block";
+
+        resultado.style.display = "grid";
+        resultado.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+});
+</script>
 </body>
 </html>

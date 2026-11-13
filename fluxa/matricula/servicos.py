@@ -347,6 +347,73 @@ def validar_selecao(perfil, periodo, ids):
         return [], 'Conflito de horário: ' + '; '.join(conflitos) + '.'
     return turmas, ''
 
+def guardar_horarios(turmas):
+    dados = []
+
+    for turma in turmas:
+        horarios = []
+
+        for dia, inicio, fim, sala in intervalos_da_turma(turma):
+            horarios.append({
+                'dia': dia,
+                'inicio': inicio,
+                'fim': fim,
+                'sala': sala,
+            })
+
+        dados.append({
+            'turma_id': turma.pk,
+            'disciplina': turma.disciplina.codigo,
+            'turma': turma.codigo,
+            'periodo': turma.periodo_letivo,
+            'creditos': turma.disciplina.creditos,
+            'horarios': horarios,
+        })
+
+    return sorted(
+        dados,
+        key=lambda item: (item['disciplina'], item['turma'])
+    )
+def verificar_mudancas_horarios(plano):
+    salvos = plano.horarios_salvos
+
+    if not salvos:
+        return {
+            'verificado': False,
+            'alterado': False,
+            'mensagem': 'Horários originais não registrados.'
+        }
+
+    atuais = guardar_horarios(plano.turmas.all())
+
+    def organizar(dados):
+        return {
+            str(item['turma_id']): {
+                **item,
+                'horarios': sorted(
+                    item['horarios'],
+                    key=lambda h: (
+                        h['dia'],
+                        h['inicio'],
+                        h['fim'],
+                        h['sala']
+                    )
+                )
+            }
+            for item in dados
+        }
+
+    alterado = organizar(salvos) != organizar(atuais)
+
+    return {
+        'verificado': True,
+        'alterado': alterado,
+        'mensagem': (
+            'Os dados de uma ou mais turmas foram alterados.'
+            if alterado else
+            'Os horários continuam iguais aos salvos.'
+        )
+    }
 
 def resumo_da_grade(turmas):
     """Dados prontos para mostrar uma grade salva (créditos, blocos, chips)."""
