@@ -107,7 +107,28 @@
 
   // Co-requisitos que ainda precisam entrar na grade junto com esta disciplina.
   function faltandoJuntos(d) {
+    if (d.correquisitos) {
+      var alternativas = d.correquisitos;
+      var cumprido = function (t) {
+        return sel[t.codigo] !== undefined || (t.opcoes.length > 0 &&
+          t.opcoes.reduce(function (soma, op) {
+            return soma + (sel[op.codigo] !== undefined ? op.creditos : 0);
+          }, 0) >= t.creditos);
+      };
+      if (!alternativas.length || alternativas.some(function (g) { return g.every(cumprido); })) { return []; }
+      return [alternativas.map(function (g) {
+        return g.filter(function (t) { return !cumprido(t); }).map(function (t) {
+          return t.codigo + (t.opcoes.length ? ' (' + t.creditos + ' créditos em opções do grupo)' : '');
+        }).join(' + ');
+      }).join(' ou ')];
+    }
     return (d.juntos || []).filter(function (c) { return sel[c] === undefined; });
+  }
+
+  function tituloBloqueio(d) {
+    if (d.tipo_bloqueio === 'sem_turma') { return 'Sem turma neste período'; }
+    if (d.tipo_bloqueio === 'historico') { return d.bloqueio; }
+    return 'Requisito não cumprido';
   }
 
   function escolher(d, t) {
@@ -120,9 +141,14 @@
     var termo = ($busca.value || '').replace(/\s+/g, '').toUpperCase();
     $lista.textContent = '';
     var mostradas = 0;
+    var ultimoPeriodo = null;
     disciplinas.forEach(function (d) {
       if (!termo && !d.do_curso) { return; }
       if (termo && d.codigo.toUpperCase() !== termo) { return; }
+      if (!termo && d.periodo !== ultimoPeriodo) {
+        $lista.appendChild(el('h3', 'periodo-lista', d.periodo ? d.periodo + 'º período' : 'Sem período definido'));
+        ultimoPeriodo = d.periodo;
+      }
       mostradas += 1;
       var escolhida = turmaEscolhida(d);
       var abre = aberto === d.codigo;
@@ -135,15 +161,15 @@
       var textos = el('span', 'textos');
       textos.appendChild(el('span', 'codigo', d.codigo + ' · ' + d.creditos + ' cr.'));
       textos.appendChild(el('span', '', d.nome));
+      if (d.periodo) { textos.appendChild(el('span', 'resumo-disc', d.periodo + 'º período')); }
+      // Fechada, a disciplina só diz se dá para selecionar; o que falta
+      // aparece ao clicar.
       textos.appendChild(el('span', 'resumo-disc estado-disc', d.bloqueio
-        ? 'Não selecionável · ' + d.bloqueio
+        ? tituloBloqueio(d)
         : (escolhida ? 'Selecionada' : 'Disponível para selecionar')));
       textos.appendChild(el('span', 'resumo-disc',
         (escolhida ? 'Na grade: turma ' + escolhida.codigo + ' · ' : '') +
         d.turmas.length + (d.turmas.length === 1 ? ' turma' : ' turmas')));
-      if (d.juntos && d.juntos.length) {
-        textos.appendChild(el('span', 'resumo-disc', 'Cursar junto com: ' + d.juntos.join(', ')));
-      }
       cab.appendChild(textos);
       cab.appendChild(el('span', 'resumo-disc', abre ? '▾' : '▸'));
       cab.addEventListener('click', function () {
@@ -154,6 +180,26 @@
       $lista.appendChild(cab);
 
       if (!abre) { return; }
+      if (d.bloqueio) {
+        var aviso = el('div', 'aviso-requisito');
+        aviso.setAttribute('role', 'status');
+        aviso.appendChild(el('strong', '', tituloBloqueio(d)));
+        aviso.appendChild(el('span', '', d.bloqueio));
+        $lista.appendChild(aviso);
+      } else {
+        // Co-requisito: some assim que o aluno escolhe a disciplina que faltava.
+        var juntos = faltandoJuntos(d);
+        if (juntos.length) {
+          var avisoCo = el('div', 'aviso-requisito');
+          avisoCo.setAttribute('role', 'status');
+          avisoCo.appendChild(el('strong', '', 'Co-requisito não cumprido'));
+          avisoCo.appendChild(el('span', '', 'Falta escolher na mesma grade: ' + juntos.join(', ') + '.'));
+          $lista.appendChild(avisoCo);
+        }
+      }
+      if (d.opcoes_grupo && d.opcoes_grupo.length) {
+        $lista.appendChild(el('p', 'resumo-disc', 'Opções deste grupo (busque pelo código): ' + d.opcoes_grupo.join(', ')));
+      }
       d.turmas.forEach(function (t) {
         var naGrade = escolhida && escolhida.id === t.id;
         var choque = naGrade ? '' : conflitoCom(d, t);

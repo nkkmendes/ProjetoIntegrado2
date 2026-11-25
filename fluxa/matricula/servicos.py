@@ -8,6 +8,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.db.models import Prefetch
+from .regras_planilha import RegrasAluno, correquisitos_cumpridos
 
 from .models import (
     AreaNivelamento,
@@ -277,24 +278,44 @@ def disciplinas_disponiveis(perfil, periodo):
         .order_by('codigo')
     )
     avisos = avisos_de_nivel(perfil, candidatas)
+    regras_aluno = RegrasAluno(perfil)
 
     ocultas = dict.fromkeys(chaves, 0)
     motivos = []
 
     def fora(d, chave, motivo):
         d.bloqueio = motivo
+        d.tipo_bloqueio = chave
         ocultas[chave] += 1
         motivos.append({'codigo': d.codigo, 'nome': d.nome, 'motivo': motivo})
 
     base = []
     for d in candidatas:
         d.do_curso = d.codigo in codigos_do_curso
+        regra = regras_aluno.regras.get(d.codigo)
+        d.periodo_grade = regra.get('periodo', 0) if regra else 0
+        d.opcoes_grupo = sorted(regras_aluno.opcoes.get(d.codigo, {}))
+        d.correquisitos = regras_aluno.correquisitos(d.codigo) if regra else [[
+            {'codigo': c.codigo, 'creditos': 0, 'opcoes': []}
+            for c in d.co_requisitos.all() if c.codigo not in ja_tem
+        ]]
+        if d.correquisitos == [[]]:
+            d.correquisitos = []
         d.bloqueio = ''
         if d.codigo in ja_tem:
             d.bloqueio = 'Já concluída no histórico.' if d.codigo in concluidas else 'Em curso no histórico.'
+            d.tipo_bloqueio = 'historico'
             continue
         bloqueios = [a['texto'] for a in avisos.get(d.codigo, []) if a['bloqueia']]
-        if (d.pre_requisito_no_microhorario and not d.creditos_minimos
+        if regra is not None:
+            motivo = regras_aluno.bloqueio(d.codigo)
+            if motivo:
+                fora(d, 'pre_requisito', motivo)
+            elif not d.turmas_periodo:
+                fora(d, 'sem_turma', f'Sem turma em {periodo}.')
+            else:
+                base.append(d)
+        elif (d.pre_requisito_no_microhorario and not d.creditos_minimos
                 and not any(g.disciplinas.all() for g in d.grupos_pre_requisito.all())):
             fora(d, 'pre_requisito', 'Pré-requisito a verificar: o Excel indica SIM, mas não detalha a exigência.')
         elif d.creditos_minimos > creditos_concluidos:
@@ -315,11 +336,8 @@ def disciplinas_disponiveis(perfil, periodo):
     while mudou:
         mudou = False
         for d in list(base):
-            faltam = [
-                c.codigo for c in d.co_requisitos.all()
-                if c.codigo not in ja_tem and c.codigo not in atuais
-            ]
-            if faltam:
+            if not correquisitos_cumpridos(d.correquisitos, atuais):
+                faltam = sorted({t['codigo'] for g in d.correquisitos for t in g})
                 base.remove(d)
                 atuais.discard(d.codigo)
                 fora(d, 'co_requisito', (
@@ -329,8 +347,9 @@ def disciplinas_disponiveis(perfil, periodo):
                 mudou = True
     for d in base:
         d.coreqs_juntos = sorted(
-            c.codigo for c in d.co_requisitos.all() if c.codigo not in ja_tem
+            {t['codigo'] for g in d.correquisitos for t in g}
         )
+    candidatas.sort(key=lambda d: (not d.do_curso, d.periodo_grade or 99, d.codigo))
     motivos.sort(key=lambda m: m['codigo'])
     return {'disciplinas': base, 'catalogo': candidatas, 'ocultas': ocultas, 'motivos': motivos}
 
@@ -371,7 +390,11 @@ def dados_do_simulador(disciplinas):
             'nome': d.nome,
             'creditos': d.creditos,
             'bloqueio': getattr(d, 'bloqueio', ''),
+            'tipo_bloqueio': getattr(d, 'tipo_bloqueio', ''),
             'do_curso': getattr(d, 'do_curso', False),
+            'periodo': getattr(d, 'periodo_grade', 0),
+            'opcoes_grupo': getattr(d, 'opcoes_grupo', []),
+            'correquisitos': getattr(d, 'correquisitos', []),
             'cor': cor_da_disciplina(d.codigo),
             'juntos': list(getattr(d, 'coreqs_juntos', [])),
             'turmas': [
@@ -414,9 +437,11 @@ def validar_selecao(perfil, periodo, ids):
     faltando = []
     nomes = {d.codigo: d for d in disponiveis}
     for t in turmas:
-        for c in nomes[t.disciplina.codigo].coreqs_juntos:
-            if c not in escolhidas:
-                faltando.append(f'{t.disciplina.codigo} exige cursar junto {c}')
+        d = nomes[t.disciplina.codigo]
+        if not correquisitos_cumpridos(d.correquisitos, escolhidas):
+            faltando.append(f'{d.codigo} exige cursar junto ' + ' ou '.join(
+                ' + '.join(termo['codigo'] for termo in grupo) for grupo in d.correquisitos
+            ))
     if faltando:
         return [], 'Co-requisito faltando na grade: ' + '; '.join(faltando) + '.'
 

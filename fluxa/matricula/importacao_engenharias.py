@@ -115,6 +115,7 @@ def importar_tudo(com_horarios=True):
     if not Disciplina.objects.filter(cursos__nome='Engenharia de Computação').exists():
         call_command('loaddata', 'disciplinas_fluxograma', verbosity=0)
     relatorio = importar_grades()
+    call_command('sincronizar_catalogo_planilha', verbosity=0)
     if com_horarios:
         from .importar_microhorario import importar
         relatorio['horarios'] = importar()

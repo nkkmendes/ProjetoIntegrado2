@@ -14,24 +14,16 @@ from django.urls import reverse
 
 from .catalogos_fluxograma import linhas_do_curso, relacoes_do_curso
 from .models import Disciplina, HistoricoDisciplina
-from .servicos import avisos_de_nivel, obter_perfil
+from .servicos import obter_perfil
+from .regras_planilha import RegrasAluno
 
 
-CARTA_L = 210
-CARTA_A = 74
-ESPACO_H = 90
-ESPACO_V = 18
-MARGEM_X = 24
-TOPO = 52
-
-CORES = [
-    '#2563eb',
-    '#059669',
-    '#d97706',
-    '#db2777',
-    '#0891b2'
-]
-
+CARTA_L = 230
+CARTA_A = 88
+ESPACO_H = 110
+ESPACO_V = 30
+MARGEM_X = 20
+TOPO = 78
 
 def _normalizar(texto):
     texto = unicodedata.normalize(
@@ -55,35 +47,12 @@ def _historico(perfil):
 
 
 def _relacoes_completas(nome):
-    """Preserva o currículo e completa elos conhecidos no banco, sem inventar requisitos."""
-    relacoes = relacoes_do_curso(nome)
-    banco = {d.codigo: d for d in Disciplina.objects.prefetch_related(
-        'grupos_pre_requisito__disciplinas', 'co_requisitos',
-    )}
-    pendentes = list(relacoes)
-    visitados = set()
-    while pendentes:
-        codigo = pendentes.pop()
-        if codigo in visitados:
-            continue
-        visitados.add(codigo)
-        d = banco.get(codigo)
-        dados = relacoes.setdefault(codigo, {
-            'nome': d.nome if d else codigo,
-            'creditos': d.creditos if d else 0,
-            'periodo': 0, 'grupos': [], 'co': [], 'grupo_optativa': False,
-        })
-        if d:
-            if not dados['grupos']:
-                dados['grupos'] = [
-                    [r.codigo for r in grupo.disciplinas.all()]
-                    for grupo in d.grupos_pre_requisito.all() if grupo.disciplinas.all()
-                ]
-            if not dados['co']:
-                dados['co'] = [r.codigo for r in d.co_requisitos.all()]
-        pendentes.extend(r for grupo in dados['grupos'] for r in grupo)
-        pendentes.extend(dados['co'])
-    return relacoes
+    """O desenho contém somente a matriz curricular da engenharia escolhida.
+
+    A avaliação do histórico usa RegrasAluno; alternativas de currículos antigos
+    da ementa não criam cartões extras nesta matriz.
+    """
+    return relacoes_do_curso(nome)
 
 
 def _cadeia(codigo, grafo):
@@ -114,33 +83,85 @@ def _cadeia(codigo, grafo):
     return encontrados
 
 
-def _liberada(grupos, concluidas):
-    """Pré-requisitos cumpridos: algum grupo todo concluído (A|B = grupos
-    alternativos; A+B = mesmo grupo). Sem pré-requisito = liberada."""
+def _setas_do_curso(cartas, relacoes, envolvidos):
+    """Calcula SVG no servidor, usando as mesmas medidas dos cartões."""
+    por_codigo = defaultdict(list)
+    for carta in cartas:
+        por_codigo[carta.codigo].append(carta)
+    setas = []
+    for destino in cartas:
+        regra = relacoes[destino.codigo]
+        requisitos = {(codigo, False) for grupo in regra['grupos'] for codigo in grupo}
+        requisitos.update((codigo, True) for codigo in regra['co'])
+        for codigo, co in sorted(requisitos):
+            if codigo == destino.codigo or codigo not in por_codigo:
+                continue
+            # Para grupos que reaparecem, conecta a ocorrência anterior mais
+            # próxima, mantendo cada posição da matriz no desenho.
+            opcoes = por_codigo[codigo]
+            anteriores = [c for c in opcoes if c.periodo <= destino.periodo]
+            origem = max(anteriores or opcoes, key=lambda c: c.periodo)
+            x1, y1 = origem.x + CARTA_L, origem.y + CARTA_A // 2
+            x2, y2 = destino.x - 4, destino.y + CARTA_A // 2
+            if x2 > x1 + 20:
+                meio = (x1 + x2) // 2
+                caminho = f'M{x1},{y1} C{meio},{y1} {meio},{y2} {x2},{y2}'
+            else:
+                x2 = destino.x + CARTA_L + 4
+                desvio = max(x1, x2) + 55
+                caminho = f'M{x1},{y1} C{desvio},{y1} {desvio},{y2} {x2},{y2}'
+            setas.append({
+                'caminho': caminho, 'co': co,
+                'origem': codigo, 'destino': destino.codigo,
+                'origem_chave': origem.chave, 'destino_chave': destino.chave,
+                'destaque': codigo in envolvidos and destino.codigo in envolvidos,
+            })
+    return setas
 
-    return not grupos or any(
-        set(grupo) <= concluidas
+
+def _texto_requisitos(grupos):
+    """Mantém explícitas as alternativas e as exigências simultâneas."""
+    return ' ou '.join(
+        '(' + ' e '.join(grupo) + ')' if len(grupos) > 1 and len(grupo) > 1
+        else ' e '.join(grupo)
         for grupo in grupos
     )
 
 
-def _itens(codigos, historico, nomes):
-    return [
-        {
+def _opcoes_do_grupo(codigo_grupo, regras_aluno):
+    opcoes = regras_aluno.opcoes.get(codigo_grupo, {})
+    sem_nome = [codigo for codigo in opcoes
+                if not regras_aluno.regras.get(codigo, {}).get('nome')]
+    nomes_banco = dict(Disciplina.objects.filter(codigo__in=sem_nome).values_list('codigo', 'nome')) if sem_nome else {}
+    resultado = []
+    for codigo, creditos in sorted(opcoes.items()):
+        regra = regras_aluno.regras.get(codigo, {})
+        pre = regra.get('grupos', [])
+        co = regra.get('co_grupos', [])
+        adicionais = regra.get('adicionais', '')
+        nao_verificada = not regra or 'nao verificad' in _normalizar(regra.get('verificacao', ''))
+        concluida = codigo in regras_aluno.concluidas
+        em_curso = codigo in regras_aluno.em_curso
+        pendente = nao_verificada or bool(regras_aluno.bloqueio(codigo) or regras_aluno.correquisitos(codigo))
+        resultado.append({
             'codigo': codigo,
-            'nome': nomes.get(codigo, codigo),
-            'concluida': (
-                historico.get(codigo)
-                == HistoricoDisciplina.CONCLUIDA
-            )
-        }
-        for codigo in sorted(set(codigos))
-    ]
+            'nome': regra.get('nome') or nomes_banco.get(codigo, codigo),
+            'creditos': creditos,
+            'concluida': concluida,
+            'em_curso': em_curso,
+            'tem_requisitos': bool(pre or co or adicionais),
+            'bloqueada': not concluida and not em_curso and pendente,
+            'nao_verificada': nao_verificada,
+            'pre_requisitos': _texto_requisitos(pre),
+            'co_requisitos': _texto_requisitos(co),
+            'adicionais': adicionais,
+        })
+    return resultado
 
 
 @login_required
 def grafo_fluxograma(request):
-    """Envia os requisitos do curso selecionado ao JavaScript."""
+    """Disponibiliza as relações curriculares da engenharia selecionada."""
 
     perfil = obter_perfil(request.user)
 
@@ -222,6 +243,7 @@ def fluxograma(request):
             'curso': None,
             'cabecalhos': [],
             'cartas': [],
+            'setas': [],
             'isoladas': [],
             'largura': 0,
             'altura': 0,
@@ -242,6 +264,7 @@ def fluxograma(request):
     total_disciplinas = len(linhas)
     creditos_total = sum(item['creditos'] for item in linhas)
     relacoes = _relacoes_completas(curso.nome)
+    regras_aluno = RegrasAluno(perfil)
 
     historico = _historico(perfil)
 
@@ -256,17 +279,6 @@ def fluxograma(request):
         for codigo, status in historico.items()
         if status == HistoricoDisciplina.EM_CURSO
     }
-
-    # Nivelamento do aluno
-    disciplinas_bd = {
-        d.codigo: d
-        for d in curso.disciplinas.all()
-    }
-
-    avisos = avisos_de_nivel(
-        perfil,
-        list(disciplinas_bd.values())
-    )
 
     # Disciplina selecionada
     foco = request.GET.get('foco', '').strip().upper()
@@ -348,13 +360,13 @@ def fluxograma(request):
             continue
         vistos.add(codigo)
         for co in relacoes[codigo]['co']:
+            if co not in relacoes:
+                continue
             co_cadeia.add(co)
             novos = {co} | _cadeia(co, grafo)
             pendentes.extend(novos - vistos)
             envolvidos.update(novos)
     cadeia = envolvidos - {foco} - co_cadeia
-    for codigo in sorted(envolvidos - codigos_curriculo):
-        linhas.append(dict(relacoes[codigo], codigo=codigo, periodo=0))
 
     co_foco = (
         co_cadeia - cadeia - {foco}
@@ -393,6 +405,13 @@ def fluxograma(request):
 
         concluida = codigo in concluidas
         cursando = codigo in em_curso
+        if codigo in regras_aluno.regras:
+            bloqueio_regra = regras_aluno.bloqueio(codigo)
+            co_pendentes = bool(regras_aluno.correquisitos(codigo))
+        else:
+            bloqueio_regra = 'Requisitos ainda não verificados.'
+            co_pendentes = False
+        requisitos_pendentes = bool(bloqueio_regra or co_pendentes)
 
         caixa = SimpleNamespace(
             codigo=codigo,
@@ -400,20 +419,18 @@ def fluxograma(request):
             periodo=periodo,
             nome=item['nome'],
             creditos=item['creditos'],
+            grupo_optativa=relacoes[codigo].get('grupo_optativa', False),
             concluida=concluida,
             em_curso=cursando,
-            # Liberada: ainda não feita e com os pré-requisitos já
-            # concluídos no Histórico.
+            # Correquisitos ainda não cursados também impedem sinalizar
+            # liberação incondicional no fluxograma.
             liberada=(
                 not concluida
                 and not cursando
-                and _liberada(relacoes[codigo]['grupos'], concluidas)
+                and not requisitos_pendentes
             ),
             classe=classe,
-            bloqueada=any(
-                a.get('bloqueia')
-                for a in avisos.get(codigo, [])
-            ),
+            bloqueada=not concluida and not cursando and requisitos_pendentes,
             x=0,
             y=0,
         )
@@ -455,6 +472,7 @@ def fluxograma(request):
         2 * MARGEM_X
         + len(colunas) * CARTA_L
         + (len(colunas) - 1) * ESPACO_H
+        + 80  # Espaço para correquisitos na última coluna.
     )
 
     altura = (
@@ -466,76 +484,18 @@ def fluxograma(request):
         + 20
     )
 
-    # Descobrir quais materias dependem de cada requisito
-    dependentes = defaultdict(set)
-
-    for codigo, dados in relacoes.items():
-        for grupo in dados['grupos']:
-            for requisito in grupo:
-                if requisito in relacoes:
-                    dependentes[requisito].add(codigo)
-
-    # Painel de detalhes
+    # Identificação e ações da disciplina; os requisitos ficam nas setas.
     painel = None
-
     if foco:
         dados = relacoes[foco]
-        total_grupos = len(dados['grupos'])
-
-        faltantes = sorted({
-            requisito
-            for grupo in dados['grupos']
-            for requisito in grupo
-            if requisito not in relacoes
-        })
-
-        nomes = {
-            codigo: item['nome']
-            for codigo, item in relacoes.items()
-        }
-
         painel = {
             'codigo': foco,
             'nome': dados['nome'],
             'creditos': dados['creditos'],
-            'creditos_minimos': getattr(
-                disciplinas_bd.get(foco),
-                'creditos_minimos',
-                0
-            ),
-            'grupos': [
-                {
-                    'cor': (
-                        CORES[i % len(CORES)]
-                        if total_grupos > 1
-                        else '#6b86a8'
-                    ),
-                    'itens': _itens(
-                        grupo,
-                        historico,
-                        nomes
-                    )
-                }
-                for i, grupo in enumerate(dados['grupos'])
-            ],
-            'co': _itens(
-                dados['co'],
-                historico,
-                nomes
-            ),
-            'dependentes': _itens(
-                dependentes.get(foco, set()),
-                historico,
-                nomes
-            ),
-            'sem_relacoes': (
-                not dados['grupos']
-                and not dados['co']
-                and not dependentes.get(foco)
-            ),
-            'avisos_nivel': avisos.get(foco, []),
             'em_curso': foco in em_curso,
-            'faltantes': faltantes,
+            'concluida': foco in concluidas,
+            'grupo_optativa': dados.get('grupo_optativa', False),
+            'opcoes': _opcoes_do_grupo(foco, regras_aluno) if dados.get('grupo_optativa') else [],
         }
 
     feitas = [
@@ -567,6 +527,7 @@ def fluxograma(request):
         'curso': curso,
         'cabecalhos': cabecalhos,
         'cartas': cartas,
+        'setas': _setas_do_curso(cartas, relacoes, envolvidos),
         'disciplinas_curso': [d for d in cartas if d.codigo in codigos_curriculo],
         'isoladas': [],
         'largura': largura,

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Comeca sem nenhuma seta
     svg.replaceChildren();
-    svg.style.zIndex = '3';
+    svg.style.zIndex = '0';
     svg.style.pointerEvents = 'none';
     svg.style.overflow = 'visible';
 
@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Manter o tamanho original, sem alterar a escala ao abrir ou selecionar.
     const quadroCurso = grade.closest('.quadro');
     document.getElementById('ver-curso-completo')?.addEventListener('click', () => {
+        if (foco) { window.location.search = ''; return; }
         grade.classList.add('mostrar-todas');
         quadroCurso?.scrollTo({left: 0, top: 0, behavior: 'smooth'});
     });
-    if (!foco) return;
 
     const url = document.querySelector(
         'script[data-grafo-url]'
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dados = await resposta.json();
         const grafo = dados.grafo || {};
 
-        if (!Object.prototype.hasOwnProperty.call(grafo, foco)) {
+        if (foco && !Object.prototype.hasOwnProperty.call(grafo, foco)) {
             console.warn(
                 'Fluxa: disciplina nao encontrada no grafo:',
                 foco
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             return Math.round(
-                (carta.offsetLeft - 24) / 300
+                (carta.offsetLeft - 20) / 340
             ) + 1;
         }
 
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 && periodoDaCarta(carta) === periodoSelecionado
         ) || escolherCarta(foco);
 
-        if (!alvo) {
+        if (foco && !alvo) {
             console.warn(
                 'Fluxa: cartao nao encontrado para',
                 foco
@@ -126,8 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Percorrer todos os pre-requisitos:
         // requisitos diretos e requisitos dos requisitos
-        const pendentes = [foco];
-        const visitados = new Set([foco]);
+        const pendentes = foco ? [foco] : [...cartas.keys()];
+        const visitados = new Set(pendentes);
 
         const ligacoes = [];
         const chaves = new Set();
@@ -189,6 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Destacar todas as disciplinas da cadeia
         visitados.forEach(codigo => {
+            if (!foco) return;
             (cartas.get(codigo) || []).forEach(carta => {
                 carta.classList.add(
                     codigo === foco ? 'alvo' : 'cadeia'
@@ -217,8 +218,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const defs = elemento('defs', {});
 
         for (const [id, cor] of [
-            ['ponta-pre-fluxa', '#2563eb'],
-            ['ponta-co-fluxa', '#7c3aed']
+            ['ponta-pre-fluxa', '#7d8ca3'],
+            ['ponta-co-fluxa', '#4679ef']
         ]) {
             const marcador = elemento('marker', {
                 id: id,
@@ -279,19 +280,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `C${meio},${y1} ` +
                     `${meio},${y2} ${x2},${y2}`;
             } else {
-                const desvio = Math.max(x1, x2) + 35;
+                const xFim = destino.offsetLeft + destino.offsetWidth + 4;
+                const desvio = Math.max(x1, xFim) + 55;
 
                 caminho =
                     `M${x1},${y1} ` +
-                    `L${desvio},${y1} ` +
-                    `L${desvio},${y2} ` +
-                    `L${x2},${y2}`;
+                    `C${desvio},${y1} ` +
+                    `${desvio},${y2} ${xFim},${y2}`;
             }
 
             const linha = elemento('path', {
                 d: caminho,
                 style: (
-                    `fill:none;stroke:${cor};stroke-width:3`
+                    `fill:none;stroke:${cor};stroke-width:2.3`
                 ),
                 'marker-end': `url(#${marcador})`
             });
@@ -321,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             desenhar(
                 origem,
                 destino,
-                ligacao.co ? '#7c3aed' : '#2563eb',
+                ligacao.co ? '#4679ef' : '#7d8ca3',
                 ligacao.co ? 'ponta-co-fluxa' : 'ponta-pre-fluxa',
                 ligacao.co || ligacao.alternativo
             );

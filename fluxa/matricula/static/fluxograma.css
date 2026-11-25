@@ -32,15 +32,15 @@ button { font: inherit; cursor: pointer; }
 .leg { display: inline-block; width: 22px; height: 14px; border-radius: 5px; border: 2px solid; background: #F0F4FA; }
 .leg-alvo { border-color: #0F2C4C; }
 .leg-cadeia { border-color: #1D4E78; }
-.leg-co { border-color: #166534; }
+.leg-co { border-color: #4679ef; border-style: dashed; }
 .leg-nivel { border-color: #B91C1C; border-style: dashed; background: #FFFFFF; }
-.leg-liberada { border-color: #166534; background: #FFFFFF; }
+.leg-liberada { border-color: #1D4E78; background: #FFFFFF; }
 .leg-cursando { border-color: #1D4E78; background: #FFFFFF; }
 
 .progresso { margin: 0 0 12px; padding: 12px 18px; background: #FFFFFF; border: 1px solid #475569; border-radius: 25px; font-size: 14px; }
 .progresso p { margin: 0; }
 .progresso .barra { height: 10px; margin: 8px 0; background: #F0F4FA; border: 1px solid #CBD5E1; border-radius: 5px; overflow: hidden; }
-.progresso .barra span { display: block; height: 100%; background: #166534; }
+.progresso .barra span { display: block; height: 100%; background: #1D4E78; }
 .progresso a { color: #1D4E78; font-weight: bold; }
 
 .area { display: flex; align-items: flex-start; gap: 16px; }
@@ -50,15 +50,16 @@ button { font: inherit; cursor: pointer; }
 .quadro { flex: 1; min-width: 0; max-height: 74vh; min-height: 300px; overflow: auto; border: 1px solid #475569; border-radius: 25px; background: #FFFFFF; scroll-behavior: smooth; scrollbar-color: #475569 #F0F4FA; }
 .grade { position: relative; }
 .setas { position: absolute; top: 0; left: 0; z-index: 0; pointer-events: none; overflow: visible; }
-.setas path { fill: none; stroke-width: 3; }
-.setas path.co { stroke-dasharray: 7 5; stroke-width: 2.5; }
+.setas .ligacao { fill: none; stroke: #7d8ca3; stroke-width: 2; }
+.setas .ligacao.co { stroke: #4679ef; stroke-dasharray: 7 5; }
+.setas .ligacao.destaque { stroke-width: 3; }
 .cabecalho { position: absolute; top: 12px; width: 210px; margin: 0; font-size: 14px; }
 
 .carta { position: absolute; z-index: 1; display: block; width: 210px; height: 74px; padding: 8px 10px; background: #F0F4FA; color: #0F2C4C; border: 1px solid #CBD5E1; border-radius: 5px; text-decoration: none; scroll-margin: 30vh 20vw; transition: opacity .15s; }
 .carta strong { display: block; font-size: 14px; }
 .carta span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; font-size: 13px; line-height: 1.35; }
 .carta:hover { background: #FFFFFF; border-color: #1D4E78; }
-.carta.liberada { background: #FFFFFF; border: 2px solid #166534; }
+.carta.liberada { background: #FFFFFF; border: 2px solid #1D4E78; }
 .carta.em-curso { background: #FFFFFF; border: 2px solid #1D4E78; }
 .carta.bloqueada { background: #FFFFFF; border: 2px dashed #B91C1C; }
 .carta .tag-cursando { position: absolute; top: -9px; left: 8px; padding: 1px 7px; background: #1D4E78; color: #FFFFFF; border-radius: 5px; font-size: 12px; font-style: normal; font-weight: bold; }
@@ -77,7 +78,7 @@ button { font: inherit; cursor: pointer; }
 .grade.com-foco .carta.co { opacity: 1; }
 .carta.alvo { border-color: #0F2C4C; box-shadow: 0 0 0 3px #0F2C4C; }
 .carta.cadeia { border-color: #1D4E78; box-shadow: 0 0 0 2px #1D4E78, 0 0 14px 3px rgba(29, 78, 120, .55); }
-.carta.co { border-color: #166534; box-shadow: 0 0 0 2px #166534, 0 0 14px 3px rgba(22, 101, 52, .55); }
+.carta.co { border-color: #4679ef; box-shadow: 0 0 0 2px #4679ef; }
 
 .painel { position: sticky; top: 16px; flex: 0 0 300px; max-height: 74vh; overflow: auto; padding: 18px; background: #FFFFFF; border: 1px solid #475569; border-radius: 25px; font-size: 14px; overflow-wrap: anywhere; }
 .painel h2 { margin: 0 0 8px; font-size: 18px; }
@@ -108,3 +109,37 @@ button { font: inherit; cursor: pointer; }
   main { padding: 12px; }
   h1 { font-size: 24px; }
 }
+
+/* Fluxograma por períodos, com conexões atrás dos cartões. */
+.pagina-fluxograma .quadro { background: #F0F4FA; border: 1px solid #CBD5E1; border-radius: 12px; }
+.pagina-fluxograma .cabecalho { top: 26px; width: auto; padding: 9px 13px; border-radius: 9px; background: #e8f1fb; color: #145588; font-size: 14px; font-weight: 700; }
+.pagina-fluxograma .carta { width: 230px; height: 88px; padding: 14px 16px; border: 1px solid #CBD5E1; border-radius: 11px; background: #FFFFFF; color: #0F2C4C; font-weight: 400; box-shadow: none; }
+.pagina-fluxograma .carta strong { font-family: ui-monospace, Consolas, monospace; font-size: 14px; margin-bottom: 5px; }
+.pagina-fluxograma .carta span { -webkit-line-clamp: 2; line-clamp: 2; font-size: 13px; line-height: 1.35; }
+.pagina-fluxograma .carta.liberada { border: 2px solid #1D4E78; }
+.pagina-fluxograma .carta.bloqueada { background: #E2E8F0; color: #475569; border: 1px dashed #94A3B8; }
+.pagina-fluxograma .carta.concluida { background: #D6E6F8; color: #14385F; border: 1px solid #5B9BD5; }
+.pagina-fluxograma .carta.concluida::after { content: "✓"; position: absolute; right: 8px; top: 5px; color: #14385F; font-weight: bold; }
+.pagina-fluxograma .carta.em-curso { background: #d9eaff; color: #174a76; }
+.pagina-fluxograma .carta.alvo { outline: 3px solid #174a76; outline-offset: 3px; }
+.pagina-fluxograma .grade.com-foco .carta { opacity: 1; }
+.pagina-fluxograma .carta.cadeia,
+.pagina-fluxograma .carta.co { box-shadow: 0 0 0 2px #8a9bb2; }
+.pagina-fluxograma .tag-nivel { display: none; }
+.pagina-fluxograma .carta:hover { outline: 2px solid #174a76; outline-offset: 2px; }
+.pagina-fluxograma .leg-liberada { background: #FFFFFF; border-color: #1D4E78; }
+.pagina-fluxograma .leg-nivel { background: #E2E8F0; border: 1px dashed #94A3B8; }
+.pagina-fluxograma .leg-concluida { background: #D6E6F8; border: 1px solid #5B9BD5; color: #14385F; height: 18px; text-align: center; }
+.controle-fluxograma { padding: 8px 12px; border: 1px solid #1D4E78; border-radius: 5px; font-weight: 600; text-decoration: none; }
+.controle-fluxograma:hover { background: #D6E6F8; }
+.pagina-fluxograma .painel { border-color: #CBD5E1; border-radius: 12px; scroll-margin-top: 16px; }
+.opcoes-resumo, .resumo-grade { color: #475569; font-size: 13px; }
+.opcoes-optativas { margin: 12px 0 0; padding: 0; list-style: none; max-height: 360px; overflow-y: auto; border-top: 1px solid #E2E8F0; }
+.opcao-optativa { padding: 12px 4px; border-bottom: 1px solid #E2E8F0; }
+.opcao-titulo { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; }
+.opcao-titulo small { color: #475569; white-space: nowrap; }
+.opcao-situacao { display: inline-block; margin-top: 5px; color: #475569; font-size: 12px; }
+.opcao-situacao.pendente { color: #B91C1C; }
+.opcao-requisitos { margin-top: 6px; font-size: 13px; }
+.opcao-requisitos summary { cursor: pointer; color: #1D4E78; }
+.opcao-requisitos p { margin: 6px 0 0; color: #475569; }

@@ -1175,6 +1175,8 @@ def detalhes_disciplina(request, codigo):
         return JsonResponse({'erro': f'Não existe disciplina com o código {codigo}.'}, status=404)
 
     perfil = obter_perfil(request.user)
+    from .regras_planilha import RegrasAluno
+    regras_aluno = RegrasAluno(perfil)
     grupos = [
         sorted(d.codigo for d in grupo.disciplinas.all())
         for grupo in disciplina.grupos_pre_requisito.prefetch_related('disciplinas')
@@ -1202,6 +1204,20 @@ def detalhes_disciplina(request, codigo):
         ).exists(),
     }
 
+    regra = regras_aluno.regras.get(disciplina.codigo)
+    if regra is not None:
+        dados.update({
+            'pre_requisitos': sorted({c for g in regra['grupos'] for c in g}),
+            'grupos_pre_requisitos': regra['grupos'],
+            'co_requisitos': regra['co'],
+            'grupos_co_requisitos': regra.get('co_grupos', []),
+            'requisitos_adicionais': regra.get('adicionais', ''),
+            'bloqueio': regras_aluno.bloqueio(disciplina.codigo),
+            'creditos_minimos': None,
+            'avisos_nivel': [],
+            'dependentes': sorted(c for c, r in regras_aluno.regras.items()
+                                  if any(disciplina.codigo in g for g in r['grupos'])),
+        })
     return JsonResponse(dados)
 
 @login_required

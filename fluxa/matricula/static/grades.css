@@ -52,6 +52,7 @@ button[disabled] { cursor: not-allowed; }
 .painel-grade { min-width: 0; position: sticky; top: 16px; }
 .lista-disciplinas { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
 .contador { margin: 8px 0 0; font-size: 12px; color: #475569; }
+.periodo-lista { margin: 14px 0 4px; padding-bottom: 6px; border-bottom: 2px solid #CBD5E1; font-size: 15px; }
 .rodape-lista { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #CBD5E1; font-size: 12px; color: #475569; }
 .ocultas { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #CBD5E1; font-size: 12px; color: #475569; }
 .ocultas summary { cursor: pointer; }
@@ -134,6 +135,7 @@ button[disabled] { cursor: not-allowed; }
 
 /* Aviso de co-requisito pendente na lista de turmas escolhidas */
 .aviso-corequisito { color: #b3261e; font-weight: 600; }
+.aviso-requisito { margin-left: 14px; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; font-size: 13px; color: #9f1239; background: #fff1f2; border: 1px solid #fda4af; border-left: 4px solid #be123c; border-radius: 5px; }
 
 .resumo-creditos {
     display: flex;

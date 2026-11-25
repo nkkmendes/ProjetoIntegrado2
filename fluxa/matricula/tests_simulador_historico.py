@@ -59,8 +59,8 @@ class MotivosDasOcultasTest(BaseSimulador):
 
     def test_tela_lista_as_ocultas_com_motivo(self):
         r = self.client.get(reverse('simulacao'))
-        self.assertContains(r, 'Ver quais e por quê')
-        self.assertContains(r, '<strong>BBB1000</strong> — Disciplina BBB1000<span>Falta concluir AAA1000.</span>', html=True)
+        self.assertIn('Falta concluir AAA1000.', next(d['bloqueio'] for d in r.context['dados_simulador'] if d['codigo'] == 'BBB1000'))
+        self.assertContains(r, 'dados-simulador')
 
 
 class GradeReabertaTest(BaseSimulador):

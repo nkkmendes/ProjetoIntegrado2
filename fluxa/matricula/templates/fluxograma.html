@@ -20,69 +20,13 @@
 
     <link
         rel="stylesheet"
-        href="{% static 'fluxograma.css' %}?v=8-fluxograma-primeiro"
+        href="{% static 'fluxograma.css' %}?v=10-tema-site-django"
     >
 
     <link
         rel="stylesheet"
         href="{% static 'navegacao.css' %}"
     >
-
-    <style>
-        /* Disciplinas concluidas */
-        .carta.concluida {
-            background: #e1efe5;
-            border: 2px solid #36764f;
-        }
-
-        .carta.concluida::after {
-            content: "✓";
-            position: absolute;
-            right: 8px;
-            top: 5px;
-            color: #27613b;
-            font-weight: bold;
-        }
-
-        /* Destacar apenas a cadeia selecionada */
-        .grade.com-foco .carta {
-            opacity: 0.3;
-        }
-
-        .grade.com-foco .carta.alvo,
-        .grade.com-foco .carta.cadeia,
-        .grade.com-foco .carta.co {
-            opacity: 1;
-        }
-
-        .grade.com-foco.mostrar-todas .carta { opacity: 1; }
-
-        /* Area das setas */
-        .grade {
-            position: relative;
-        }
-
-        .setas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            overflow: visible;
-        }
-
-        .aviso-fluxo {
-            color: #72551a;
-            font-size: 13px;
-            margin: 10px 0;
-        }
-    </style>
-
-    <!-- JavaScript das setas -->
-    <script
-        src="{% static 'fluxograma_setas.js' %}?v=13-sem-zoom"
-        data-grafo-url="{% url 'grafo_fluxograma' %}"
-        defer>
-    </script>
 
 </head>
 
@@ -96,7 +40,7 @@
 
         {% include 'mensagens.html' %}
 
-        <h1>Fluxograma de matérias</h1>
+        <h1>Fluxograma{% if curso %} — {{ curso.nome }}{% endif %}</h1>
 
         {% if not curso %}
 
@@ -113,6 +57,7 @@
 
                 <div
                     class="quadro"
+                    id="desenho-fluxograma"
                     tabindex="0"
                     role="region"
                     aria-label="Fluxograma por período"
@@ -123,13 +68,25 @@
                         style="width: {{ largura }}px; height: {{ altura }}px;"
                     >
 
-                        <!-- SETAS DESENHADAS PELO JAVASCRIPT -->
+                        <!-- Conexões calculadas e renderizadas pelo Django. -->
 
                         <svg
                             class="setas"
                             width="{{ largura }}"
                             height="{{ altura }}"
                             aria-hidden="true">
+                            <defs>
+                                <marker id="ponta-pre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M0 0 L10 5 L0 10 z" fill="#7d8ca3" />
+                                </marker>
+                                <marker id="ponta-co" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M0 0 L10 5 L0 10 z" fill="#4679ef" />
+                                </marker>
+                            </defs>
+                            {% for seta in setas %}
+                            <path class="ligacao{% if seta.co %} co{% endif %}{% if seta.destaque %} destaque{% endif %}"
+                                  d="{{ seta.caminho }}" marker-end="url(#{% if seta.co %}ponta-co{% else %}ponta-pre{% endif %})" />
+                            {% endfor %}
                         </svg>
 
                         <!-- CABECALHOS DOS PERIODOS -->
@@ -157,8 +114,8 @@
                                 data-codigo="{{ d.codigo }}"
                                 data-periodo="{{ d.periodo }}"
                                 style="left: {{ d.x }}px; top: {{ d.y }}px;"
-                                href="{% url 'fluxograma' %}?foco={{ d.codigo }}&amp;periodo={{ d.periodo }}#c-{{ d.chave }}"
-                                title="{{ d.codigo }} — {{ d.nome }} ({{ d.creditos }} créditos)"
+                                href="{% url 'fluxograma' %}?foco={{ d.codigo }}&amp;periodo={{ d.periodo }}#{% if d.grupo_optativa %}detalhes-disciplina{% else %}c-{{ d.chave }}{% endif %}"
+                                title="{{ d.codigo }} — {{ d.nome }} ({{ d.creditos }} créditos){% if d.concluida %} · Concluída{% elif d.em_curso %} · Cursando{% elif d.bloqueada %} · Requisitos pendentes{% elif d.liberada %} · Requisitos cumpridos{% endif %}"
                             >
 
                                 <strong>
@@ -172,7 +129,7 @@
                                 {% if d.bloqueada %}
 
                                     <em class="tag-nivel">
-                                        nível
+                                        requisito
                                     </em>
 
                                 {% endif %}
@@ -206,6 +163,7 @@
 
                     <aside
                         class="painel"
+                        id="detalhes-disciplina"
                         aria-label="Detalhes da disciplina"
                     >
 
@@ -225,163 +183,45 @@
 
                         {% endif %}
 
-                        <!-- NIVELAMENTO -->
-
-                        {% if painel.avisos_nivel %}
-
-                            <h3>Nivelamento</h3>
-
-                            {% for a in painel.avisos_nivel %}
-
-                                <p class="aviso-nivel{% if a.bloqueia %} bloqueia{% endif %}">
-                                    {{ a.texto }}
-                                </p>
-
+                        {% if painel.grupo_optativa %}
+                        <p class="opcoes-resumo">{{ painel.opcoes|length }} opções neste grupo</p>
+                        <ul class="opcoes-optativas" aria-label="Opções de optativas">
+                            {% for opcao in painel.opcoes %}
+                            <li class="opcao-optativa">
+                                <div class="opcao-titulo">
+                                    <span><strong>{{ opcao.codigo }}</strong> — {{ opcao.nome }}</span>
+                                    <small>{{ opcao.creditos }} créditos</small>
+                                </div>
+                                <span class="opcao-situacao{% if opcao.bloqueada and not opcao.concluida and not opcao.em_curso %} pendente{% endif %}">
+                                    {% if opcao.concluida %}Concluída
+                                    {% elif opcao.em_curso %}Cursando
+                                    {% elif opcao.nao_verificada %}Requisitos não verificados
+                                    {% elif not opcao.tem_requisitos %}Sem requisitos
+                                    {% elif opcao.bloqueada %}Requisitos pendentes
+                                    {% else %}Requisitos cumpridos{% endif %}
+                                </span>
+                                {% if opcao.tem_requisitos %}
+                                <details class="opcao-requisitos">
+                                    <summary>Ver requisitos</summary>
+                                    {% if opcao.pre_requisitos %}<p><strong>Pré:</strong> {{ opcao.pre_requisitos }}</p>{% endif %}
+                                    {% if opcao.co_requisitos %}<p><strong>Co:</strong> {{ opcao.co_requisitos }}</p>{% endif %}
+                                    {% if opcao.adicionais %}<p>{{ opcao.adicionais }}</p>{% endif %}
+                                </details>
+                                {% endif %}
+                            </li>
+                            {% empty %}
+                            <li class="opcao-optativa">Nenhuma opção cadastrada para este grupo.</li>
                             {% endfor %}
-
-                            <p>
-                                <a href="{% url 'historico' %}#nivelamento">
-                                    Informar meu nível
-                                </a>
-                            </p>
-
-                        {% endif %}
-
-                        <!-- PRE-REQUISITOS -->
-
-                        <h3>
-                            Pré-requisitos
-                        </h3>
-
-                        {% for g in painel.grupos %}
-
-                            <div
-                                class="grupo"
-                                style="border-left-color: {{ g.cor }};"
-                            >
-
-                                {% for i in g.itens %}
-
-                                    <a href="{% url 'fluxograma' %}?foco={{ i.codigo }}">
-
-                                        {{ i.codigo }}
-
-                                        {% if i.concluida %}
-                                            (concluída)
-                                        {% endif %}
-
-                                    </a>
-
-                                {% endfor %}
-
-                            </div>
-
-                        {% empty %}
-
-                            <p>
-                                Nenhum pré-requisito cadastrado.
-                            </p>
-
-                        {% endfor %}
-
-                        <!-- REQUISITOS FORA DA GRADE -->
-
-                        {% if painel.faltantes %}
-
-                            <p class="aviso-fluxo">
-
-                                Atenção: existem requisitos
-                                que não foram encontrados
-                                nesta grade:
-
-                                <strong>
-                                    {{ painel.faltantes|join:", " }}
-                                </strong>
-
-                            </p>
-
-                        {% endif %}
-
-                        <!-- CO-REQUISITOS -->
-
-                        <h3>
-                            Co-requisitos
-                        </h3>
-
-                        {% if painel.co %}
-
-                            <p class="codigos">
-
-                                {% for i in painel.co %}
-
-                                    <a href="{% url 'fluxograma' %}?foco={{ i.codigo }}">
-
-                                        {{ i.codigo }}
-
-                                        {% if i.concluida %}
-                                            (concluída)
-                                        {% endif %}
-
-                                    </a>
-
-                                {% endfor %}
-
-                            </p>
-
-                        {% else %}
-
-                            <p>Nenhum</p>
-
-                        {% endif %}
-
-                        <!-- DISCIPLINAS DEPENDENTES -->
-
-                        <h3>
-                            É pré-requisito de
-                        </h3>
-
-                        {% if painel.dependentes %}
-
-                            <p class="codigos">
-
-                                {% for i in painel.dependentes %}
-
-                                    <a href="{% url 'fluxograma' %}?foco={{ i.codigo }}">
-
-                                        {{ i.codigo }}
-
-                                        {% if i.concluida %}
-                                            (concluída)
-                                        {% endif %}
-
-                                    </a>
-
-                                {% endfor %}
-
-                            </p>
-
-                        {% else %}
-
-                            <p>Nenhuma</p>
-
-                        {% endif %}
-
-                        <!-- CREDITOS MINIMOS -->
-
-                        {% if painel.creditos_minimos %}
-
-                            <p>
-                                Exige no mínimo
-                                {{ painel.creditos_minimos }}
-                                créditos concluídos.
-                            </p>
-
+                        </ul>
                         {% endif %}
 
                         <!-- ACOES -->
 
                         <div class="rodape">
 
+                            {% if painel.grupo_optativa %}
+                            <a class="sec" href="{% url 'historico' %}">Atualizar histórico</a>
+                            {% else %}
                             <form
                                 method="post"
                                 action="{% url 'marcar_concluida' painel.codigo %}"
@@ -409,6 +249,7 @@
                                 </button>
 
                             </form>
+                            {% endif %}
 
                             <a
                                 class="sec"
@@ -427,27 +268,7 @@
 
             <!-- INFORMACOES DO CURSO -->
 
-            <p>
-                <strong>{{ curso.nome }}</strong>
-                — PUC-Rio, currículo 2023.
-            </p>
-
-            <p>
-                Créditos representados na grade:
-                <strong>{{ creditos_total }}</strong>
-            </p>
-
-            <p>
-                As disciplinas estão organizadas do
-                <strong>1º ao 10º período</strong>.
-
-                Clique em uma matéria para visualizar
-                todos os pré-requisitos necessários,
-                incluindo os pré-requisitos dos pré-requisitos.
-
-                As setas aparecem somente após selecionar
-                uma disciplina.
-            </p>
+            <p class="resumo-grade">PUC-Rio · Currículo 2023 · {{ creditos_total }} créditos na grade</p>
 
             <!-- PROGRESSO (vem do Histórico) -->
 
@@ -622,12 +443,12 @@
 
                 <li>
                     <span class="leg leg-nivel"></span>
-                    Nivelamento insuficiente
+                    Requisitos pendentes
                 </li>
 
                 <li>
                     <span class="leg leg-liberada"></span>
-                    Liberada (pré-requisitos cumpridos)
+                    Requisitos cumpridos
                 </li>
 
                 <li>
@@ -635,14 +456,19 @@
                     Cursando
                 </li>
 
+                <li>
+                    <span class="leg leg-concluida">✓</span>
+                    Concluída
+                </li>
+
             </ul>
 
             <!-- AREA PRINCIPAL -->
 
             <div class="busca" aria-label="Visualização das setas">
-                <button type="button" id="ver-curso-completo">Ver curso completo</button>
+                <a class="controle-fluxograma" id="ver-curso-completo" href="{% url 'fluxograma' %}#desenho-fluxograma">Ver curso completo</a>
                 {% if foco %}
-                <button type="button" id="ver-cadeia-completa">Ver cadeia completa</button>
+                <a class="controle-fluxograma" id="ver-cadeia-completa" href="#desenho-fluxograma">Ver cadeia completa</a>
                 {% endif %}
                 <span>{{ progresso.total }} disciplinas do curso · {{ total_disciplinas }} posições na grade, incluindo grupos de optativas repetidos.</span>
             </div>

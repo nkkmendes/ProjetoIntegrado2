@@ -27,8 +27,31 @@ para importar só as grades dos cursos. Quando sair um novo micro-horário,
 atualize a planilha e rode o comando de novo: o período letivo vem da célula A1
 da planilha.
 
-Os dados dos cursos ficam no banco (editáveis pelo `/admin/`); a aplicação não
-lê planilhas nem JSON enquanto roda.
+Os períodos e as setas de cada engenharia usam
+`matricula/dados/FLUXA_grade_curricular_A_engenharias.xlsx`, incluindo a aba
+`OPTATIVAS`. O fluxograma é renderizado pelo Django, inclusive as setas SVG,
+sem depender de JavaScript e sem aplicar zoom. A seleção destaca a cadeia
+na própria grade; o painel abaixo contém somente identificação e ações.
+
+Na validação, o cache `matricula/dados/requisitos_oficiais_puc.json` tem
+prioridade para as disciplinas consultadas nas ementas oficiais. Ele preserva
+alternativas de disciplinas, créditos e níveis sem substituir códigos exatos
+por grupos de optativas. Para atualizar, execute
+`python manage.py sincronizar_ementas_puc`; o comando registra fonte, data
+e falhas de consulta. As matérias sem consulta bem-sucedida usam a planilha.
+
+Essas regras prevalecem sobre regras antigas do banco: `+` exige
+todos os itens e `|` permite alternativas. Créditos mínimos e nivelamento
+também são conferidos ao salvar a grade. CTC corresponde a Matemática;
+Português exige o nível indicado em Compreensão textual e Interpretação textual.
+No fluxograma, uma matéria só aparece com requisitos cumpridos quando os
+pré-requisitos e os correquisitos estiverem atendidos no histórico; no simulador,
+correquisitos também podem ser selecionados juntos na mesma matrícula.
+
+Depois de substituir a planilha, rode `python manage.py sincronizar_catalogo_planilha`
+para cadastrar disciplinas novas sem alterar históricos. Esse passo também
+faz parte de `importar_dados`. Matérias sem regras nessa planilha continuam
+usando os requisitos cadastrados; exigências não verificadas ficam bloqueadas.
 
 ## Importação do histórico (SAU)
 

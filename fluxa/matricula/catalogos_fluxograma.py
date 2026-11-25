@@ -12,7 +12,7 @@ BASE = Path(settings.BASE_DIR) / 'matricula'
 
 OPTATIVAS = BASE / 'dados' / 'FLUXA_consulta_optativas_5_engenharias.xlsx'
 
-GRADE = BASE / 'dados' / 'FLUXA_grade_curricular_9_engenharias.xlsx'
+GRADE = BASE / 'dados' / 'FLUXA_grade_curricular_A_engenharias.xlsx'
 
 ABAS = {
     'Engenharia de Computação': 'Computação',
@@ -154,6 +154,8 @@ def linhas_do_curso(nome):
             'grupos': _requisitos(
                 registro.get('pre_requisitos')
             ),
+            'co_grupos': _requisitos(registro.get('co_requisitos')),
+            'adicionais': _texto(registro.get('requisitos_adicionais')),
             'co': [
                 c
                 for grupo in _requisitos(
@@ -189,6 +191,9 @@ def relacoes_do_curso(nome):
                 'periodo': item['periodo'],
                 'grupos': item['grupos'],
                 'co': item['co'],
+                'co_grupos': item['co_grupos'],
+                'adicionais': item['adicionais'],
+                'verificacao': item['verificacao'],
                 'grupo_optativa': (
                     'grupo' in item['tipo'].lower()
                     or codigo.startswith(
