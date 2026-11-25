@@ -7,14 +7,55 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .catalogos_fluxograma import relacoes_do_curso
-from .models import Curso, Disciplina, HistoricoDisciplina
+from .catalogos_fluxograma import ABAS, linhas_do_curso, relacoes_do_curso
+from .models import Curso, Disciplina, HistoricoDisciplina, GrupoPreRequisito
 from .servicos import obter_perfil
 
 CURSO = 'Engenharia de Computação'
 
 
 class FluxogramaPeloHistoricoTest(TestCase):
+    def test_todos_os_cursos_mostram_curriculo_inteiro(self):
+        for nome in ABAS:
+            with self.subTest(curso=nome):
+                curso, _ = Curso.objects.get_or_create(nome=nome)
+                self.perfil.curso = curso
+                self.perfil.save()
+                resposta = self.client.get(reverse('fluxograma'))
+                esperadas = linhas_do_curso(nome)
+                cartas = resposta.context['disciplinas_curso']
+                self.assertEqual(len(cartas), len(esperadas))
+                self.assertEqual({c.codigo for c in cartas}, {d['codigo'] for d in esperadas})
+                self.assertEqual(resposta.context['progresso']['total'], len({d['codigo'] for d in esperadas}))
+                self.assertContains(resposta, 'Ver curso completo')
+                self.assertContains(resposta, 'Lista completa de')
+                if nome == 'Engenharia de Produção':
+                    self.assertEqual(len(cartas), 69)
+                    self.assertEqual(len({c.codigo for c in cartas}), 66)
+
+    def test_cadeia_ate_primeiro_periodo_e_requisitos_externos(self):
+        externo = Disciplina.objects.create(codigo='EXT1000', nome='Base externa', creditos=2)
+        raiz = Disciplina.objects.create(codigo='EXT0001', nome='Base inicial', creditos=2)
+        grupo = GrupoPreRequisito.objects.create(disciplina=self.disc['ENG4010'])
+        grupo.disciplinas.add(externo)
+        grupo = GrupoPreRequisito.objects.create(disciplina=externo)
+        grupo.disciplinas.add(raiz)
+        # Ciclo de correquisitos não pode provocar recursão infinita.
+        externo.co_requisitos.add(raiz)
+        raiz.co_requisitos.add(externo)
+        antes = self.client.get(reverse('fluxograma')).context['progresso']['total']
+        resposta = self.client.get(reverse('fluxograma'), {'foco': 'ENG4030'})
+        cartas = {c.codigo: c for c in resposta.context['cartas']}
+        for codigo in ('ENG4021', 'ENG4010', 'EXT1000', 'EXT0001'):
+            self.assertIn(cartas[codigo].classe, ('cadeia', 'co'))
+        self.assertEqual(cartas['ENG4010'].periodo, 1)
+        self.assertEqual(resposta.context['progresso']['total'], antes)
+        grafo = self.client.get(reverse('grafo_fluxograma')).json()
+        self.assertEqual(grafo['grafo']['ENG4030'], [['ENG4021']])
+        self.assertEqual(grafo['grafo']['ENG4010'], [['EXT1000']])
+        self.assertEqual(grafo['grafo']['EXT1000'], [['EXT0001']])
+        self.assertContains(resposta, 'Ver cadeia completa')
+
     def setUp(self):
         self.curso = Curso.objects.create(nome=CURSO)
         self.disc = {

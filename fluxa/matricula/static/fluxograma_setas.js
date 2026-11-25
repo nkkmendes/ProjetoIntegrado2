@@ -18,7 +18,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         parametros.get('foco') || ''
     ).trim().toUpperCase();
 
-    // Sem clicar em uma disciplina, nao aparecem setas
+    // A visão inicial deve mostrar todos os períodos, não só o trecho à esquerda.
+    // Manter o tamanho original, sem alterar a escala ao abrir ou selecionar.
+    const quadroCurso = grade.closest('.quadro');
+    document.getElementById('ver-curso-completo')?.addEventListener('click', () => {
+        grade.classList.add('mostrar-todas');
+        quadroCurso?.scrollTo({left: 0, top: 0, behavior: 'smooth'});
+    });
     if (!foco) return;
 
     const url = document.querySelector(
@@ -129,6 +135,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         while (pendentes.length) {
             const atual = pendentes.pop();
             const grupos = grafo[atual] || [];
+
+            for (const requisito of dados.co_requisitos?.[atual] || []) {
+                const chave = `co:${requisito}>${atual}`;
+                if (requisito !== atual && !chaves.has(chave)) {
+                    chaves.add(chave);
+                    ligacoes.push({de: requisito, para: atual, co: true});
+                }
+                if (!visitados.has(requisito)) {
+                    visitados.add(requisito);
+                    pendentes.push(requisito);
+                }
+            }
 
             for (const grupo of grupos) {
                 if (!Array.isArray(grupo)) continue;
@@ -303,42 +321,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             desenhar(
                 origem,
                 destino,
-                '#2563eb',
-                'ponta-pre-fluxa',
-                ligacao.alternativo
-            );
-        }
-
-        // Setas dos correquisitos, em roxo
-        const correquisitos =
-            dados.co_requisitos?.[foco] || [];
-
-        for (const codigo of correquisitos) {
-            if (visitados.has(codigo)) continue;
-
-            const origem = escolherCarta(
-                codigo,
-                periodoDaCarta(alvo)
-            );
-
-            if (!origem) continue;
-
-            (cartas.get(codigo) || []).forEach(
-                carta => carta.classList.add('co')
-            );
-
-            desenhar(
-                origem,
-                alvo,
-                '#7c3aed',
-                'ponta-co-fluxa',
-                true
+                ligacao.co ? '#7c3aed' : '#2563eb',
+                ligacao.co ? 'ponta-co-fluxa' : 'ponta-pre-fluxa',
+                ligacao.co || ligacao.alternativo
             );
         }
 
         console.info(
             `Fluxa: ${ligacoes.length} conexoes encontradas para ${foco}`
         );
+
+        document.getElementById('ver-cadeia-completa')?.addEventListener('click', () => {
+            grade.classList.remove('mostrar-todas');
+            quadroCurso?.scrollTo({left: 0, top: 0, behavior: 'smooth'});
+        });
 
         if (dados.faltantes?.[foco]?.length) {
             console.warn(

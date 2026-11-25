@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'grades.css' %}">
+  <link rel="stylesheet" href="{% static 'grades.css' %}?v=simulador-lateral-2">
   <link rel="stylesheet" href="{% static 'navegacao.css' %}">
 </head>
 <body>
@@ -17,7 +17,7 @@
 <main>
   {% include 'mensagens.html' %}
   <h1>Simulador de matrícula</h1>
-  <p class="intro">Monte sua grade{% if periodo %} de {{ periodo }}{% endif %} com turmas reais do micro-horário. Só aparecem as disciplinas que o seu histórico permite cursar, e uma turma que bate de horário com a grade fica bloqueada.</p>
+  <p class="intro">Monte sua grade{% if periodo %} de {{ periodo }}{% endif %} com todas as matérias e optativas do Excel do micro-horário. Abra uma matéria para consultar turmas e horários. As bloqueadas ficam vermelhas e não podem ser selecionadas.</p>
 
   {% if not curso %}
   <p class="aviso">Você ainda não escolheu um curso. <a href="{% url 'perfil' %}">Escolher meu curso no perfil</a>.</p>
@@ -67,22 +67,11 @@
 
   <div class="simulador">
     <section class="bloco painel-lateral" aria-labelledby="titulo-lista">
-      <h2 id="titulo-lista">Disciplinas que posso cursar</h2>
-      <p class="sub">Calculadas pelo seu histórico: pré-requisitos cumpridos, sem as já cursadas e sem bloqueio de nivelamento.</p>
-      <label for="sim-busca">Buscar por código ou nome</label>
-      <input id="sim-busca" type="search" placeholder="Ex.: INF1037 ou Cálculo" autocomplete="off">
+      <h2 id="titulo-lista">Matérias e optativas</h2>
+      <label for="sim-busca">Buscar por código</label>
+      <input id="sim-busca" type="search" placeholder="Código completo, ex.: INF1037" autocomplete="off">
       <p class="contador" id="sim-contador"></p>
       <div class="lista-disciplinas" id="sim-lista" tabindex="0" role="region" aria-label="Lista de disciplinas e turmas"></div>
-      {% if motivos_ocultas %}
-      <details class="ocultas">
-        <summary>{{ nota_ocultas }} <strong>Ver quais e por quê</strong></summary>
-        <ul>
-          {% for m in motivos_ocultas %}
-          <li><strong>{{ m.codigo }}</strong> — {{ m.nome }}<span>{{ m.motivo }}</span></li>
-          {% endfor %}
-        </ul>
-      </details>
-      {% endif %}
     </section>
 
     <div class="painel-grade">
@@ -108,7 +97,7 @@
 
   {{ dados_simulador|json_script:"dados-simulador" }}
   {{ selecao_inicial|json_script:"selecao-inicial" }}
-  <script src="{% static 'simulador.js' %}"></script>
+  <script src="{% static 'simulador.js' %}?v=curso-codigo-exato-2"></script>
   {% endif %}
 </main>
 </div>

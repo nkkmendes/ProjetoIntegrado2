@@ -71,7 +71,7 @@
                 </form>
             </details>
             <h4>CR acumulado</h4>
-            <p>{% if resumo.cr %}{{ resumo.cr|floatformat:2 }}{% else %}Ainda sem médias no histórico{% endif %}</p>
+            <p>{% if resumo.cr is not None %}{{ resumo.cr|floatformat:2 }}{% else %}Ainda sem médias no histórico{% endif %}</p>
             <h4>Créditos cumpridos</h4>
             <p>{% if resumo.total_curso %}{{ resumo.cumpridos_no_curso }} de {{ resumo.total_curso }} ({{ resumo.percentual }}% do currículo){% else %}{{ resumo.cumpridos }}{% endif %}{% if resumo.fora_do_curso and resumo.total_curso %} + {{ resumo.fora_do_curso }} fora do currículo{% endif %}</p>
             <h4>Créditos em curso</h4>

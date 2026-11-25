@@ -36,7 +36,7 @@
           </div>
           <div class="kv">
             <span>CR acumulado</span>
-            <span class="pill">{% if resumo.cr %}{{ resumo.cr|floatformat:2 }}{% else %}—{% endif %}</span>
+            <span class="pill">{% if resumo.cr is not None %}{{ resumo.cr|floatformat:2 }}{% else %}—{% endif %}</span>
           </div>
         {% else %}
           <p class="aviso">Você ainda não escolheu o seu curso. <a href="{% url 'perfil' %}">Escolha em Meu perfil</a> para ver o fluxograma, as disciplinas disponíveis e a contagem de créditos.</p>

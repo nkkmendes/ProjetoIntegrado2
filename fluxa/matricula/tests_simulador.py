@@ -89,11 +89,21 @@ class BaseSimulador(TestCase):
 
 
 class DisponibilidadeTest(BaseSimulador):
+    def test_historico_mostra_nota_zero_no_cr(self):
+        registro = self.perfil_ana.historico.get(disciplina=self.F)
+        registro.media = 0
+        registro.save()
+        resposta = self.client.get(reverse('historico'))
+        self.assertEqual(resposta.context['resumo']['cr'], 0)
+        self.assertContains(resposta, 'Cálculo do CR:')
+        self.assertContains(resposta, 'Nota final (para o CR)')
+        self.assertContains(resposta, '0,00')
+
     def test_so_aparece_o_que_o_historico_permite(self):
         codigos, ocultas = self.codigos_disponiveis()
         # A e C livres; B (pré-requisito A pendente), D (nível não informado não bloqueia!),
         # E sem turma, F concluída, G em curso, X de outro curso.
-        self.assertEqual(codigos, {'AAA1000', 'CCC1000', 'DDD1000'})
+        self.assertEqual(codigos, {'AAA1000', 'CCC1000', 'DDD1000', 'XXX1000'})
         self.assertEqual(ocultas, {'pre_requisito': 1, 'nivelamento': 0, 'co_requisito': 0, 'sem_turma': 1})
 
     def test_concluir_o_pre_requisito_libera_a_disciplina(self):
@@ -182,9 +192,10 @@ class CoRequisitoTest(BaseSimulador):
         for alvo in (self.E, self.B, self.X):
             self.nova(f'K{alvo.codigo[:2]}1000', [(5, 8, 10)], [alvo])
         codigos, ocultas = self.codigos_disponiveis()
-        for c in ('KEE1000', 'KBB1000', 'KXX1000'):
+        for c in ('KEE1000', 'KBB1000'):
             self.assertNotIn(c, codigos)
-        self.assertEqual(ocultas['co_requisito'], 3)
+        self.assertIn('KXX1000', codigos)
+        self.assertEqual(ocultas['co_requisito'], 2)
 
     def test_bloqueio_em_cadeia(self):
         k, _ = self.nova('KKK1000', [(5, 8, 10)], [self.E])      # E sem turma
@@ -214,9 +225,9 @@ class TelaSimuladorTest(BaseSimulador):
     def test_tela_so_entrega_o_que_pode_ser_cursado(self):
         r = self.client.get(reverse('simulacao'))
         self.assertEqual(r.status_code, 200)
-        enviados = {d['codigo'] for d in r.context['dados_simulador']}
-        self.assertEqual(enviados, {'AAA1000', 'CCC1000', 'DDD1000'})
-        self.assertContains(r, 'Disciplinas que posso cursar')
+        enviados = {d['codigo'] for d in r.context['dados_simulador'] if not d['bloqueio']}
+        self.assertEqual(enviados, {'AAA1000', 'CCC1000', 'DDD1000', 'XXX1000'})
+        self.assertContains(r, 'Matérias e optativas')
         self.assertIn('1 com pré-requisito pendente', r.context['nota_ocultas'])
         self.assertIn('1 sem turma em 2026.2', r.context['nota_ocultas'])
 
@@ -260,7 +271,7 @@ class SalvarGradeTest(BaseSimulador):
         self.assertEqual(PlanejamentoSalvo.objects.count(), 0)
 
     def test_turma_de_disciplina_indisponivel_e_barrada(self):
-        for indisponivel in (self.B1, self.F1, self.G1, self.X1):
+        for indisponivel in (self.B1, self.F1, self.G1):
             r = self.salvar([indisponivel])
             self.assertContains(r, 'não estão disponíveis', msg_prefix=indisponivel.codigo)
         self.assertEqual(PlanejamentoSalvo.objects.count(), 0)

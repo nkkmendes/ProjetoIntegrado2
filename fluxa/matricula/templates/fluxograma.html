@@ -20,7 +20,7 @@
 
     <link
         rel="stylesheet"
-        href="{% static 'fluxograma.css' %}?v=6"
+        href="{% static 'fluxograma.css' %}?v=8-fluxograma-primeiro"
     >
 
     <link
@@ -55,6 +55,8 @@
             opacity: 1;
         }
 
+        .grade.com-foco.mostrar-todas .carta { opacity: 1; }
+
         /* Area das setas */
         .grade {
             position: relative;
@@ -77,7 +79,7 @@
 
     <!-- JavaScript das setas -->
     <script
-        src="{% static 'fluxograma_setas.js' %}?v=10"
+        src="{% static 'fluxograma_setas.js' %}?v=13-sem-zoom"
         data-grafo-url="{% url 'grafo_fluxograma' %}"
         defer>
     </script>
@@ -90,7 +92,7 @@
 
     {% include 'menu.html' %}
 
-    <main>
+    <main class="pagina-fluxograma">
 
         {% include 'mensagens.html' %}
 
@@ -106,220 +108,6 @@
             </p>
 
         {% else %}
-
-            <!-- INFORMACOES DO CURSO -->
-
-            <p>
-                <strong>{{ curso.nome }}</strong>
-                — PUC-Rio, currículo 2023.
-            </p>
-
-            <p>
-                Créditos representados na grade:
-                <strong>{{ creditos_total }}</strong>
-            </p>
-
-            <p>
-                As disciplinas estão organizadas do
-                <strong>1º ao 10º período</strong>.
-
-                Clique em uma matéria para visualizar
-                todos os pré-requisitos necessários,
-                incluindo os pré-requisitos dos pré-requisitos.
-
-                As setas aparecem somente após selecionar
-                uma disciplina.
-            </p>
-
-            <!-- PROGRESSO (vem do Histórico) -->
-
-            <div class="progresso" role="status">
-
-                <p>
-                    <strong>{{ progresso.concluidas }} de {{ progresso.total }}</strong>
-                    disciplinas concluídas ({{ progresso.percentual }}%)
-                </p>
-
-                <div class="barra" aria-hidden="true">
-                    <span style="width: {{ progresso.percentual }}%;"></span>
-                </div>
-
-                <p>
-                    <strong>{{ progresso.liberadas }}</strong>
-                    liberada{{ progresso.liberadas|pluralize }} para cursar
-                    · <strong>{{ progresso.em_curso }}</strong> em curso.
-                    Atualize o que você já fez no
-                    <a href="{% url 'historico' %}">Histórico</a>
-                    ou pelo botão “Marcar como concluída”.
-                </p>
-
-            </div>
-
-            <!-- BUSCA DE DISCIPLINAS -->
-
-            <form
-                class="busca"
-                method="get"
-                action="{% url 'fluxograma' %}"
-                role="search"
-            >
-
-                <label for="busca-texto">
-                    Buscar matéria
-                </label>
-
-                <input
-                    id="busca-texto"
-                    type="search"
-                    name="q"
-                    value="{{ busca }}"
-                    placeholder="Código ou nome"
-                    autocomplete="off"
-                >
-
-                <button type="submit">
-                    Buscar
-                </button>
-
-            </form>
-
-            {% if aviso %}
-
-                <p class="busca-aviso" role="status">
-                    {{ aviso }}
-                </p>
-
-            {% endif %}
-
-            <!-- RESULTADOS DA BUSCA -->
-
-            {% if resultados %}
-
-                <ul class="busca-lista">
-
-                    {% for d in resultados %}
-
-                        <li>
-
-                            <a href="{% url 'fluxograma' %}?foco={{ d.codigo }}">
-
-                                {{ d.codigo }} — {{ d.nome }}
-
-                                {% if d.concluida %}
-                                    (concluída)
-                                {% endif %}
-
-                            </a>
-
-                        </li>
-
-                    {% endfor %}
-
-                </ul>
-
-            {% endif %}
-
-            <!-- MATERIAS CONCLUIDAS -->
-
-            <details
-                id="concluidas"
-                class="concluidas"
-            >
-
-                <summary>
-                    Concluídas ({{ concluidas|length }})
-                </summary>
-
-                {% if concluidas %}
-
-                    <ul>
-
-                        {% for d in concluidas %}
-
-                            <li>
-
-                                <span>
-                                    {{ d.codigo }} — {{ d.nome }}
-                                </span>
-
-                                <form
-                                    method="post"
-                                    action="{% url 'marcar_concluida' d.codigo %}"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <input
-                                        type="hidden"
-                                        name="acao"
-                                        value="desfazer"
-                                    >
-
-                                    <input
-                                        type="hidden"
-                                        name="foco"
-                                        value="{{ foco }}"
-                                    >
-
-                                    <button type="submit">
-                                        Desfazer
-                                    </button>
-
-                                </form>
-
-                            </li>
-
-                        {% endfor %}
-
-                    </ul>
-
-                {% else %}
-
-                    <p class="vazio">
-                        Nenhuma matéria concluída.
-                    </p>
-
-                {% endif %}
-
-            </details>
-
-            <!-- LEGENDA -->
-
-            <ul class="legenda" aria-label="Legenda">
-
-                <li>
-                    <span class="leg leg-alvo"></span>
-                    Selecionada
-                </li>
-
-                <li>
-                    <span class="leg leg-cadeia"></span>
-                    Pré-requisito direto ou indireto
-                </li>
-
-                <li>
-                    <span class="leg leg-co"></span>
-                    Co-requisito
-                </li>
-
-                <li>
-                    <span class="leg leg-nivel"></span>
-                    Nivelamento insuficiente
-                </li>
-
-                <li>
-                    <span class="leg leg-liberada"></span>
-                    Liberada (pré-requisitos cumpridos)
-                </li>
-
-                <li>
-                    <span class="leg leg-cursando"></span>
-                    Cursando
-                </li>
-
-            </ul>
-
-            <!-- AREA PRINCIPAL -->
 
             <div class="area">
 
@@ -636,6 +424,241 @@
                 {% endif %}
 
             </div>
+
+            <!-- INFORMACOES DO CURSO -->
+
+            <p>
+                <strong>{{ curso.nome }}</strong>
+                — PUC-Rio, currículo 2023.
+            </p>
+
+            <p>
+                Créditos representados na grade:
+                <strong>{{ creditos_total }}</strong>
+            </p>
+
+            <p>
+                As disciplinas estão organizadas do
+                <strong>1º ao 10º período</strong>.
+
+                Clique em uma matéria para visualizar
+                todos os pré-requisitos necessários,
+                incluindo os pré-requisitos dos pré-requisitos.
+
+                As setas aparecem somente após selecionar
+                uma disciplina.
+            </p>
+
+            <!-- PROGRESSO (vem do Histórico) -->
+
+            <div class="progresso" role="status">
+
+                <p>
+                    <strong>{{ progresso.concluidas }} de {{ progresso.total }}</strong>
+                    disciplinas concluídas ({{ progresso.percentual }}%)
+                </p>
+
+                <div class="barra" aria-hidden="true">
+                    <span style="width: {{ progresso.percentual }}%;"></span>
+                </div>
+
+                <p>
+                    <strong>{{ progresso.liberadas }}</strong>
+                    liberada{{ progresso.liberadas|pluralize }} para cursar
+                    · <strong>{{ progresso.em_curso }}</strong> em curso.
+                    Atualize o que você já fez no
+                    <a href="{% url 'historico' %}">Histórico</a>
+                    ou pelo botão “Marcar como concluída”.
+                </p>
+
+            </div>
+
+            <!-- BUSCA DE DISCIPLINAS -->
+
+            <form
+                class="busca"
+                method="get"
+                action="{% url 'fluxograma' %}"
+                role="search"
+            >
+
+                <label for="busca-texto">
+                    Buscar matéria
+                </label>
+
+                <input
+                    id="busca-texto"
+                    type="search"
+                    name="q"
+                    value="{{ busca }}"
+                    placeholder="Código ou nome"
+                    autocomplete="off"
+                >
+
+                <button type="submit">
+                    Buscar
+                </button>
+
+            </form>
+
+            {% if aviso %}
+
+                <p class="busca-aviso" role="status">
+                    {{ aviso }}
+                </p>
+
+            {% endif %}
+
+            <!-- RESULTADOS DA BUSCA -->
+
+            {% if resultados %}
+
+                <ul class="busca-lista">
+
+                    {% for d in resultados %}
+
+                        <li>
+
+                            <a href="{% url 'fluxograma' %}?foco={{ d.codigo }}">
+
+                                {{ d.codigo }} — {{ d.nome }}
+
+                                {% if d.concluida %}
+                                    (concluída)
+                                {% endif %}
+
+                            </a>
+
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% endif %}
+
+            <!-- MATERIAS CONCLUIDAS -->
+
+            <details
+                id="concluidas"
+                class="concluidas"
+            >
+
+                <summary>
+                    Concluídas ({{ concluidas|length }})
+                </summary>
+
+                {% if concluidas %}
+
+                    <ul>
+
+                        {% for d in concluidas %}
+
+                            <li>
+
+                                <span>
+                                    {{ d.codigo }} — {{ d.nome }}
+                                </span>
+
+                                <form
+                                    method="post"
+                                    action="{% url 'marcar_concluida' d.codigo %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="hidden"
+                                        name="acao"
+                                        value="desfazer"
+                                    >
+
+                                    <input
+                                        type="hidden"
+                                        name="foco"
+                                        value="{{ foco }}"
+                                    >
+
+                                    <button type="submit">
+                                        Desfazer
+                                    </button>
+
+                                </form>
+
+                            </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                {% else %}
+
+                    <p class="vazio">
+                        Nenhuma matéria concluída.
+                    </p>
+
+                {% endif %}
+
+            </details>
+
+            <!-- LEGENDA -->
+
+            <ul class="legenda" aria-label="Legenda">
+
+                <li>
+                    <span class="leg leg-alvo"></span>
+                    Selecionada
+                </li>
+
+                <li>
+                    <span class="leg leg-cadeia"></span>
+                    Pré-requisito direto ou indireto
+                </li>
+
+                <li>
+                    <span class="leg leg-co"></span>
+                    Co-requisito
+                </li>
+
+                <li>
+                    <span class="leg leg-nivel"></span>
+                    Nivelamento insuficiente
+                </li>
+
+                <li>
+                    <span class="leg leg-liberada"></span>
+                    Liberada (pré-requisitos cumpridos)
+                </li>
+
+                <li>
+                    <span class="leg leg-cursando"></span>
+                    Cursando
+                </li>
+
+            </ul>
+
+            <!-- AREA PRINCIPAL -->
+
+            <div class="busca" aria-label="Visualização das setas">
+                <button type="button" id="ver-curso-completo">Ver curso completo</button>
+                {% if foco %}
+                <button type="button" id="ver-cadeia-completa">Ver cadeia completa</button>
+                {% endif %}
+                <span>{{ progresso.total }} disciplinas do curso · {{ total_disciplinas }} posições na grade, incluindo grupos de optativas repetidos.</span>
+            </div>
+
+            <details class="lista-curso">
+                <summary>Lista completa de {{ curso.nome }} — todos os períodos</summary>
+                <div class="lista-curso-itens">
+                    {% for d in disciplinas_curso %}
+                    <a href="{% url 'fluxograma' %}?foco={{ d.codigo }}&amp;periodo={{ d.periodo }}#c-{{ d.chave }}">
+                        <strong>{{ d.codigo }}</strong> — {{ d.nome }}
+                        <small>{% if d.periodo %}{{ d.periodo }}º período{% else %}Período não definido{% endif %} · {{ d.creditos }} créditos</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </details>
+
 
         {% endif %}
 

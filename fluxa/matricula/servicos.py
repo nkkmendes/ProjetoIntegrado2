@@ -11,6 +11,7 @@ from django.db.models import Prefetch
 
 from .models import (
     AreaNivelamento,
+    Disciplina,
     HistoricoDisciplina,
     HorarioTurma,
     PerfilAluno,
@@ -54,9 +55,9 @@ def calcular_cr(registros):
     soma = Decimal('0')
     creditos = 0
     for r in registros:
-        if r.media is None or r.status == HistoricoDisciplina.EM_CURSO:
+        if r.pontos_cr is None:
             continue
-        soma += r.media * r.disciplina.creditos
+        soma += r.pontos_cr
         creditos += r.disciplina.creditos
     if creditos == 0:
         return None
@@ -93,6 +94,8 @@ def resumo_creditos(perfil):
         'percentual': round(100 * cumpridos_no_curso / total_curso) if total_curso else 0,
         'disciplinas_concluidas': concluidas,
         'cr': calcular_cr(registros),
+        'pontos_cr': sum((r.pontos_cr for r in registros if r.pontos_cr is not None), Decimal('0')),
+        'creditos_cr': sum(r.disciplina.creditos for r in registros if r.pontos_cr is not None),
     }
 
 
@@ -224,7 +227,7 @@ def pre_requisitos_cumpridos(disciplina, concluidas):
 def disciplinas_disponiveis(perfil, periodo):
     """O que o aluno pode cursar no período de oferta, a partir do histórico.
 
-    Aparecem as disciplinas do curso do perfil que:
+    Libera disciplinas do currículo e toda a oferta do micro-horário que:
       * ainda não foram concluídas nem estão em curso (reprovada pode refazer);
       * têm os pré-requisitos concluídos;
       * não estão bloqueadas pelo nivelamento (nível informado abaixo do mínimo);
@@ -235,11 +238,12 @@ def disciplinas_disponiveis(perfil, periodo):
 
     Cada disciplina devolvida ganha `coreqs_juntos`: os co-requisitos que o aluno
     ainda precisa escolher na mesma grade. Devolve {'disciplinas', 'ocultas',
-    'motivos'}: `ocultas` conta as que ficaram de fora por tipo e `motivos`
+    'motivos', 'catalogo'}: `catalogo` inclui bloqueadas com o motivo;
+    `ocultas` conta as indisponíveis por tipo e `motivos`
     lista cada uma delas com o porquê ({'codigo', 'nome', 'motivo'}).
     """
     chaves = ('pre_requisito', 'nivelamento', 'co_requisito', 'sem_turma')
-    vazio = {'disciplinas': [], 'ocultas': dict.fromkeys(chaves, 0), 'motivos': []}
+    vazio = {'disciplinas': [], 'catalogo': [], 'ocultas': dict.fromkeys(chaves, 0), 'motivos': []}
     if not perfil.curso or not periodo:
         return vazio
 
@@ -251,10 +255,14 @@ def disciplinas_disponiveis(perfil, periodo):
         c for c, s in situacoes.items() if s == HistoricoDisciplina.EM_CURSO
     }
     ja_tem = concluidas | em_curso
+    codigos_do_curso = set(perfil.curso.disciplinas.values_list('codigo', flat=True))
+    creditos_concluidos = sum(
+        r.disciplina.creditos for r in perfil.historico.select_related('disciplina')
+        if r.status == HistoricoDisciplina.CONCLUIDA
+    )
 
     candidatas = list(
-        perfil.curso.disciplinas
-        .exclude(codigo__in=ja_tem)
+        Disciplina.objects.all()
         .prefetch_related(
             'grupos_pre_requisito__disciplinas',
             'co_requisitos',
@@ -274,13 +282,24 @@ def disciplinas_disponiveis(perfil, periodo):
     motivos = []
 
     def fora(d, chave, motivo):
+        d.bloqueio = motivo
         ocultas[chave] += 1
         motivos.append({'codigo': d.codigo, 'nome': d.nome, 'motivo': motivo})
 
     base = []
     for d in candidatas:
+        d.do_curso = d.codigo in codigos_do_curso
+        d.bloqueio = ''
+        if d.codigo in ja_tem:
+            d.bloqueio = 'Já concluída no histórico.' if d.codigo in concluidas else 'Em curso no histórico.'
+            continue
         bloqueios = [a['texto'] for a in avisos.get(d.codigo, []) if a['bloqueia']]
-        if not pre_requisitos_cumpridos(d, concluidas):
+        if (d.pre_requisito_no_microhorario and not d.creditos_minimos
+                and not any(g.disciplinas.all() for g in d.grupos_pre_requisito.all())):
+            fora(d, 'pre_requisito', 'Pré-requisito a verificar: o Excel indica SIM, mas não detalha a exigência.')
+        elif d.creditos_minimos > creditos_concluidos:
+            fora(d, 'pre_requisito', f'Exige {d.creditos_minimos} créditos concluídos; você tem {creditos_concluidos}.')
+        elif not pre_requisitos_cumpridos(d, concluidas):
             fora(d, 'pre_requisito', _falta_de_pre_requisito(d, concluidas, em_curso))
         elif bloqueios:
             fora(d, 'nivelamento', 'Nivelamento insuficiente. ' + ' '.join(bloqueios))
@@ -313,7 +332,7 @@ def disciplinas_disponiveis(perfil, periodo):
             c.codigo for c in d.co_requisitos.all() if c.codigo not in ja_tem
         )
     motivos.sort(key=lambda m: m['codigo'])
-    return {'disciplinas': base, 'ocultas': ocultas, 'motivos': motivos}
+    return {'disciplinas': base, 'catalogo': candidatas, 'ocultas': ocultas, 'motivos': motivos}
 
 
 def _juntar(codigos):
@@ -351,6 +370,8 @@ def dados_do_simulador(disciplinas):
             'codigo': d.codigo,
             'nome': d.nome,
             'creditos': d.creditos,
+            'bloqueio': getattr(d, 'bloqueio', ''),
+            'do_curso': getattr(d, 'do_curso', False),
             'cor': cor_da_disciplina(d.codigo),
             'juntos': list(getattr(d, 'coreqs_juntos', [])),
             'turmas': [

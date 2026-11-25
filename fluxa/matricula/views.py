@@ -140,8 +140,8 @@ def _nota_das_ocultas(ocultas, periodo):
     if not total:
         return ''
     inicio = (
-        f'{total} disciplinas do seu curso não aparecem aqui'
-        if total != 1 else '1 disciplina do seu curso não aparece aqui'
+        f'{total} disciplinas estão bloqueadas'
+        if total != 1 else '1 disciplina está bloqueada'
     )
     return inicio + ': ' + ', '.join(partes) + '.'
 
@@ -366,7 +366,7 @@ def simulacao(request):
         'plano': plano,
         'nome': nome,
         'erro': erro,
-        'dados_simulador': dados_do_simulador(disponiveis['disciplinas']),
+        'dados_simulador': dados_do_simulador(disponiveis['catalogo']),
         'selecao_inicial': mantidas,
         'nota_ocultas': _nota_das_ocultas(disponiveis['ocultas'], periodo),
         'motivos_ocultas': disponiveis['motivos'],
@@ -428,8 +428,8 @@ def historico(request):
             disciplina__codigo=editar
         ).select_related('disciplina').first()
 
-    form = HistoricoForm(instance=registro_editado) if registro_editado else HistoricoForm()
-    form_nivel = NivelamentoAlunoForm()
+    form = HistoricoForm(instance=registro_editado, perfil=perfil)
+    form_nivel = NivelamentoAlunoForm(perfil=perfil)
 
     if request.method == 'POST':
         acao = request.POST.get('acao')
@@ -578,18 +578,18 @@ def historico(request):
             return redirect(reverse('historico') + '#cursadas')
 
         if acao == 'historico':
-            form = HistoricoForm(request.POST)
+            form = HistoricoForm(request.POST, perfil=perfil)
             if form.is_valid():
                 registro = form.save(perfil)
                 messages.success(request, f'{registro.disciplina.codigo} salva no histórico.')
                 return redirect('historico')
 
         elif acao == 'nivel':
-            form_nivel = NivelamentoAlunoForm(request.POST)
+            form_nivel = NivelamentoAlunoForm(request.POST, perfil=perfil)
             if form_nivel.is_valid():
-                registro = form_nivel.save(perfil)
+                form_nivel.save(perfil)
                 messages.success(
-                    request, f'Nível de {registro.area.nome} salvo: {registro.nivel}.'
+                    request, 'Nivelamentos salvos.'
                 )
                 return redirect(reverse('historico') + '#nivelamento')
 

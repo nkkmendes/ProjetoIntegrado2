@@ -30,7 +30,7 @@
   var sel = {};
   disciplinas.forEach(function (d) {
     d.turmas.forEach(function (t) {
-      if (inicial.indexOf(t.id) !== -1) { sel[d.codigo] = t.id; }
+      if (!d.bloqueio && inicial.indexOf(t.id) !== -1) { sel[d.codigo] = t.id; }
     });
   });
 
@@ -110,20 +110,24 @@
     return (d.juntos || []).filter(function (c) { return sel[c] === undefined; });
   }
 
-  function escolher(d, t) { sel[d.codigo] = t.id; foco = d.codigo + ':' + t.id; render(); }
+  function escolher(d, t) {
+    if (d.bloqueio || conflitoCom(d, t)) { return; }
+    sel[d.codigo] = t.id; foco = d.codigo + ':' + t.id; render();
+  }
   function remover(d) { delete sel[d.codigo]; foco = d.codigo + ':cab'; render(); }
 
   function desenharLista() {
-    var termo = ($busca.value || '').trim().toLowerCase();
+    var termo = ($busca.value || '').replace(/\s+/g, '').toUpperCase();
     $lista.textContent = '';
     var mostradas = 0;
     disciplinas.forEach(function (d) {
-      if (termo && (d.codigo + ' ' + d.nome).toLowerCase().indexOf(termo) === -1) { return; }
+      if (!termo && !d.do_curso) { return; }
+      if (termo && d.codigo.toUpperCase() !== termo) { return; }
       mostradas += 1;
       var escolhida = turmaEscolhida(d);
       var abre = aberto === d.codigo;
 
-      var cab = el('button', 'disc cor-' + d.cor + (escolhida ? ' na-grade' : ''));
+      var cab = el('button', 'disc cor-' + d.cor + (escolhida ? ' na-grade' : '') + (d.bloqueio ? ' bloqueada' : ' liberada'));
       cab.type = 'button';
       cab.setAttribute('aria-expanded', abre ? 'true' : 'false');
       cab.setAttribute('data-foco', d.codigo + ':cab');
@@ -131,6 +135,9 @@
       var textos = el('span', 'textos');
       textos.appendChild(el('span', 'codigo', d.codigo + ' · ' + d.creditos + ' cr.'));
       textos.appendChild(el('span', '', d.nome));
+      textos.appendChild(el('span', 'resumo-disc estado-disc', d.bloqueio
+        ? 'Não selecionável · ' + d.bloqueio
+        : (escolhida ? 'Selecionada' : 'Disponível para selecionar')));
       textos.appendChild(el('span', 'resumo-disc',
         (escolhida ? 'Na grade: turma ' + escolhida.codigo + ' · ' : '') +
         d.turmas.length + (d.turmas.length === 1 ? ' turma' : ' turmas')));
@@ -170,6 +177,10 @@
         if (naGrade) {
           botao.className = 'remover'; botao.textContent = 'Remover da grade';
           botao.addEventListener('click', function () { remover(d); });
+        } else if (d.bloqueio) {
+          botao.className = 'indisponivel'; botao.disabled = true;
+          botao.textContent = 'Seleção bloqueada';
+          botao.title = d.bloqueio;
         } else if (choque) {
           botao.className = 'indisponivel'; botao.disabled = true;
           botao.textContent = 'Indisponível: conflito de horário';
@@ -183,9 +194,12 @@
       });
     });
     if (!mostradas) {
-      $lista.appendChild(el('p', 'vazio', 'Nenhuma disciplina encontrada.'));
+      $lista.appendChild(el('p', 'vazio', termo
+        ? 'Informe o código completo da disciplina, por exemplo INF1037. Nenhuma disciplina encontrada para este código.'
+        : 'Nenhuma disciplina cadastrada para esta engenharia.'));
     }
-    $contador.textContent = mostradas + (mostradas === 1 ? ' disciplina disponível' : ' disciplinas disponíveis');
+    $contador.textContent = mostradas + (mostradas === 1 ? ' disciplina' : ' disciplinas') +
+      (termo ? ' encontradas no catálogo da PUC' : ' do seu curso');
   }
 
   function desenharGrade() {

@@ -13,7 +13,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from .catalogos_fluxograma import linhas_do_curso, relacoes_do_curso
-from .models import HistoricoDisciplina
+from .models import Disciplina, HistoricoDisciplina
 from .servicos import avisos_de_nivel, obter_perfil
 
 
@@ -52,6 +52,38 @@ def _historico(perfil):
             'status'
         )
     )
+
+
+def _relacoes_completas(nome):
+    """Preserva o currículo e completa elos conhecidos no banco, sem inventar requisitos."""
+    relacoes = relacoes_do_curso(nome)
+    banco = {d.codigo: d for d in Disciplina.objects.prefetch_related(
+        'grupos_pre_requisito__disciplinas', 'co_requisitos',
+    )}
+    pendentes = list(relacoes)
+    visitados = set()
+    while pendentes:
+        codigo = pendentes.pop()
+        if codigo in visitados:
+            continue
+        visitados.add(codigo)
+        d = banco.get(codigo)
+        dados = relacoes.setdefault(codigo, {
+            'nome': d.nome if d else codigo,
+            'creditos': d.creditos if d else 0,
+            'periodo': 0, 'grupos': [], 'co': [], 'grupo_optativa': False,
+        })
+        if d:
+            if not dados['grupos']:
+                dados['grupos'] = [
+                    [r.codigo for r in grupo.disciplinas.all()]
+                    for grupo in d.grupos_pre_requisito.all() if grupo.disciplinas.all()
+                ]
+            if not dados['co']:
+                dados['co'] = [r.codigo for r in d.co_requisitos.all()]
+        pendentes.extend(r for grupo in dados['grupos'] for r in grupo)
+        pendentes.extend(dados['co'])
+    return relacoes
 
 
 def _cadeia(codigo, grafo):
@@ -120,7 +152,7 @@ def grafo_fluxograma(request):
             'faltantes': {}
         })
 
-    relacoes = relacoes_do_curso(perfil.curso.nome)
+    relacoes = _relacoes_completas(perfil.curso.nome)
     codigos = set(relacoes)
 
     grafo = {}
@@ -206,7 +238,10 @@ def fluxograma(request):
 
     # Ler o Excel da engenharia escolhida
     linhas = linhas_do_curso(curso.nome)
-    relacoes = relacoes_do_curso(curso.nome)
+    codigos_curriculo = {item['codigo'] for item in linhas}
+    total_disciplinas = len(linhas)
+    creditos_total = sum(item['creditos'] for item in linhas)
+    relacoes = _relacoes_completas(curso.nome)
 
     historico = _historico(perfil)
 
@@ -302,9 +337,27 @@ def fluxograma(request):
     }
 
     cadeia = _cadeia(foco, grafo) if foco else set()
+    # Correquisitos e seus próprios requisitos também fazem parte da cadeia.
+    envolvidos = cadeia | ({foco} if foco else set())
+    co_cadeia = set()
+    pendentes = list(envolvidos)
+    vistos = set()
+    while pendentes:
+        codigo = pendentes.pop()
+        if codigo in vistos:
+            continue
+        vistos.add(codigo)
+        for co in relacoes[codigo]['co']:
+            co_cadeia.add(co)
+            novos = {co} | _cadeia(co, grafo)
+            pendentes.extend(novos - vistos)
+            envolvidos.update(novos)
+    cadeia = envolvidos - {foco} - co_cadeia
+    for codigo in sorted(envolvidos - codigos_curriculo):
+        linhas.append(dict(relacoes[codigo], codigo=codigo, periodo=0))
 
     co_foco = (
-        set(relacoes[foco]['co']) - cadeia - {foco}
+        co_cadeia - cadeia - {foco}
         if foco else set()
     )
 
@@ -354,7 +407,7 @@ def fluxograma(request):
             liberada=(
                 not concluida
                 and not cursando
-                and _liberada(item['grupos'], concluidas)
+                and _liberada(relacoes[codigo]['grupos'], concluidas)
             ),
             classe=classe,
             bloqueada=any(
@@ -491,12 +544,12 @@ def fluxograma(request):
             nome=relacoes[codigo]['nome']
         )
         for codigo in sorted(concluidas)
-        if codigo in relacoes
+        if codigo in codigos_curriculo
     ]
 
     # Progresso do aluno no curso (cada código conta uma vez, mesmo que
     # apareça em mais de um período)
-    por_codigo = {d.codigo: d for d in cartas}
+    por_codigo = {d.codigo: d for d in cartas if d.codigo in codigos_curriculo}
     total = len(por_codigo)
 
     progresso = {
@@ -514,6 +567,7 @@ def fluxograma(request):
         'curso': curso,
         'cabecalhos': cabecalhos,
         'cartas': cartas,
+        'disciplinas_curso': [d for d in cartas if d.codigo in codigos_curriculo],
         'isoladas': [],
         'largura': largura,
         'altura': altura,
@@ -523,10 +577,7 @@ def fluxograma(request):
         'aviso': aviso,
         'resultados': resultados,
         'concluidas': feitas,
-        'total_disciplinas': len(linhas),
-        'creditos_total': sum(
-            item['creditos']
-            for item in linhas
-        ),
+        'total_disciplinas': total_disciplinas,
+        'creditos_total': creditos_total,
         'progresso': progresso,
     })

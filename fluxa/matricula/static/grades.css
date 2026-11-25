@@ -47,9 +47,9 @@ button[disabled] { cursor: not-allowed; }
 .salvar .campo { flex: 1 1 220px; max-width: 360px; }
 .salvar .nota { flex-basis: 100%; margin: 0; text-align: right; font-size: 12px; color: #475569; }
 
-.simulador { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-.painel-lateral { flex: 1 1 340px; max-width: 440px; min-width: 0; }
-.painel-grade { flex: 999 1 560px; min-width: 0; }
+.simulador { display: grid; grid-template-columns: minmax(260px, 320px) minmax(560px, 1fr); gap: 20px; align-items: start; overflow-x: auto; padding-bottom: 12px; }
+.painel-lateral { min-width: 0; }
+.painel-grade { min-width: 0; position: sticky; top: 16px; }
 .lista-disciplinas { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
 .contador { margin: 8px 0 0; font-size: 12px; color: #475569; }
 .rodape-lista { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #CBD5E1; font-size: 12px; color: #475569; }
@@ -67,6 +67,10 @@ button[disabled] { cursor: not-allowed; }
 .disc .textos { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .disc .codigo { font-weight: bold; }
 .disc .resumo-disc { font-size: 12px; color: #475569; }
+.disc.bloqueada { background: #fff1f2; border-color: #fda4af; color: #9f1239; }
+.disc.bloqueada .resumo-disc { color: #9f1239; }
+.disc.bloqueada .cor { background: #be123c; }
+.disc.liberada .estado-disc { color: #166534; }
 .turma { margin-left: 14px; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 5px; }
 .turma.escolhida { border-color: #1D4E78; background: #F0F4FA; }
 .turma.conflito { border: 1px dashed #B91C1C; background: #FFFFFF; }
@@ -80,6 +84,8 @@ button[disabled] { cursor: not-allowed; }
 
 .rolagem-x { overflow-x: auto; }
 .grade { min-width: 640px; }
+.simulador .grade { min-width: 560px; }
+.simulador .rolagem-x { max-height: 72vh; }
 .grade-dias { display: flex; margin-left: 52px; border-bottom: 1px solid #CBD5E1; }
 .grade-dias span { flex: 1; padding: 6px 0; text-align: center; font-size: 12px; font-weight: bold; color: #475569; }
 .grade-corpo { position: relative; margin-left: 52px; }

@@ -6,6 +6,7 @@ from .models import (
     PerfilAluno,
     HistoricoDisciplina,
     NivelamentoAluno,
+    AreaNivelamento,
 )
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
@@ -143,10 +144,17 @@ class HistoricoForm(forms.ModelForm):
     Registrar de novo a mesma disciplina atualiza o registro que já existe."""
 
     disciplina = DisciplinaChoiceField(
-        queryset=Disciplina.objects.order_by('codigo'),
+        queryset=Disciplina.objects.none(),
         empty_label='Escolha a disciplina',
         label='Disciplina',
     )
+
+    def __init__(self, *args, perfil=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if perfil and perfil.curso_id:
+            self.fields['disciplina'].queryset = perfil.curso.disciplinas.order_by('codigo')
+        else:
+            self.fields['disciplina'].empty_label = 'Escolha sua engenharia no perfil primeiro'
 
     class Meta:
         model = HistoricoDisciplina
@@ -158,7 +166,7 @@ class HistoricoForm(forms.ModelForm):
             'g1': 'G1',
             'g2': 'G2',
             'g3': 'G3',
-            'media': 'Média',
+            'media': 'Nota final (para o CR)',
         }
         widgets = {
             'periodo_letivo': forms.TextInput(attrs={'placeholder': 'Ex: 2025.1', 'maxlength': 10}),
@@ -195,24 +203,39 @@ class HistoricoForm(forms.ModelForm):
         return registro
 
 
-class NivelamentoAlunoForm(forms.ModelForm):
-    """Informa o nível do aluno numa área de nivelamento (um número)."""
+class NivelamentoAlunoForm(forms.Form):
+    CAMPOS = {
+        'matematica': 'Matem\u00e1tica',
+        'compreensao_textual': 'Compreens\u00e3o textual',
+        'interpretacao_textual': 'Interpreta\u00e7\u00e3o textual',
+    }
 
-    class Meta:
-        model = NivelamentoAluno
-        fields = ['area', 'nivel']
-        labels = {'area': 'Área', 'nivel': 'Seu nível'}
-        widgets = {'nivel': forms.NumberInput(attrs={'min': 0, 'max': 99})}
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, perfil=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['area'].empty_label = 'Escolha a área'
+        existentes = {
+            n.area.nome.casefold(): n.nivel
+            for n in perfil.niveis.select_related('area')
+        } if perfil else {}
+        for campo, nome in self.CAMPOS.items():
+            self.fields[campo] = forms.TypedChoiceField(
+                label=nome, required=False, coerce=int, empty_value=None,
+                choices=[('', 'N\u00e3o informado')] + [(n, f'N\u00edvel {n}') for n in range(1, 6)],
+                initial=existentes.get(nome.casefold()),
+                error_messages={'invalid_choice': 'Escolha um n\u00edvel de 1 a 5.'},
+            )
 
     def save(self, perfil):
-        dados = self.cleaned_data
-        registro, _ = NivelamentoAluno.objects.update_or_create(
-            perfil=perfil,
-            area=dados['area'],
-            defaults={'nivel': dados['nivel']},
-        )
-        return registro
+        from django.db import transaction
+        with transaction.atomic():
+            for campo, nome in self.CAMPOS.items():
+                nivel = self.cleaned_data[campo]
+                area = AreaNivelamento.objects.filter(nome__iexact=nome).first()
+                if nivel is None:
+                    if area:
+                        NivelamentoAluno.objects.filter(perfil=perfil, area=area).delete()
+                    continue
+                if area is None:
+                    area, _ = AreaNivelamento.objects.get_or_create(nome=nome)
+                NivelamentoAluno.objects.update_or_create(
+                    perfil=perfil, area=area, defaults={'nivel': nivel},
+                )

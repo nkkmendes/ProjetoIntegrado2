@@ -34,6 +34,24 @@ class ImportacaoTest(TestCase):
         self.assertGreater(Turma.objects.count(), 100)
         self.assertEqual(set(Turma.objects.values_list('periodo_letivo', flat=True)), {'2026.2'})
 
+    def test_importa_todas_as_materias_e_turmas_do_excel(self):
+        from openpyxl import load_workbook
+        from .importar_microhorario import ARQUIVO
+        planilha = load_workbook(ARQUIVO, read_only=True, data_only=True)
+        try:
+            esperadas = {
+                (str(r[0]).split(' - ', 1)[0].strip().upper(), str(r[3]).strip().upper())
+                for r in planilha['MicroHorario'].iter_rows(min_row=3, values_only=True)
+                if r[0] and r[3]
+            }
+        finally:
+            planilha.close()
+        self.assertEqual(esperadas, set(Turma.objects.values_list('disciplina__codigo', 'codigo')))
+        optativa = Disciplina.objects.get(codigo='ACN1022')
+        self.assertEqual(optativa.creditos, 4)
+        self.assertFalse(optativa.pre_requisito_no_microhorario)
+        self.assertTrue(Disciplina.objects.get(codigo='ACN1005').pre_requisito_no_microhorario)
+
     def test_importar_de_novo_nao_duplica_nem_altera_nada(self):
         segunda = importar_tudo()
         self.assertEqual(self.contagens, {

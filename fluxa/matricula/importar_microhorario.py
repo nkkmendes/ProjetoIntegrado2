@@ -70,6 +70,9 @@ def importar():
             linhas_lidas += 1
             codigo_nome = str(linha[0]).strip()
             codigo = codigo_nome.split(' - ', 1)[0].strip().upper()
+            nome = codigo_nome.split(' - ', 1)[-1].strip()
+            creditos = int(linha[2] or 0)
+            exige_pre = str(linha[11] or '').strip().upper() == 'SIM'
             codigo_turma = str(linha[3]).strip().upper()
             chave = (codigo, codigo_turma)
             professor = str(linha[1] or '').strip()
@@ -82,11 +85,15 @@ def importar():
 
             if chave not in registros:
                 registros[chave] = {
+                    'nome': nome,
+                    'creditos': creditos,
+                    'exige_pre': exige_pre,
                     'professor': professor,
                     'destinos': {},
                     'horarios': set(),
                 }
             registro = registros[chave]
+            registro['exige_pre'] |= exige_pre
             if not registro['professor'] and professor:
                 registro['professor'] = professor
             if vagas is not None:
@@ -98,13 +105,27 @@ def importar():
     finally:
         planilha.close()
 
-    # Não cadastramos todas as disciplinas da PUC: somente as que já existem
-    # no banco do Fluxa (associadas ao catálogo importado das engenharias).
+    # Incluir optativas e matérias além do catálogo inicial das engenharias.
     codigos = {codigo for codigo, _ in registros}
     disciplinas = Disciplina.objects.in_bulk(codigos, field_name='codigo')
     criadas = atualizadas = horarios_salvos = ignoradas = 0
 
     with transaction.atomic():
+        dados_disciplinas = {}
+        for (codigo, _), registro in registros.items():
+            if codigo not in dados_disciplinas:
+                dados_disciplinas[codigo] = dict(registro)
+            else:
+                dados_disciplinas[codigo]['exige_pre'] |= registro['exige_pre']
+        for codigo, dados in dados_disciplinas.items():
+            disciplina = disciplinas.get(codigo)
+            if disciplina is None:
+                disciplina = Disciplina.objects.create(
+                    codigo=codigo, nome=dados['nome'][:200], creditos=dados['creditos'],
+                )
+                disciplinas[codigo] = disciplina
+            disciplina.pre_requisito_no_microhorario = dados['exige_pre']
+            disciplina.save(update_fields=['pre_requisito_no_microhorario'])
         for (codigo, codigo_turma), registro in registros.items():
             disciplina = disciplinas.get(codigo)
             if disciplina is None:

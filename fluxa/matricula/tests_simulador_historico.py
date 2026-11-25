@@ -87,12 +87,12 @@ class GradeReabertaTest(BaseSimulador):
         r = self.client.get(f"{reverse('simulacao')}?planejamento={plano.pk}")
         self.assertContains(r, 'BBB1000 (B1): falta concluir AAA1000.')
 
-    def test_disciplina_fora_do_curso(self):
+    def test_disciplina_de_outro_curso_continua_disponivel_como_optativa(self):
         self.salvar([self.C1])
         self.C.cursos.set([self.outro_curso])
         plano = PlanejamentoSalvo.objects.get()
         r = self.client.get(f"{reverse('simulacao')}?planejamento={plano.pk}")
-        self.assertContains(r, 'CCC1000 (C1): ela não faz parte do seu curso atual.')
+        self.assertIn(self.C1.pk, r.context['selecao_inicial'])
 
 
 class HistoricoVazioTest(BaseSimulador):

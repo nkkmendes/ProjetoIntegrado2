@@ -90,6 +90,7 @@ class Disciplina(models.Model):
     )
 
     creditos_minimos = models.IntegerField(default=0)
+    pre_requisito_no_microhorario = models.BooleanField(default=False)
 
     objects = DisciplinaManager()
 
@@ -203,6 +204,13 @@ class HistoricoDisciplina(models.Model):
                 name='historico_unico_por_aluno_e_disciplina'
             )
         ]
+
+    @property
+    def pontos_cr(self):
+        """Contribuição da nota final ao CR; zero é uma nota válida."""
+        if self.media is None or self.status == self.EM_CURSO:
+            return None
+        return self.media * self.disciplina.creditos
 
     @property
     def tem_notas(self):
