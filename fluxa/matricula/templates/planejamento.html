@@ -122,7 +122,11 @@
     <div class="item-disponibilidade">
       <span>{{ d.codigo }} — {{ d.nome }}</span>
 
-      {% if d.situacao == "Disponível" %}
+      {% if d.situacao == "Concluída" %}
+        <span class="status-disponivel">Concluída</span>
+      {% elif d.situacao == "Em curso" %}
+        <span class="status-nao-verificada">Em curso</span>
+      {% elif d.situacao == "Disponível" %}
         <span class="status-disponivel">Disponível</span>
       {% elif d.situacao == "Sem oferta cadastrada" %}
         <span class="status-sem-oferta">Sem oferta cadastrada</span>
@@ -133,6 +137,14 @@
       {% else %}
         <span class="status-nao-verificada">Aguardando atualização</span>
       {% endif %}
+      {% if d.fora_do_curso %}
+        <small style="display:block; width:100%;">
+          Fora do seu curso
+        </small>
+      {% endif %}
+      {% if d.motivo %}
+        <small style="display:block; width:100%;">{{ d.motivo }}</small>
+      {% endif %}
     </div>
   {% empty %}
     <p>Nenhuma disciplina cadastrada nesta grade.</p>
@@ -140,6 +152,12 @@
 </div>
 
       <div class="acoes">
+        <form method="post" action="{% url 'planejamento' %}">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="duplicar">
+          <input type="hidden" name="planejamento_id" value="{{ g.plano.pk }}">
+          <button type="submit">Duplicar grade</button>
+        </form>
         <a class="botao" href="{% url 'simulacao' %}?planejamento={{ g.plano.pk }}">Abrir no simulador</a>
         <form method="post" action="{% url 'planejamento' %}">
           {% csrf_token %}
@@ -161,6 +179,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const resultado = document.getElementById("resultado-comparacao");
 
     if (!botao || !resultado) return;
+
+    const seletorA = document.getElementById("grade-a");
+    const seletorB = document.getElementById("grade-b");
+
+    if (seletorB.options.length > 1) {
+        seletorB.selectedIndex = 1;
+    }
+
+    [seletorA, seletorB].forEach(seletor => {
+        seletor.addEventListener("change", () => {
+            if (seletorA.value !== seletorB.value) {
+                botao.click();
+            } else {
+                resultado.style.display = "none";
+                const resumo = document.getElementById("resumo-diferencas");
+                if (resumo) resumo.style.display = "none";
+            }
+        });
+    });
 
     botao.addEventListener("click", function () {
         const idA = document.getElementById("grade-a").value;
@@ -196,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             coluna.appendChild(titulo);
 
-            [".resumo-creditos", ".mini-dias", ".mini", ".chips"]
+            [".resumo-creditos", ".mini-dias", ".mini", ".chips", ".disponibilidade-grade"]
                 .forEach(function (seletor) {
                     const elemento = grade.querySelector(seletor);
 

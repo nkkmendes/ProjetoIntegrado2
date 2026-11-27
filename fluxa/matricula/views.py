@@ -197,6 +197,25 @@ def planejamento(request):
             nome = plano.nome
             plano.delete()
             messages.success(request, f'Grade “{nome}” excluída.')
+        elif acao == 'duplicar':
+            base = plano.nome[:80] + ' - Copia'
+            nome = base
+            numero = 2
+
+            while request.user.planejamentos.filter(nome=nome).exists():
+                nome = f'{base} {numero}'
+                numero += 1
+
+            with transaction.atomic():
+                copia = PlanejamentoSalvo.objects.create(
+                    usuario=request.user,
+                    nome=nome,
+                    periodo_letivo=plano.periodo_letivo,
+                    horarios_salvos=plano.horarios_salvos,
+                )
+                copia.turmas.set(plano.turmas.all())
+
+            messages.success(request, f'Grade duplicada: {nome}.')
         elif acao == 'renomear':
             novo_nome = request.POST.get('nome', '').strip()[:100]
             if not novo_nome:
@@ -213,16 +232,7 @@ def planejamento(request):
         request.user.planejamentos
         .prefetch_related('turmas__disciplina', 'turmas__horarios')
     )
-    from datetime import date
-
-    hoje = date.today()
-    semestre_atual = 1 if hoje.month <= 6 else 2
-
-    if semestre_atual == 1:
-        periodo = f'{hoje.year}.2'
-    else:
-        periodo = f'{hoje.year + 1}.1'
-
+    periodo = periodo_de_oferta()
 
     ofertas_cadastradas = (
         Disciplina.objects.filter(
@@ -231,20 +241,22 @@ def planejamento(request):
     )
 
 
-    codigos_disponiveis = set()
+    resultado = disciplinas_disponiveis(perfil, periodo)
+    codigos_disponiveis = {
+        d.codigo for d in resultado['disciplinas']
+    }
+    motivos = {
+        d.codigo: d.bloqueio for d in resultado['catalogo']
+    }
+    situacoes = dict(
+        perfil.historico.values_list('disciplina__codigo', 'status')
+    )
 
-    if ofertas_cadastradas:
-        resultado = disciplinas_disponiveis(perfil, periodo)
-        codigos_disponiveis = {
-            d.codigo for d in resultado['disciplinas']
-        }
-
+    codigos_do_curso = set(
+        perfil.curso.disciplinas.values_list('codigo', flat=True)
+    ) if perfil.curso else set()
 
     grades = []
-    codigos_do_curso = (
-        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
-        if perfil.curso else None
-    )
 
     for plano in planos:
         turmas = list(plano.turmas.all())
@@ -269,8 +281,15 @@ def planejamento(request):
                 periodo_letivo=periodo
             ).exists()
 
-            if codigos_do_curso is not None and disciplina.codigo not in codigos_do_curso:
-                situacao = 'Fora do seu curso'
+            motivo = ''
+            status = situacoes.get(disciplina.codigo)
+
+            if status == HistoricoDisciplina.CONCLUIDA:
+                situacao = 'Concluída'
+                motivo = 'Disciplina já concluída no histórico.'
+            elif status == HistoricoDisciplina.EM_CURSO:
+                situacao = 'Em curso'
+                motivo = 'Disciplina em curso no histórico.'
             elif not periodo or not ofertas_cadastradas:
                 situacao = 'Aguardando atualização'
             elif not tem_oferta:
@@ -279,12 +298,16 @@ def planejamento(request):
                 situacao = 'Disponível'
             else:
                 situacao = 'Não habilitada'
-
+                motivo = motivos.get(disciplina.codigo, '')
 
             disponibilidade.append({
                 'codigo': disciplina.codigo,
                 'nome': disciplina.nome,
                 'situacao': situacao,
+                'motivo': motivo,
+                'fora_do_curso': bool(
+                    perfil.curso and disciplina.codigo not in codigos_do_curso
+                ),
             })
 
         grades.append({
@@ -380,10 +403,6 @@ def _motivos_das_retiradas(perfil, periodo, turmas, motivos):
     Usa o Histórico do aluno e os motivos de `disciplinas_disponiveis`."""
     situacao = dict(perfil.historico.values_list('disciplina__codigo', 'status'))
     por_codigo = {m['codigo']: m['motivo'] for m in motivos}
-    do_curso = (
-        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
-        if perfil.curso else set()
-    )
     frases = []
     for t in turmas:
         codigo = t.disciplina.codigo
@@ -391,8 +410,6 @@ def _motivos_das_retiradas(perfil, periodo, turmas, motivos):
             porque = 'você já a concluiu no Histórico.'
         elif situacao.get(codigo) == HistoricoDisciplina.EM_CURSO:
             porque = 'ela está como "em curso" no seu Histórico.'
-        elif codigo not in do_curso:
-            porque = 'ela não faz parte do seu curso atual.'
         elif codigo in por_codigo:
             motivo = por_codigo[codigo]
             porque = motivo[0].lower() + motivo[1:]
@@ -612,9 +629,11 @@ def historico(request):
     ).order_by(
         '-periodo_letivo', 'disciplina__codigo'
     )
-    # Colunas G1/G2/G3 só aparecem se alguma disciplina tiver grau lançado
-    # (o PDF do SAU não traz os graus, só a média).
-    tem_graus = any(r.g1 is not None or r.g2 is not None or r.g3 is not None for r in registros)
+
+    tem_graus = any(
+        r.g1 is not None or r.g2 is not None or r.g3 is not None
+        for r in registros
+    )
 
     return render(request, 'historico.html', {
         'perfil': perfil,

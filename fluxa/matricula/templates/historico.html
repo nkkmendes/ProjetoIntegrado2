@@ -153,6 +153,36 @@
 
   <section id="cursadas" class="bloco">
     <h2>Disciplinas cursadas ({{ registros|length }})</h2>
+
+    <div class="campos" id="filtros-historico">
+      <p>
+        <label for="busca-historico">Buscar disciplina</label>
+        <input type="search" id="busca-historico"
+               placeholder="Nome ou codigo">
+      </p>
+      <p>
+        <label for="filtro-status">Situacao</label>
+        <select id="filtro-status">
+          <option value="">Todas</option>
+          <option value="concluida">Concluida</option>
+          <option value="em_curso">Em curso</option>
+          <option value="reprovada">Reprovada</option>
+        </select>
+      </p>
+      <p>
+        <label for="filtro-periodo">Periodo letivo</label>
+        <select id="filtro-periodo">
+          <option value="">Todos</option>
+        </select>
+      </p>
+    </div>
+
+    <button type="button" class="acao" id="limpar-filtros">
+      Limpar filtros
+    </button>
+
+    <p class="sub" id="contador-historico" aria-live="polite"></p>
+
     <div class="tabela">
       <table>
         <thead>
@@ -170,7 +200,9 @@
             </th>
           </tr>
           {% for r in p.registros %}
-          <tr>
+          <tr class="registro-historico"
+              data-status="{{ r.status }}"
+              data-periodo="{{ r.periodo_letivo }}">
             <td><strong>{{ r.disciplina.codigo }}</strong></td>
             <td>{{ r.disciplina.nome }}</td>
             <td>{{ r.disciplina.creditos }}</td>
@@ -238,5 +270,75 @@
   </section>
 </main>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const busca = document.getElementById("busca-historico");
+    const status = document.getElementById("filtro-status");
+    const periodo = document.getElementById("filtro-periodo");
+    const contador = document.getElementById("contador-historico");
+
+    const linhas = Array.from(
+        document.querySelectorAll("#cursadas .registro-historico")
+    );
+
+    const normalizar = texto => texto.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
+    const periodos = [...new Set(
+        linhas.map(linha => linha.dataset.periodo).filter(Boolean)
+    )].sort().reverse();
+
+    periodos.forEach(valor => {
+        periodo.add(new Option(valor, valor));
+    });
+
+    function filtrar() {
+        let encontrados = 0;
+        const termo = normalizar(busca.value);
+
+        linhas.forEach(linha => {
+            const texto = normalizar(
+                linha.cells[0].textContent + " " +
+                linha.cells[1].textContent
+            );
+
+            const mostrar =
+                texto.includes(termo) &&
+                (!status.value || linha.dataset.status === status.value) &&
+                (!periodo.value || linha.dataset.periodo === periodo.value);
+
+            linha.hidden = !mostrar;
+            linha.style.display = mostrar ? "" : "none";
+
+            if (mostrar) encontrados++;
+        });
+
+        contador.textContent = encontrados + " de " +
+            linhas.length + " disciplinas encontradas.";
+
+        if (encontrados === 0 && linhas.length > 0) {
+            contador.textContent = "Nenhuma disciplina corresponde aos filtros.";
+        }
+    }
+
+    busca.addEventListener("input", filtrar);
+    status.addEventListener("change", filtrar);
+    periodo.addEventListener("change", filtrar);
+
+    document.getElementById("limpar-filtros")
+        .addEventListener("click", function () {
+            busca.value = "";
+            status.value = "";
+            periodo.value = "";
+            filtrar();
+        });
+
+    filtrar();
+});
+</script>
+
 </body>
 </html>

@@ -107,3 +107,142 @@ class HistoricoVazioTest(BaseSimulador):
         self.assertTrue(r.context['historico_vazio'])
         self.assertContains(r, 'Seu Histórico está vazio')
         self.assertContains(r, reverse('historico'))
+
+
+class IntegracaoPlanejamentoTest(BaseSimulador):
+    def test_planejamento_utiliza_periodo_do_simulador(self):
+        self.salvar([self.A1])
+        resposta = self.client.get(reverse('planejamento'))
+        simulador = self.client.get(reverse('simulacao'))
+
+        self.assertEqual(
+            resposta.context['periodo_oferta'],
+            simulador.context['periodo']
+        )
+
+    def test_optativa_disponivel_no_planejamento(self):
+        self.salvar([self.C1])
+        self.C.cursos.set([self.outro_curso])
+
+        resposta = self.client.get(reverse('planejamento'))
+        disponibilidade = resposta.context['grades'][0]['disponibilidade']
+
+        self.assertEqual(
+            disponibilidade[0]['situacao'],
+            'Disponível'
+        )
+
+
+class SincronizacaoHistoricoTest(BaseSimulador):
+    def situacao_planejamento(self):
+        resposta = self.client.get(reverse('planejamento'))
+        return resposta.context['grades'][0]['disponibilidade'][0]
+
+    def test_conclusao_atualiza_planejamento(self):
+        self.salvar([self.A1])
+        registro = HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida'
+        )
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Conclu\u00edda'
+        )
+        registro.delete()
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Dispon\u00edvel'
+        )
+
+    def test_disciplina_em_curso_atualiza_planejamento(self):
+        self.salvar([self.C1])
+        HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.C,
+            status='em_curso'
+        )
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Em curso'
+        )
+
+    def test_remocao_de_pre_requisito_atualiza_planejamento(self):
+        registro = HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida'
+        )
+        self.salvar([self.B1])
+        registro.delete()
+        self.assertIn(
+            'AAA1000',
+            self.situacao_planejamento()['motivo']
+        )
+
+
+class DuplicacaoPlanejamentoTest(BaseSimulador):
+    def test_duplicar_grade_preserva_dados(self):
+        self.salvar([self.A1])
+        original = PlanejamentoSalvo.objects.get()
+
+        resposta = self.client.post(reverse('planejamento'), {
+            'acao': 'duplicar',
+            'planejamento_id': original.pk,
+        })
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(PlanejamentoSalvo.objects.count(), 2)
+
+        copia = PlanejamentoSalvo.objects.exclude(pk=original.pk).get()
+
+        self.assertNotEqual(copia.nome, original.nome)
+        self.assertEqual(copia.usuario, original.usuario)
+        self.assertEqual(copia.periodo_letivo, original.periodo_letivo)
+        self.assertEqual(copia.horarios_salvos, original.horarios_salvos)
+        self.assertEqual(
+            set(copia.turmas.values_list('pk', flat=True)),
+            set(original.turmas.values_list('pk', flat=True))
+        )
+
+    def test_duplicacoes_possuem_nomes_distintos(self):
+        self.salvar([self.A1])
+        original = PlanejamentoSalvo.objects.get()
+
+        for _ in range(2):
+            self.client.post(reverse('planejamento'), {
+                'acao': 'duplicar',
+                'planejamento_id': original.pk,
+            })
+
+        nomes = list(
+            PlanejamentoSalvo.objects.values_list('nome', flat=True)
+        )
+        self.assertEqual(len(nomes), 3)
+        self.assertEqual(len(set(nomes)), 3)
+
+
+class FiltrosHistoricoTest(BaseSimulador):
+    def test_historico_exibe_controles_de_filtragem(self):
+        resposta = self.client.get(reverse('historico'))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'id="busca-historico"')
+        self.assertContains(resposta, 'id="filtro-status"')
+        self.assertContains(resposta, 'id="filtro-periodo"')
+        self.assertContains(resposta, 'id="limpar-filtros"')
+        self.assertContains(resposta, 'id="contador-historico"')
+
+    def test_registro_possui_dados_para_filtragem(self):
+        HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida',
+            periodo_letivo='2026.1'
+        )
+
+        resposta = self.client.get(reverse('historico'))
+
+        self.assertContains(resposta, 'class="registro-historico"')
+        self.assertContains(resposta, 'data-status="concluida"')
+        self.assertContains(resposta, 'data-periodo="2026.1"')

@@ -111,10 +111,11 @@ class TrocaDeCursoTest(BasePerfil):
         self.salvar_grade('Mista', self.comum, self.so_prod)
         r = self.client.get(reverse('planejamento'))
         disponibilidade = {
-            d['codigo']: d['situacao'] for d in r.context['grades'][0]['disponibilidade']
+            d['codigo']: d for d in r.context['grades'][0]['disponibilidade']
         }
-        self.assertEqual(disponibilidade['ENG1700'], 'Fora do seu curso')
-        self.assertNotEqual(disponibilidade['MAT4161'], 'Fora do seu curso')
+        self.assertTrue(disponibilidade['ENG1700']['fora_do_curso'])
+        self.assertFalse(disponibilidade['MAT4161']['fora_do_curso'])
+        self.assertEqual(disponibilidade['ENG1700']['situacao'], 'Dispon\u00edvel')
         self.assertContains(r, 'Fora do seu curso')
 
     def test_depois_da_troca_as_telas_usam_o_novo_curso(self):
