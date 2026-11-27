@@ -28,6 +28,75 @@
         href="{% static 'navegacao.css' %}"
     >
 
+
+<style>
+.ajuda-fluxograma {
+    margin: 24px 0;
+    border: 1px solid #94a3b866;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.ajuda-fluxograma > summary {
+    padding: 18px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    background: #64748b12;
+}
+.ajuda-conteudo {
+    padding: 20px;
+}
+.ajuda-conteudo h2 {
+    margin: 20px 0 12px;
+}
+.ajuda-legenda {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+}
+.ajuda-legenda li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #94a3b844;
+    border-radius: 10px;
+}
+.ajuda-legenda .leg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 5px;
+}
+.ajuda-legenda small {
+    display: block;
+    margin-top: 5px;
+    line-height: 1.5;
+    opacity: .85;
+}
+.ajuda-setas span {
+    font-size: 26px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+.seta-pre { color: #7d8ca3; }
+.seta-co { color: #4679ef; }
+.ajuda-conteudo ol li {
+    margin-bottom: 8px;
+}
+.ajuda-nota {
+    padding: 12px;
+    border-left: 3px solid #7d8ca3;
+    background: #64748b12;
+    border-radius: 4px;
+}
+</style>
+
 </head>
 
 <body>
@@ -422,46 +491,78 @@
 
             </details>
 
-            <!-- LEGENDA -->
 
-            <ul class="legenda" aria-label="Legenda">
+            <!-- AJUDA DO FLUXOGRAMA -->
 
-                <li>
-                    <span class="leg leg-alvo"></span>
-                    Selecionada
-                </li>
+            <details class="ajuda-fluxograma" id="ajuda-fluxograma" open>
+                <summary>Como utilizar o fluxograma?</summary>
 
-                <li>
-                    <span class="leg leg-cadeia"></span>
-                    Pré-requisito direto ou indireto
-                </li>
+                <div class="ajuda-conteudo">
+                    <p>Entenda as disciplinas, suas conexoes e seu progresso academico.</p>
 
-                <li>
-                    <span class="leg leg-co"></span>
-                    Co-requisito
-                </li>
+                    <h2>Legenda das disciplinas</h2>
 
-                <li>
-                    <span class="leg leg-nivel"></span>
-                    Requisitos pendentes
-                </li>
+                    <ul class="ajuda-legenda">
+                        <li>
+                            <span class="leg leg-alvo"></span>
+                            <div><strong>Selecionada</strong>
+                            <small>Disciplina que voce esta consultando.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-cadeia"></span>
+                            <div><strong>Pr&eacute;-requisito</strong>
+                            <small>Disciplina necessaria antes de cursar outra.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-co"></span>
+                            <div><strong>Co-requisito</strong>
+                            <small>Disciplina que pode precisar ser cursada simultaneamente.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-nivel"></span>
+                            <div><strong>Requisitos pendentes</strong>
+                            <small>Existem exigencias academicas ainda nao cumpridas.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-liberada"></span>
+                            <div><strong>Requisitos cumpridos</strong>
+                            <small>Os requisitos academicos foram atendidos.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-cursando"></span>
+                            <div><strong>Cursando</strong>
+                            <small>Disciplina registrada como em curso no historico.</small></div>
+                        </li>
+                        <li>
+                            <span class="leg leg-concluida">&#10003;</span>
+                            <div><strong>Conclu&iacute;da</strong>
+                            <small>Disciplina ja concluida no historico.</small></div>
+                        </li>
+                    </ul>
 
-                <li>
-                    <span class="leg leg-liberada"></span>
-                    Requisitos cumpridos
-                </li>
+                    <h2>Como interpretar as setas</h2>
 
-                <li>
-                    <span class="leg leg-cursando"></span>
-                    Cursando
-                </li>
+                    <div class="ajuda-setas">
+                        <p><span class="seta-pre">&#10230;</span>
+                        <strong>Pr&eacute;-requisito:</strong> indica uma dependencia entre disciplinas.</p>
+                        <p><span class="seta-co">&#10230;</span>
+                        <strong>Co-requisito:</strong> indica uma exigencia de cursar disciplinas em conjunto, quando aplicavel.</p>
+                    </div>
 
-                <li>
-                    <span class="leg leg-concluida">✓</span>
-                    Concluída
-                </li>
+                    <h2>Passo a passo</h2>
 
-            </ul>
+                    <ol>
+                        <li>Clique em uma disciplina para consultar seus detalhes.</li>
+                        <li>Observe as conexoes e os requisitos pendentes.</li>
+                        <li>Atualize seu <a href="{% url 'historico' %}">Historico</a> para acompanhar seu progresso.</li>
+                        <li>Consulte o <a href="{% url 'simulacao' %}">Simulador</a> para verificar turmas e horarios disponiveis.</li>
+                    </ol>
+
+                    <p class="ajuda-nota">
+                        Requisitos cumpridos nao garantem oferta de turma ou vaga na matricula.
+                    </p>
+                </div>
+            </details>
 
             <!-- AREA PRINCIPAL -->
 
