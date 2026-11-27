@@ -131,3 +131,51 @@ class IntegracaoPlanejamentoTest(BaseSimulador):
             disponibilidade[0]['situacao'],
             'Disponível'
         )
+
+
+class SincronizacaoHistoricoTest(BaseSimulador):
+    def situacao_planejamento(self):
+        resposta = self.client.get(reverse('planejamento'))
+        return resposta.context['grades'][0]['disponibilidade'][0]
+
+    def test_conclusao_atualiza_planejamento(self):
+        self.salvar([self.A1])
+        registro = HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida'
+        )
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Conclu\u00edda'
+        )
+        registro.delete()
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Dispon\u00edvel'
+        )
+
+    def test_disciplina_em_curso_atualiza_planejamento(self):
+        self.salvar([self.C1])
+        HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.C,
+            status='em_curso'
+        )
+        self.assertEqual(
+            self.situacao_planejamento()['situacao'],
+            'Em curso'
+        )
+
+    def test_remocao_de_pre_requisito_atualiza_planejamento(self):
+        registro = HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida'
+        )
+        self.salvar([self.B1])
+        registro.delete()
+        self.assertIn(
+            'AAA1000',
+            self.situacao_planejamento()['motivo']
+        )

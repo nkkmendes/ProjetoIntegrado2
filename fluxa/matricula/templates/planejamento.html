@@ -122,7 +122,11 @@
     <div class="item-disponibilidade">
       <span>{{ d.codigo }} — {{ d.nome }}</span>
 
-      {% if d.situacao == "Disponível" %}
+      {% if d.situacao == "Concluída" %}
+        <span class="status-disponivel">Concluída</span>
+      {% elif d.situacao == "Em curso" %}
+        <span class="status-nao-verificada">Em curso</span>
+      {% elif d.situacao == "Disponível" %}
         <span class="status-disponivel">Disponível</span>
       {% elif d.situacao == "Sem oferta cadastrada" %}
         <span class="status-sem-oferta">Sem oferta cadastrada</span>
@@ -132,6 +136,9 @@
         <span class="status-bloqueada">Fora do seu curso</span>
       {% else %}
         <span class="status-nao-verificada">Aguardando atualização</span>
+      {% endif %}
+      {% if d.motivo %}
+        <small style="display:block; width:100%;">{{ d.motivo }}</small>
       {% endif %}
     </div>
   {% empty %}

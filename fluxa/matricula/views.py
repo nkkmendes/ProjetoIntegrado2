@@ -222,16 +222,19 @@ def planejamento(request):
     )
 
 
-    codigos_disponiveis = set()
-
-    if ofertas_cadastradas:
-        resultado = disciplinas_disponiveis(perfil, periodo)
-        codigos_disponiveis = {
-            d.codigo for d in resultado['disciplinas']
-        }
-
+    resultado = disciplinas_disponiveis(perfil, periodo)
+    codigos_disponiveis = {
+        d.codigo for d in resultado['disciplinas']
+    }
+    motivos = {
+        d.codigo: d.bloqueio for d in resultado['catalogo']
+    }
+    situacoes = dict(
+        perfil.historico.values_list('disciplina__codigo', 'status')
+    )
 
     grades = []
+
     for plano in planos:
         turmas = list(plano.turmas.all())
         resumo = (
@@ -255,7 +258,16 @@ def planejamento(request):
                 periodo_letivo=periodo
             ).exists()
 
-            if not periodo or not ofertas_cadastradas:
+            motivo = ''
+            status = situacoes.get(disciplina.codigo)
+
+            if status == HistoricoDisciplina.CONCLUIDA:
+                situacao = 'Concluída'
+                motivo = 'Disciplina já concluída no histórico.'
+            elif status == HistoricoDisciplina.EM_CURSO:
+                situacao = 'Em curso'
+                motivo = 'Disciplina em curso no histórico.'
+            elif not periodo or not ofertas_cadastradas:
                 situacao = 'Aguardando atualização'
             elif not tem_oferta:
                 situacao = 'Sem oferta cadastrada'
@@ -263,12 +275,13 @@ def planejamento(request):
                 situacao = 'Disponível'
             else:
                 situacao = 'Não habilitada'
-
+                motivo = motivos.get(disciplina.codigo, '')
 
             disponibilidade.append({
                 'codigo': disciplina.codigo,
                 'nome': disciplina.nome,
                 'situacao': situacao,
+                'motivo': motivo,
             })
 
         grades.append({
