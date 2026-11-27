@@ -264,7 +264,8 @@ def _ler_bloco(periodo, codigo, texto):
     }
 
 
-# Em caso de várias tentativas na mesma disciplina, vale a melhor situação.
+# Em caso de várias tentativas na mesma disciplina, a melhor situação vira o
+# registro do histórico; as outras ficam como tentativas anteriores (para o CR).
 _PESO = {CONCLUIDA: 3, EM_CURSO: 2, ESCOLHER: 2, REPROVADA: 1}
 
 
@@ -314,22 +315,29 @@ def identificar_disciplinas(texto):
             'escolher': dados['acao'] == ESCOLHER,
             'status': '' if dados['acao'] == ESCOLHER else dados['acao'],
             'aviso': aviso,
-            'tentativas': 1,
         }
-        anterior = por_disciplina.get(registro['codigo'])
-        if anterior is None:
-            por_disciplina[registro['codigo']] = registro
-            continue
-        registro['tentativas'] = anterior['tentativas'] + 1
-        anterior['tentativas'] = registro['tentativas']
-        melhor = max(
-            (anterior, registro),
-            key=lambda r: (_PESO[r['acao']], r['periodo']),
-        )
-        melhor['tentativas'] = registro['tentativas']
-        por_disciplina[registro['codigo']] = melhor
+        por_disciplina.setdefault(registro['codigo'], []).append(registro)
 
-    registros = sorted(por_disciplina.values(), key=lambda r: (r['periodo'], r['codigo']))
+    registros = []
+    for tentativas in por_disciplina.values():
+        melhor = max(tentativas, key=lambda r: (_PESO[r['acao']], r['periodo']))
+        melhor['tentativas'] = len(tentativas)
+        # As outras vezes com resultado (reprovação ou aprovação) não somem:
+        # a nota delas também entra no CR, como no SAU.
+        melhor['anteriores'] = [
+            {
+                'periodo': t['periodo'],
+                'turma': t['turma'],
+                'situacao_sau': t['situacao_sau'],
+                'status': t['acao'],
+                'media': t['media'],
+            }
+            for t in sorted(tentativas, key=lambda r: r['periodo'])
+            if t is not melhor and t['acao'] in (CONCLUIDA, REPROVADA)
+        ]
+        registros.append(melhor)
+
+    registros.sort(key=lambda r: (r['periodo'], r['codigo']))
     return {
         'registros': registros,
         'ignoradas': ignoradas,

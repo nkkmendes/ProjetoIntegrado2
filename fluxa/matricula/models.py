@@ -212,6 +212,13 @@ class HistoricoDisciplina(models.Model):
             return None
         return self.media * self.disciplina.creditos
 
+    def notas_anteriores_no_cr(self):
+        """Notas das vezes anteriores em que o aluno cursou esta disciplina
+        (ex.: a reprovação antes da aprovação). Também entram no CR."""
+        if self.pk is None:
+            return []
+        return [t for t in self.tentativas_anteriores.all() if t.media is not None]
+
     @property
     def tem_notas(self):
         return any(
@@ -222,6 +229,39 @@ class HistoricoDisciplina(models.Model):
     def __str__(self):
         return (
             f'{self.perfil} — {self.disciplina.codigo} '
+            f'({self.get_status_display()})'
+        )
+
+
+class TentativaAnterior(models.Model):
+    """Vez anterior em que o aluno cursou uma disciplina do histórico.
+
+    O histórico guarda uma linha por disciplina, com a melhor situação
+    (ex.: aprovado em 2026.1). Se antes ele tinha reprovado (ex.: em 2025.1),
+    essa nota fica aqui, porque o CR do SAU conta todas as vezes."""
+
+    registro = models.ForeignKey(
+        HistoricoDisciplina,
+        on_delete=models.CASCADE,
+        related_name='tentativas_anteriores'
+    )
+    periodo_letivo = models.CharField(max_length=10, blank=True, default='')
+    turma = models.CharField(max_length=10, blank=True, default='')
+    status = models.CharField(
+        max_length=10,
+        choices=HistoricoDisciplina.STATUS,
+        default=HistoricoDisciplina.REPROVADA
+    )
+    media = models.DecimalField(
+        max_digits=4, decimal_places=2, null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ['periodo_letivo']
+
+    def __str__(self):
+        return (
+            f'{self.registro.disciplina.codigo} em {self.periodo_letivo} '
             f'({self.get_status_display()})'
         )
 

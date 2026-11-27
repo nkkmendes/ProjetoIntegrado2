@@ -49,17 +49,28 @@ def grades_fora_do_curso(user, curso):
     return afetadas
 
 
-def calcular_cr(registros):
-    """CR = média das médias, ponderada pelos créditos, considerando as
-    disciplinas concluídas ou reprovadas que têm média informada.
-    Devolve None quando ainda não há nenhuma média."""
+def _parcelas_cr(registros):
+    """(soma de nota × créditos, soma dos créditos) de todas as notas que
+    entram no CR: a de cada disciplina e as das vezes anteriores em que ela
+    foi cursada (ex.: reprovação antes da aprovação), como no SAU."""
     soma = Decimal('0')
     creditos = 0
     for r in registros:
-        if r.pontos_cr is None:
-            continue
-        soma += r.pontos_cr
-        creditos += r.disciplina.creditos
+        if r.pontos_cr is not None:
+            soma += r.pontos_cr
+            creditos += r.disciplina.creditos
+        for anterior in r.notas_anteriores_no_cr():
+            soma += anterior.media * r.disciplina.creditos
+            creditos += r.disciplina.creditos
+    return soma, creditos
+
+
+def calcular_cr(registros):
+    """CR = média das médias, ponderada pelos créditos, considerando as
+    disciplinas concluídas ou reprovadas que têm média informada, inclusive
+    as reprovações anteriores de uma disciplina refeita.
+    Devolve None quando ainda não há nenhuma média."""
+    soma, creditos = _parcelas_cr(registros)
     if creditos == 0:
         return None
     return (soma / creditos).quantize(Decimal('0.01'))
@@ -67,7 +78,11 @@ def calcular_cr(registros):
 
 def resumo_creditos(perfil):
     """Contagem de créditos calculada a partir do histórico (nada é digitado)."""
-    registros = list(perfil.historico.select_related('disciplina'))
+    registros = list(
+        perfil.historico.select_related('disciplina')
+        .prefetch_related('tentativas_anteriores')
+    )
+    pontos_cr, creditos_cr = _parcelas_cr(registros)
     curso_codigos = set()
     total_curso = 0
     if perfil.curso:
@@ -95,8 +110,8 @@ def resumo_creditos(perfil):
         'percentual': round(100 * cumpridos_no_curso / total_curso) if total_curso else 0,
         'disciplinas_concluidas': concluidas,
         'cr': calcular_cr(registros),
-        'pontos_cr': sum((r.pontos_cr for r in registros if r.pontos_cr is not None), Decimal('0')),
-        'creditos_cr': sum(r.disciplina.creditos for r in registros if r.pontos_cr is not None),
+        'pontos_cr': pontos_cr,
+        'creditos_cr': creditos_cr,
     }
 
 

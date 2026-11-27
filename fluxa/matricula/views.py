@@ -18,7 +18,8 @@ from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from .models import (
-    CalendarioMatricula, Disciplina, HistoricoDisciplina, PlanejamentoSalvo, Turma,
+    CalendarioMatricula, Disciplina, HistoricoDisciplina, PlanejamentoSalvo,
+    TentativaAnterior, Turma,
 )
 from .forms import (
     LoginForm, CadastroForm, RecuperarSenhaForm, PerfilNomeForm, TrocarSenhaForm,
@@ -562,9 +563,22 @@ def historico(request):
                     }
                     if item['media'] is not None:
                         dados['media'] = item['media']
-                    HistoricoDisciplina.objects.update_or_create(
+                    registro, _ = HistoricoDisciplina.objects.update_or_create(
                         perfil=perfil, disciplina=disciplina, defaults=dados
                     )
+                    # As outras vezes em que cursou (ex.: a reprovação antes da
+                    # aprovação) são trocadas pelas do PDF, para entrarem no CR.
+                    registro.tentativas_anteriores.all().delete()
+                    TentativaAnterior.objects.bulk_create([
+                        TentativaAnterior(
+                            registro=registro,
+                            periodo_letivo=a['periodo'],
+                            turma=a.get('turma', ''),
+                            status=a['status'],
+                            media=a['media'],
+                        )
+                        for a in item.get('anteriores', [])
+                    ])
                     alterados += 1
                 for chave in ('sau_registros_ocr', 'sau_ocr_usuario', 'sau_ocr_usado'):
                     request.session.pop(chave, None)
@@ -593,7 +607,9 @@ def historico(request):
                 )
                 return redirect(reverse('historico') + '#nivelamento')
 
-    registros = perfil.historico.select_related('disciplina').order_by(
+    registros = perfil.historico.select_related('disciplina').prefetch_related(
+        'tentativas_anteriores'
+    ).order_by(
         '-periodo_letivo', 'disciplina__codigo'
     )
 

@@ -85,6 +85,7 @@
                 {% if not item.cadastrada %}Não cadastrada — apenas conferência.{% endif %}
                 {% if item.aviso %}{{ item.aviso }}{% endif %}
                 {% if item.tentativas > 1 %}Cursada {{ item.tentativas }} vezes; vale a melhor situação.{% endif %}
+                {% for a in item.anteriores %}Antes: {{ a.situacao_sau }} em {{ a.periodo|default:'—' }}{% if a.media %} (nota {{ a.media|floatformat:2 }}, entra no CR){% endif %}.{% endfor %}
               </td>
             </tr>
             {% endfor %}
@@ -122,7 +123,7 @@
     {% if resumo.fora_do_curso and resumo.total_curso %}
     <p class="sub">{{ resumo.fora_do_curso }} dos créditos cumpridos são de disciplinas que não fazem parte do currículo do seu curso.</p>
     {% endif %}
-    <p class="sub">CR = soma de (nota final × créditos) ÷ soma dos créditos. Entram somente disciplinas concluídas ou reprovadas com nota final informada, inclusive nota zero. Graus G1, G2 e G3 não são usados neste cálculo.</p>
+    <p class="sub">CR = soma de (nota final × créditos) ÷ soma dos créditos. Entram somente disciplinas concluídas ou reprovadas com nota final informada, inclusive nota zero. Se você refez uma disciplina, a nota da reprovação anterior também entra, como no SAU. Graus G1, G2 e G3 não são usados neste cálculo.</p>
     {% if resumo.creditos_cr %}<p><strong>Cálculo do CR:</strong> {{ resumo.pontos_cr|floatformat:2 }} ÷ {{ resumo.creditos_cr }} = {{ resumo.cr|floatformat:2 }}</p>{% endif %}
   </section>
 
@@ -171,7 +172,12 @@
             <td>{{ r.g3|default_if_none:"—" }}</td>
             <td>{{ r.media|default_if_none:"—" }}</td>
             <td>{% if r.pontos_cr is not None %}{{ r.pontos_cr|floatformat:2 }}{% else %}—{% endif %}</td>
-            <td><span class="status status-{{ r.status }}">{{ r.get_status_display }}</span></td>
+            <td>
+              <span class="status status-{{ r.status }}">{{ r.get_status_display }}</span>
+              {% for t in r.tentativas_anteriores.all %}
+              <span class="anterior">{{ t.get_status_display }} em {{ t.periodo_letivo|default:"—" }}{% if t.media is not None %} — nota {{ t.media }}{% endif %}</span>
+              {% endfor %}
+            </td>
             <td class="acoes">
               <a href="{% url 'historico' %}?editar={{ r.disciplina.codigo }}#registrar">Editar</a>
               <form method="post" action="{% url 'historico_remover' r.disciplina.codigo %}">
