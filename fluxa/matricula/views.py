@@ -252,6 +252,10 @@ def planejamento(request):
         perfil.historico.values_list('disciplina__codigo', 'status')
     )
 
+    codigos_do_curso = set(
+        perfil.curso.disciplinas.values_list('codigo', flat=True)
+    ) if perfil.curso else set()
+
     grades = []
 
     for plano in planos:
@@ -301,6 +305,9 @@ def planejamento(request):
                 'nome': disciplina.nome,
                 'situacao': situacao,
                 'motivo': motivo,
+                'fora_do_curso': bool(
+                    perfil.curso and disciplina.codigo not in codigos_do_curso
+                ),
             })
 
         grades.append({

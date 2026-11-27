@@ -137,6 +137,11 @@
       {% else %}
         <span class="status-nao-verificada">Aguardando atualização</span>
       {% endif %}
+      {% if d.fora_do_curso %}
+        <small style="display:block; width:100%;">
+          Fora do seu curso
+        </small>
+      {% endif %}
       {% if d.motivo %}
         <small style="display:block; width:100%;">{{ d.motivo }}</small>
       {% endif %}

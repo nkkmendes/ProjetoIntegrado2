@@ -256,6 +256,7 @@ def fluxograma(request):
             'total_disciplinas': 0,
             'creditos_total': 0,
             'progresso': None,
+            'requisitos_incompletos': False,
         })
 
     # Ler o Excel da engenharia escolhida
@@ -265,6 +266,14 @@ def fluxograma(request):
     creditos_total = sum(item['creditos'] for item in linhas)
     relacoes = _relacoes_completas(curso.nome)
     regras_aluno = RegrasAluno(perfil)
+
+    requisitos_incompletos = any(
+        codigo not in regras_aluno.regras
+        or 'nao verificad' in _normalizar(
+            regras_aluno.regras[codigo].get('verificacao', '')
+        )
+        for codigo in codigos_curriculo
+    )
 
     historico = _historico(perfil)
 
@@ -541,4 +550,5 @@ def fluxograma(request):
         'total_disciplinas': total_disciplinas,
         'creditos_total': creditos_total,
         'progresso': progresso,
+        'requisitos_incompletos': requisitos_incompletos,
     })
