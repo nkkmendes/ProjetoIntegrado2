@@ -29,7 +29,7 @@ from .servicos import (
     obter_perfil, resumo_creditos, avisos_de_nivel, quadro_de_nivelamento,
     periodo_de_oferta, disciplinas_disponiveis, dados_do_simulador,
     validar_selecao, resumo_da_grade, guardar_horarios, verificar_mudancas_horarios,
-    cor_da_disciplina, grades_fora_do_curso,
+    cor_da_disciplina, grades_fora_do_curso, historico_por_periodo,
 )
 
 def inicio(request):
@@ -630,12 +630,19 @@ def historico(request):
         '-periodo_letivo', 'disciplina__codigo'
     )
 
+    tem_graus = any(
+        r.g1 is not None or r.g2 is not None or r.g3 is not None
+        for r in registros
+    )
+
     return render(request, 'historico.html', {
         'perfil': perfil,
         'form': form,
         'editando': registro_editado,
         'form_nivel': form_nivel,
         'registros': registros,
+        'periodos': historico_por_periodo(registros),
+        'tem_graus': tem_graus,
         'resumo': resumo_creditos(perfil),
         'quadro_nivel': quadro_de_nivelamento(perfil),
         'sau_pdf_existe': _caminho_pdf_sau(request.user).is_file(),

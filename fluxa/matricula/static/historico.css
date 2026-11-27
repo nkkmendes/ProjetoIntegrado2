@@ -53,6 +53,9 @@ tbody tr:last-child td { border-bottom: 0; }
 .status-reprovada { background: #FFFFFF; border: 1px solid #B91C1C; color: #B91C1C; }
 .status-em_curso { background: #F0F4FA; border: 1px solid #1D4E78; color: #1D4E78; }
 .anterior { display: block; margin-top: 4px; font-size: 12px; color: #B91C1C; }
+.periodo th { background: #1D4E78; color: #FFFFFF; font-size: 14px; }
+.cr-periodo { float: right; font-weight: normal; }
+.tentativa td { background: #FEF2F2; color: #475569; }
 .exige { display: inline-block; margin: 0 6px 4px 0; padding: 2px 8px; background: #F0F4FA; border: 1px solid #CBD5E1; border-radius: 5px; font-size: 12px; }
 .exige.bloqueia { background: #FFFFFF; border-color: #B91C1C; color: #B91C1C; font-weight: bold; }
 .acoes { white-space: nowrap; }

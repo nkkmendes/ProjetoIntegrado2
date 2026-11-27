@@ -60,14 +60,16 @@
       <input type="hidden" name="acao" value="confirmar_ocr_sau">
       <div class="tabela">
         <table>
-          <thead><tr><th>Importar</th><th>Código</th><th>Disciplina</th><th>Período</th><th>Situação</th><th>Média</th><th>Observações</th></tr></thead>
+          <thead><tr><th>Importar</th><th>Código</th><th>Disciplina</th><th>Créd.</th><th>Período</th><th>Turma</th><th>Situação</th><th>Média</th><th>Observações</th></tr></thead>
           <tbody>
             {% for item in sau_ocr_registros %}
             <tr>
               <td><input type="checkbox" name="selecionados" value="{{ forloop.counter0 }}" {% if item.cadastrada %}checked{% else %}disabled{% endif %} aria-label="Selecionar {{ item.codigo }}"></td>
               <td>{{ item.codigo }}</td>
               <td>{{ item.nome }}</td>
+              <td>{{ item.creditos_sau }}</td>
               <td>{{ item.periodo|default:'—' }}</td>
+              <td>{{ item.turma|default:'—' }}</td>
               <td>
                 {% if item.escolher %}
                 <label for="status_{{ forloop.counter0 }}" class="sub">{{ item.situacao_sau }} — escolha:</label>
@@ -185,23 +187,31 @@
       <table>
         <thead>
           <tr>
-            <th>Código</th><th>Disciplina</th><th>Créd.</th><th>Período</th><th>Turma</th>
-            <th>G1</th><th>G2</th><th>G3</th><th>Nota final</th><th>Nota × créditos</th><th>Situação</th><th>Ações</th>
+            <th>Código</th><th>Disciplina</th><th>Créd.</th><th>Turma</th>
+            {% if tem_graus %}<th>G1</th><th>G2</th><th>G3</th>{% endif %}<th>Nota final</th><th>Nota × créditos</th><th>Situação</th><th>Ações</th>
           </tr>
         </thead>
+        {% for p in periodos %}
         <tbody>
-          {% for r in registros %}
+          <tr class="periodo">
+            <th colspan="{% if tem_graus %}11{% else %}8{% endif %}">
+              {{ p.periodo|default:"Período não informado" }}
+              <span class="cr-periodo">CR do período: {% if p.cr is not None %}{{ p.cr|floatformat:2 }}{% else %}—{% endif %}</span>
+            </th>
+          </tr>
+          {% for r in p.registros %}
           <tr class="registro-historico"
               data-status="{{ r.status }}"
               data-periodo="{{ r.periodo_letivo }}">
             <td><strong>{{ r.disciplina.codigo }}</strong></td>
             <td>{{ r.disciplina.nome }}</td>
             <td>{{ r.disciplina.creditos }}</td>
-            <td>{{ r.periodo_letivo|default:"—" }}</td>
             <td>{{ r.turma|default:"—" }}</td>
+            {% if tem_graus %}
             <td>{{ r.g1|default_if_none:"—" }}</td>
             <td>{{ r.g2|default_if_none:"—" }}</td>
             <td>{{ r.g3|default_if_none:"—" }}</td>
+            {% endif %}
             <td>{{ r.media|default_if_none:"—" }}</td>
             <td>{% if r.pontos_cr is not None %}{{ r.pontos_cr|floatformat:2 }}{% else %}—{% endif %}</td>
             <td>
@@ -218,10 +228,29 @@
               </form>
             </td>
           </tr>
-          {% empty %}
-          <tr><td colspan="12" class="vazio">Nenhuma disciplina registrada ainda. Use o formulário acima ou marque matérias como concluídas no <a href="{% url 'fluxograma' %}">Fluxograma</a>.</td></tr>
+          {% endfor %}
+          {% for a in p.anteriores %}
+          <tr class="tentativa">
+            <td><strong>{{ a.registro.disciplina.codigo }}</strong></td>
+            <td>{{ a.registro.disciplina.nome }}</td>
+            <td>{{ a.registro.disciplina.creditos }}</td>
+            <td>{{ a.tentativa.turma|default:"—" }}</td>
+            {% if tem_graus %}<td>—</td><td>—</td><td>—</td>{% endif %}
+            <td>{{ a.tentativa.media|default_if_none:"—" }}</td>
+            <td>—</td>
+            <td>
+              <span class="status status-{{ a.tentativa.status }}">{{ a.tentativa.get_status_display }}</span>
+              <span class="anterior">Refeita em {{ a.registro.periodo_letivo|default:"—" }}</span>
+            </td>
+            <td></td>
+          </tr>
           {% endfor %}
         </tbody>
+        {% empty %}
+        <tbody>
+          <tr><td colspan="8" class="vazio">Nenhuma disciplina registrada ainda. Use o formulário acima ou marque matérias como concluídas no <a href="{% url 'fluxograma' %}">Fluxograma</a>.</td></tr>
+        </tbody>
+        {% endfor %}
       </table>
     </div>
   </section>
