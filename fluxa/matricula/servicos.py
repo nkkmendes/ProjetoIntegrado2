@@ -76,6 +76,38 @@ def calcular_cr(registros):
     return (soma / creditos).quantize(Decimal('0.01'))
 
 
+def historico_por_periodo(registros):
+    """Agrupa o histórico por período letivo (o mais recente primeiro) com o
+    CR de cada período. Uma tentativa anterior (ex.: reprovação antes da
+    aprovação) aparece e conta no período em que aconteceu."""
+    grupos = {}
+
+    def grupo(periodo):
+        return grupos.setdefault(periodo, {
+            'periodo': periodo, 'registros': [], 'anteriores': [],
+            'soma': Decimal('0'), 'creditos_cr': 0,
+        })
+
+    for r in registros:
+        g = grupo(r.periodo_letivo)
+        g['registros'].append(r)
+        if r.pontos_cr is not None:
+            g['soma'] += r.pontos_cr
+            g['creditos_cr'] += r.disciplina.creditos
+        for anterior in r.tentativas_anteriores.all():
+            ga = grupo(anterior.periodo_letivo)
+            ga['anteriores'].append({'registro': r, 'tentativa': anterior})
+            if anterior.media is not None:
+                ga['soma'] += anterior.media * r.disciplina.creditos
+                ga['creditos_cr'] += r.disciplina.creditos
+
+    for g in grupos.values():
+        g['cr'] = ((g['soma'] / g['creditos_cr']).quantize(Decimal('0.01'))
+                   if g['creditos_cr'] else None)
+    # Mais recente primeiro; "período não informado" fica no fim.
+    return sorted(grupos.values(), key=lambda g: (g['periodo'] != '', g['periodo']), reverse=True)
+
+
 def resumo_creditos(perfil):
     """Contagem de créditos calculada a partir do histórico (nada é digitado)."""
     registros = list(
