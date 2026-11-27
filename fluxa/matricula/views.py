@@ -197,6 +197,25 @@ def planejamento(request):
             nome = plano.nome
             plano.delete()
             messages.success(request, f'Grade “{nome}” excluída.')
+        elif acao == 'duplicar':
+            base = plano.nome[:80] + ' - Copia'
+            nome = base
+            numero = 2
+
+            while request.user.planejamentos.filter(nome=nome).exists():
+                nome = f'{base} {numero}'
+                numero += 1
+
+            with transaction.atomic():
+                copia = PlanejamentoSalvo.objects.create(
+                    usuario=request.user,
+                    nome=nome,
+                    periodo_letivo=plano.periodo_letivo,
+                    horarios_salvos=plano.horarios_salvos,
+                )
+                copia.turmas.set(plano.turmas.all())
+
+            messages.success(request, f'Grade duplicada: {nome}.')
         elif acao == 'renomear':
             novo_nome = request.POST.get('nome', '').strip()[:100]
             if not novo_nome:

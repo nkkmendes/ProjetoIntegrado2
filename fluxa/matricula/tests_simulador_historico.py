@@ -179,3 +179,44 @@ class SincronizacaoHistoricoTest(BaseSimulador):
             'AAA1000',
             self.situacao_planejamento()['motivo']
         )
+
+
+class DuplicacaoPlanejamentoTest(BaseSimulador):
+    def test_duplicar_grade_preserva_dados(self):
+        self.salvar([self.A1])
+        original = PlanejamentoSalvo.objects.get()
+
+        resposta = self.client.post(reverse('planejamento'), {
+            'acao': 'duplicar',
+            'planejamento_id': original.pk,
+        })
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertEqual(PlanejamentoSalvo.objects.count(), 2)
+
+        copia = PlanejamentoSalvo.objects.exclude(pk=original.pk).get()
+
+        self.assertNotEqual(copia.nome, original.nome)
+        self.assertEqual(copia.usuario, original.usuario)
+        self.assertEqual(copia.periodo_letivo, original.periodo_letivo)
+        self.assertEqual(copia.horarios_salvos, original.horarios_salvos)
+        self.assertEqual(
+            set(copia.turmas.values_list('pk', flat=True)),
+            set(original.turmas.values_list('pk', flat=True))
+        )
+
+    def test_duplicacoes_possuem_nomes_distintos(self):
+        self.salvar([self.A1])
+        original = PlanejamentoSalvo.objects.get()
+
+        for _ in range(2):
+            self.client.post(reverse('planejamento'), {
+                'acao': 'duplicar',
+                'planejamento_id': original.pk,
+            })
+
+        nomes = list(
+            PlanejamentoSalvo.objects.values_list('nome', flat=True)
+        )
+        self.assertEqual(len(nomes), 3)
+        self.assertEqual(len(set(nomes)), 3)
