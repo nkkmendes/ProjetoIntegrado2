@@ -220,3 +220,29 @@ class DuplicacaoPlanejamentoTest(BaseSimulador):
         )
         self.assertEqual(len(nomes), 3)
         self.assertEqual(len(set(nomes)), 3)
+
+
+class FiltrosHistoricoTest(BaseSimulador):
+    def test_historico_exibe_controles_de_filtragem(self):
+        resposta = self.client.get(reverse('historico'))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, 'id="busca-historico"')
+        self.assertContains(resposta, 'id="filtro-status"')
+        self.assertContains(resposta, 'id="filtro-periodo"')
+        self.assertContains(resposta, 'id="limpar-filtros"')
+        self.assertContains(resposta, 'id="contador-historico"')
+
+    def test_registro_possui_dados_para_filtragem(self):
+        HistoricoDisciplina.objects.create(
+            perfil=self.perfil_ana,
+            disciplina=self.A,
+            status='concluida',
+            periodo_letivo='2026.1'
+        )
+
+        resposta = self.client.get(reverse('historico'))
+
+        self.assertContains(resposta, 'class="registro-historico"')
+        self.assertContains(resposta, 'data-status="concluida"')
+        self.assertContains(resposta, 'data-periodo="2026.1"')
