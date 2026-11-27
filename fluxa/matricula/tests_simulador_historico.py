@@ -107,3 +107,27 @@ class HistoricoVazioTest(BaseSimulador):
         self.assertTrue(r.context['historico_vazio'])
         self.assertContains(r, 'Seu Histórico está vazio')
         self.assertContains(r, reverse('historico'))
+
+
+class IntegracaoPlanejamentoTest(BaseSimulador):
+    def test_planejamento_utiliza_periodo_do_simulador(self):
+        self.salvar([self.A1])
+        resposta = self.client.get(reverse('planejamento'))
+        simulador = self.client.get(reverse('simulacao'))
+
+        self.assertEqual(
+            resposta.context['periodo_oferta'],
+            simulador.context['periodo']
+        )
+
+    def test_optativa_disponivel_no_planejamento(self):
+        self.salvar([self.C1])
+        self.C.cursos.set([self.outro_curso])
+
+        resposta = self.client.get(reverse('planejamento'))
+        disponibilidade = resposta.context['grades'][0]['disponibilidade']
+
+        self.assertEqual(
+            disponibilidade[0]['situacao'],
+            'Disponível'
+        )

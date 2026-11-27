@@ -213,16 +213,7 @@ def planejamento(request):
         request.user.planejamentos
         .prefetch_related('turmas__disciplina', 'turmas__horarios')
     )
-    from datetime import date
-
-    hoje = date.today()
-    semestre_atual = 1 if hoje.month <= 6 else 2
-
-    if semestre_atual == 1:
-        periodo = f'{hoje.year}.2'
-    else:
-        periodo = f'{hoje.year + 1}.1'
-
+    periodo = periodo_de_oferta()
 
     ofertas_cadastradas = (
         Disciplina.objects.filter(
@@ -241,11 +232,6 @@ def planejamento(request):
 
 
     grades = []
-    codigos_do_curso = (
-        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
-        if perfil.curso else None
-    )
-
     for plano in planos:
         turmas = list(plano.turmas.all())
         resumo = (
@@ -269,9 +255,7 @@ def planejamento(request):
                 periodo_letivo=periodo
             ).exists()
 
-            if codigos_do_curso is not None and disciplina.codigo not in codigos_do_curso:
-                situacao = 'Fora do seu curso'
-            elif not periodo or not ofertas_cadastradas:
+            if not periodo or not ofertas_cadastradas:
                 situacao = 'Aguardando atualização'
             elif not tem_oferta:
                 situacao = 'Sem oferta cadastrada'
@@ -380,10 +364,6 @@ def _motivos_das_retiradas(perfil, periodo, turmas, motivos):
     Usa o Histórico do aluno e os motivos de `disciplinas_disponiveis`."""
     situacao = dict(perfil.historico.values_list('disciplina__codigo', 'status'))
     por_codigo = {m['codigo']: m['motivo'] for m in motivos}
-    do_curso = (
-        set(perfil.curso.disciplinas.values_list('codigo', flat=True))
-        if perfil.curso else set()
-    )
     frases = []
     for t in turmas:
         codigo = t.disciplina.codigo
@@ -391,8 +371,6 @@ def _motivos_das_retiradas(perfil, periodo, turmas, motivos):
             porque = 'você já a concluiu no Histórico.'
         elif situacao.get(codigo) == HistoricoDisciplina.EM_CURSO:
             porque = 'ela está como "em curso" no seu Histórico.'
-        elif codigo not in do_curso:
-            porque = 'ela não faz parte do seu curso atual.'
         elif codigo in por_codigo:
             motivo = por_codigo[codigo]
             porque = motivo[0].lower() + motivo[1:]
